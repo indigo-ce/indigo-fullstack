@@ -46,35 +46,39 @@ This starter kit integrates Astro with Better Auth for authentication and Drizzl
 ## 🛠️ Getting Started
 
 1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/astro-starter.git
-   cd astro-starter
-   ```
 
-2. **Install dependencies**:
-   ```bash
-   pnpm install
-   ```
+```bash
+git clone https://github.com/yourusername/astro-starter.git
+cd astro-starter
+```
 
-3. **Set up environment variables**:
-   ```bash
-   cp .env.example .env
-   ```
+1. **Install dependencies**:
 
-4. **Start the development server**:
-   ```bash
-   pnpm dev
-   ```
+```bash
+pnpm install
+```
+
+1. **Set up environment variables**:
+
+```bash
+cp .env.example .env
+```
+
+1. **Start the development server**:
+
+```bash
+pnpm dev
+```
 
 ## 🧞 Commands
 
-| Command                  | Action                                           |
-| :----------------------- | :----------------------------------------------- |
-| `pnpm install`           | Installs dependencies                            |
-| `pnpm dev`               | Starts local dev server with DB setup            |
-| `pnpm build`             | Build your production site with DB setup         |
-| `pnpm preview`           | Preview your build locally                       |
-| `pnpm db-setup`          | Generate and push Drizzle migrations             |
+| Command         | Action                                   |
+| :-------------- | :--------------------------------------- |
+| `pnpm install`  | Installs dependencies                    |
+| `pnpm dev`      | Starts local dev server with DB setup    |
+| `pnpm build`    | Build your production site with DB setup |
+| `pnpm preview`  | Preview your build locally               |
+| `pnpm db-setup` | Generate and push Drizzle migrations     |
 
 ## 🔐 Authentication Flow
 
