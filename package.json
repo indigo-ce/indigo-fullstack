@@ -3,12 +3,21 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "pnpm db-setup && astro dev",
+    "build": "pnpm db-setup && astro build",
+    "preview": "pnpm build && astro preview",
+    "astro": "astro",
+    "db-setup": "drizzle-kit generate & drizzle-kit push"
   },
   "dependencies": {
-    "astro": "^5.4.3"
+    "@astrojs/node": "^9.0.0",
+    "@libsql/client": "^0.14.0",
+    "astro": "^5.4.3",
+    "better-auth": "^1.1.3",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.2"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.30.1"
   }
 }

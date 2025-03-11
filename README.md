@@ -1,48 +1,99 @@
-# Astro Starter Kit: Basics
+# Astro Starter Kit with Better Auth and Drizzle ORM
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+This starter kit integrates Astro with Better Auth for authentication and Drizzle ORM for database operations. It includes a complete authentication system with sign-up, sign-in, and user profile functionality.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+## 🚀 Features
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+- **User Authentication**: Complete authentication flow with Better Auth
+- **Database Integration**: SQLite database with Drizzle ORM
+- **Server-side Rendering**: Full SSR support with Astro
+- **Type Safety**: Built with TypeScript for better developer experience
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
+## 📁 Project Structure
 
 ```text
 /
 ├── public/
 │   └── favicon.svg
 ├── src/
+│   ├── components/
+│   │   └── Welcome.astro
+│   ├── db/
+│   │   ├── index.ts
+│   │   └── schema.ts
 │   ├── layouts/
 │   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
+│   ├── lib/
+│   │   ├── auth-client.ts
+│   │   └── auth.ts
+│   ├── pages/
+│   │   ├── api/
+│   │   │   └── auth/
+│   │   │       └── [...all].ts
+│   │   ├── signin/
+│   │   │   └── index.astro
+│   │   ├── signup/
+│   │   │   └── index.astro
+│   │   └── index.astro
+│   └── middleware.ts
+├── .env.example
+├── astro.config.mjs
+├── drizzle.config.ts
+├── env.d.ts
 └── package.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## 🛠️ Getting Started
+
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/yourusername/astro-starter.git
+   cd astro-starter
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
+
+3. **Set up environment variables**:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Start the development server**:
+   ```bash
+   pnpm dev
+   ```
 
 ## 🧞 Commands
 
-All commands are run from the root of the project, from a terminal:
+| Command                  | Action                                           |
+| :----------------------- | :----------------------------------------------- |
+| `pnpm install`           | Installs dependencies                            |
+| `pnpm dev`               | Starts local dev server with DB setup            |
+| `pnpm build`             | Build your production site with DB setup         |
+| `pnpm preview`           | Preview your build locally                       |
+| `pnpm db-setup`          | Generate and push Drizzle migrations             |
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## 🔐 Authentication Flow
 
-## 👀 Want to learn more?
+1. **Sign Up**: Users can create an account with name, email, and password
+2. **Sign In**: Users can log in with their email and password
+3. **Protected Routes**: The home page is protected and requires authentication
+4. **Sign Out**: Users can log out from their account
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+## 🗄️ Database
+
+The application uses SQLite with Drizzle ORM. The database schema includes:
+
+- Users
+- Sessions
+- Accounts
+- Verification tokens
+
+## 📚 Learn More
+
+- [Astro Documentation](https://docs.astro.build)
+- [Better Auth Documentation](https://github.com/zenstackhq/better-auth)
+- [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)

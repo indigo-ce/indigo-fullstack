@@ -1,0 +1,610 @@
+This file is a merged representation of a subset of the codebase, containing files not matching ignore patterns, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching these patterns are excluded: .build, **/*.svg
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+src/
+  components/
+    Welcome.astro
+  db/
+    index.ts
+    schema.ts
+  layouts/
+    Layout.astro
+  lib/
+    auth-client.ts
+    auth.ts
+  pages/
+    api/
+      auth/
+        [...all].ts
+    signin/
+      index.astro
+    signup/
+      index.astro
+    index.astro
+  middleware.ts
+.gitignore
+astro.config.mjs
+drizzle.config.ts
+env.d.ts
+package.json
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/components/Welcome.astro">
+---
+import { eq } from 'drizzle-orm'
+import { db } from '../db'
+import { user } from '../db/schema'
+
+export interface Props {
+	initialSession: import('better-auth').Session
+}
+const { initialSession } = Astro.props
+
+const User = await db
+	.select()
+	.from(user)
+	.where(eq(user.id, initialSession.userId))
+	.get()
+---
+
+<div class='container'>
+	<h3 style='text-align: center;'>
+		👋 Hello, <span>{User?.name.toUpperCase()}</span>
+	</h3>
+	<p>Mail verified: {User?.emailVerified ? 'Yes' : 'No'}</p>
+	<p>Mail: {User?.email}</p>
+</div>
+
+<style>
+	.container {
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+	}
+
+	span {
+		color: var(--pico-primary-background);
+	}
+</style>
+</file>
+
+<file path="src/db/index.ts">
+import 'dotenv/config'
+import { drizzle } from 'drizzle-orm/libsql'
+import * as schema from './schema'
+
+export const db = drizzle(process.env.DB_FILE_NAME!, {
+	schema: schema,
+})
+</file>
+
+<file path="src/db/schema.ts">
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core'
+
+export const user = sqliteTable('user', {
+	id: text('id').primaryKey(),
+	name: text('name').notNull(),
+	email: text('email').notNull().unique(),
+	emailVerified: integer('emailVerified', { mode: 'boolean' }).notNull(),
+	image: text('image'),
+	createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+})
+
+export const session = sqliteTable('session', {
+	id: text('id').primaryKey(),
+	expiresAt: integer('expiresAt', { mode: 'timestamp' }).notNull(),
+	token: text('token').notNull().unique(),
+	createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+	ipAddress: text('ipAddress'),
+	userAgent: text('userAgent'),
+	userId: text('userId')
+		.notNull()
+		.references(() => user.id),
+})
+
+export const account = sqliteTable('account', {
+	id: text('id').primaryKey(),
+	accountId: text('accountId').notNull(),
+	providerId: text('providerId').notNull(),
+	userId: text('userId')
+		.notNull()
+		.references(() => user.id),
+	accessToken: text('accessToken'),
+	refreshToken: text('refreshToken'),
+	idToken: text('idToken'),
+	accessTokenExpiresAt: integer('accessTokenExpiresAt', { mode: 'timestamp' }),
+	refreshTokenExpiresAt: integer('refreshTokenExpiresAt', {
+		mode: 'timestamp',
+	}),
+	scope: text('scope'),
+	password: text('password'),
+	createdAt: integer('createdAt', { mode: 'timestamp' }).notNull(),
+	updatedAt: integer('updatedAt', { mode: 'timestamp' }).notNull(),
+})
+
+export const verification = sqliteTable('verification', {
+	id: text('id').primaryKey(),
+	identifier: text('identifier').notNull(),
+	value: text('value').notNull(),
+	expiresAt: integer('expiresAt', { mode: 'timestamp' }).notNull(),
+	createdAt: integer('createdAt', { mode: 'timestamp' }),
+	updatedAt: integer('updatedAt', { mode: 'timestamp' }),
+})
+</file>
+
+<file path="src/layouts/Layout.astro">
+<!doctype html>
+<html lang='en'>
+	<head>
+		<meta charset='UTF-8' />
+		<meta name='viewport' content='width=device-width' />
+		<link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+		<meta name='generator' content={Astro.generator} />
+		<link
+			rel='stylesheet'
+			href='https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.sand.min.css'
+		/>
+		<title>Astro Basics</title>
+	</head>
+	<body>
+		<header>
+			<a href='/'
+				><h3>Astor Authentication</h3>
+				<p>astro Authentication with Better Auth</p></a
+			>
+		</header>
+		<main>
+			<slot />
+		</main>
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	main {
+		padding-top: 1rem;
+		margin: auto;
+		max-width: 56rem;
+		padding: 4rem;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
+	header {
+		background-color: var(--pico-primary-background);
+		text-align: center;
+		padding-block: 0.5rem;
+
+		h3 {
+			margin: 0;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
+</style>
+</file>
+
+<file path="src/lib/auth-client.ts">
+import { createAuthClient } from 'better-auth/client'
+
+export const authClient = createAuthClient()
+</file>
+
+<file path="src/lib/auth.ts">
+import { betterAuth } from 'better-auth'
+import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { db } from '../db'
+
+export const auth = betterAuth({
+	database: drizzleAdapter(db, {
+		provider: 'sqlite',
+	}),
+	emailAndPassword: {
+		enabled: true,
+	},
+})
+</file>
+
+<file path="src/pages/api/auth/[...all].ts">
+import type { APIRoute } from 'astro'
+import { auth } from '../../../lib/auth'
+
+export const ALL: APIRoute = async (ctx) => {
+	return auth.handler(ctx.request)
+}
+</file>
+
+<file path="src/pages/signin/index.astro">
+---
+if (Astro.locals.user?.id) return Astro.redirect('/')
+import Layout from '../../layouts/Layout.astro'
+---
+
+<Layout>
+	<div class='container'>
+		<h2>Sign in here</h2>
+		<p id='error'></p>
+		<form id='signin-form'>
+			<input type='email' name='email' placeholder='Email' required />
+			<input required type='password' name='password' placeholder='Password' />
+			<button type='submit'>Sign In</button>
+		</form>
+		<p>Don't have an account? <a href='/signup'>Sign up here</a>.</p>
+	</div>
+	<script>
+		import { authClient } from '../../lib/auth-client'
+
+		const errorShow = document.getElementById('error') as HTMLParagraphElement
+
+		document
+			.getElementById('signin-form')
+			?.addEventListener('submit', async (event: Event) => {
+				event.preventDefault()
+				const email = (event.target as HTMLFormElement).email.value
+				const password = (event.target as HTMLFormElement).password.value
+				const tmp = await authClient.signIn.email({
+					email,
+					password,
+				})
+				if (Boolean(tmp.error) === false) {
+					window.location.href = '/'
+				} else {
+					errorShow.textContent = '😥 ' + tmp.error?.message || ''
+				}
+			})
+	</script>
+</Layout>
+
+<style>
+	.container {
+		max-width: 500px;
+
+		h2 {
+			text-align: center;
+		}
+	}
+	#error {
+		color: var(--pico-form-element-invalid-focus-color);
+	}
+</style>
+</file>
+
+<file path="src/pages/signup/index.astro">
+---
+if (Astro.locals.user?.id) return Astro.redirect('/')
+import Layout from '../../layouts/Layout.astro'
+---
+
+<Layout>
+	<div class='container'>
+		<h2>Sign up here</h2>
+		<form id='signup-form'>
+			<input type='text' name='name' placeholder='Name' required />
+			<input type='email' name='email' placeholder='Email' required />
+			<input required type='password' name='password' placeholder='Password' />
+			<button type='submit'>Sign up</button>
+		</form>
+		<p>Already have an account? <a href='/signin'>Sign in here</a>.</p>
+	</div>
+	<script>
+		import { authClient } from '../../lib/auth-client'
+
+		document
+			.getElementById('signup-form')
+			?.addEventListener('submit', async (event) => {
+				event.preventDefault()
+				const name = (event.target as HTMLFormElement).name.value as string
+				const email = (event.target as HTMLFormElement).email.value
+				const password = (event.target as HTMLFormElement).password.value
+				const tmp = await authClient.signUp.email({
+					name,
+					email,
+					password,
+				})
+				if (Boolean(tmp.error) === false) window.location.href = '/'
+			})
+	</script>
+</Layout>
+
+<style>
+	.container {
+		max-width: 500px;
+
+		h2 {
+			text-align: center;
+		}
+	}
+</style>
+</file>
+
+<file path="src/pages/index.astro">
+---
+import Welcome from '../components/Welcome.astro'
+import Layout from '../layouts/Layout.astro'
+
+if (!Astro.locals.user?.id) return Astro.redirect('/signin')
+
+const session = Astro.locals.session
+---
+
+<Layout>
+	<div>
+		{session && <Welcome initialSession={session} />}
+		<button id='signOutButton'>Sign Out</button>
+	</div>
+	<script>
+		import { authClient } from '../lib/auth-client'
+
+		document
+			.getElementById('signOutButton')
+			?.addEventListener('click', async () => {
+				await authClient.signOut()
+				window.location.href = '/signin'
+			})
+	</script>
+</Layout>
+
+<style>
+	div {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		gap: 1rem;
+	}
+</style>
+</file>
+
+<file path="src/middleware.ts">
+import { defineMiddleware } from 'astro:middleware'
+import { auth } from './lib/auth'
+
+export const onRequest = defineMiddleware(async (context, next) => {
+	const isAuthed = await auth.api.getSession({
+		headers: context.request.headers,
+	})
+
+	if (isAuthed) {
+		context.locals.user = isAuthed.user
+		context.locals.session = isAuthed.session
+	} else {
+		context.locals.user = null
+		context.locals.session = null
+	}
+
+	return next()
+})
+</file>
+
+<file path=".gitignore">
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# drizzle database
+drizzle/
+*.db
+</file>
+
+<file path="astro.config.mjs">
+// @ts-check
+import { defineConfig } from 'astro/config'
+
+import node from '@astrojs/node'
+
+// https://astro.build/config
+export default defineConfig({
+	output: 'server',
+	adapter: node({
+		mode: 'standalone',
+	}),
+})
+</file>
+
+<file path="drizzle.config.ts">
+import 'dotenv/config'
+import { defineConfig } from 'drizzle-kit'
+
+export default defineConfig({
+	out: './drizzle',
+	schema: './src/db/schema.ts',
+	dialect: 'sqlite',
+	dbCredentials: {
+		url: process.env.DB_FILE_NAME!,
+	},
+})
+</file>
+
+<file path="env.d.ts">
+/// <reference path="../.astro/types.d.ts" />
+
+declare namespace App {
+	// Note: 'import {} from ""' syntax does not work in .d.ts files.
+	interface Locals {
+		user: import('better-auth').User | null
+		session: import('better-auth').Session | null
+	}
+}
+</file>
+
+<file path="package.json">
+{
+	"name": "better-auth-astro5",
+	"type": "module",
+	"version": "1.0.0",
+	"scripts": {
+		"dev": "pnpm db-setup && astro dev",
+		"build": "pnpm db-setup && astro build",
+		"preview": "pnpm build && astro preview",
+		"astro": "astro",
+		"db-setup": "drizzle-kit generate & drizzle-kit push"
+	},
+	"dependencies": {
+		"@astrojs/node": "^9.0.0",
+		"@libsql/client": "^0.14.0",
+		"astro": "^5.1.1",
+		"better-auth": "^1.1.3",
+		"dotenv": "^16.4.7",
+		"drizzle-orm": "^0.38.2"
+	},
+	"devDependencies": {
+		"drizzle-kit": "^0.30.1"
+	}
+}
+</file>
+
+<file path="README.md">
+## Better Auth Astro 📚🌟🛠️
+
+Better Auth Astro is a web application built using Astro, Drizzle ORM, and Better Auth for implementing authentication and session management. The application demonstrates user authentication, including sign-up, sign-in, and session handling. 🛡️🌍🔐
+
+## Features 🌟🔒🛠️
+
+- **User Sign-Up and Sign-In**
+- **Session Management**
+- **Secure Password Handling**
+- **Email Verification Status Display**
+- **User Profile Display**
+
+## Technologies Used 🛠️📚🔐
+
+- **Astro**: A modern web framework for building fast, content-focused websites.
+- **Drizzle ORM**: A lightweight ORM for interacting with SQLite databases.
+- **Better Auth**: A library for easy authentication setup and management.
+
+## Project Structure 📝🗂🛠️
+
+- **src/components**: Contains the UI components used in the project, including the Welcome component for user greetings.
+- **src/db**: Database configuration and schema definitions using Drizzle ORM.
+- **src/layouts**: Layout files used for consistent styling across pages.
+- **src/pages**: Application pages like the index, signin, and signup pages.
+- **src/lib**: Authentication logic and client setup.
+- **drizzle**: Database migrations and related files.
+
+## Getting Started 🚀🔧🏃
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/devgauravjatt/better-auth-astro5
+   ```
+
+2. **Navigate to the project directory**:
+
+   ```bash
+   cd better-auth-astro
+   ```
+
+3. **Install dependencies**:
+
+   ```bash
+   pnpm install
+   ```
+
+4. **Start the development server**:
+   ```bash
+   pnpm dev
+   ```
+
+## Contributing 🙌📚🔧
+
+Contributions are welcome! Feel free to open issues or submit pull requests to help improve this project. 👨‍💻👷️‍♂️🌐
+
+## License 🔒📚🌐
+
+This project is licensed under the MIT License. See the `LICENSE` file for details. 🛡️🔗🔒
+
+## Acknowledgements 👨‍💻🌟🌍
+
+- Thanks to the Astro, Drizzle ORM, and Better Auth communities for providing excellent tools and support. 📚👨‍🛠️🌐
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
+}
+</file>
+
+</files>

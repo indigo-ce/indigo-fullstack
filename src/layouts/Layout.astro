@@ -1,14 +1,26 @@
 <!doctype html>
-<html lang="en">
+<html lang='en'>
 	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<meta charset='UTF-8' />
+		<meta name='viewport' content='width=device-width' />
+		<link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+		<meta name='generator' content={Astro.generator} />
+		<link
+			rel='stylesheet'
+			href='https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.sand.min.css'
+		/>
+		<title>Astro Starter</title>
 	</head>
 	<body>
-		<slot />
+		<header>
+			<a href='/'
+				><h3>Astro Authentication</h3>
+				<p>Astro Authentication with Better Auth</p></a
+			>
+		</header>
+		<main>
+			<slot />
+		</main>
 	</body>
 </html>
 
@@ -18,5 +30,30 @@
 		margin: 0;
 		width: 100%;
 		height: 100%;
+	}
+
+	main {
+		padding-top: 1rem;
+		margin: auto;
+		max-width: 56rem;
+		padding: 4rem;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
+	header {
+		background-color: var(--pico-primary-background);
+		text-align: center;
+		padding-block: 0.5rem;
+
+		h3 {
+			margin: 0;
+		}
+
+		p {
+			margin: 0;
+		}
 	}
 </style>
