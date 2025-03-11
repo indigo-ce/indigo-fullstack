@@ -4,92 +4,92 @@ import Layout from '../../layouts/Layout.astro'
 ---
 
 <Layout>
-	<div class='auth-container'>
-		<h1>Sign In</h1>
-		<p id='error' class='error-message'></p>
-		<form id='signin-form' class='auth-form'>
-			<div class='form-group'>
-				<label for='email'>Email</label>
-				<input type='email' id='email' name='email' required />
-			</div>
-			<div class='form-group'>
-				<label for='password'>Password</label>
-				<input type='password' id='password' name='password' required />
-			</div>
-			<button type='submit' class='submit-button'>Sign In</button>
-		</form>
-		<p class='auth-link'>Don't have an account? <a href='/signup'>Sign up here</a></p>
-	</div>
-	<script>
-		import { authClient } from '../../lib/auth-client'
+  <div class='auth-container'>
+    <h1>Sign In</h1>
+    <p id='error' class='error-message'></p>
+    <form id='signin-form' class='auth-form'>
+      <div class='form-group'>
+        <label for='email'>Email</label>
+        <input type='email' id='email' name='email' required />
+      </div>
+      <div class='form-group'>
+        <label for='password'>Password</label>
+        <input type='password' id='password' name='password' required />
+      </div>
+      <button type='submit' class='submit-button'>Sign In</button>
+    </form>
+    <p class='auth-link'>Don't have an account? <a href='/signup'>Sign up here</a></p>
+  </div>
+  <script>
+    import { authClient } from '../../lib/auth-client'
 
-		const errorShow = document.getElementById('error') as HTMLParagraphElement
+    const errorShow = document.getElementById('error') as HTMLParagraphElement
 
-		document
-			.getElementById('signin-form')
-			?.addEventListener('submit', async (event: Event) => {
-				event.preventDefault()
-				errorShow.textContent = '' // Clear previous errors
-				
-				const email = (event.target as HTMLFormElement).email.value
-				const password = (event.target as HTMLFormElement).password.value
-				const tmp = await authClient.signIn.email({
-					email,
-					password,
-				})
-				if (Boolean(tmp.error) === false) {
-					window.location.href = '/'
-				} else {
-					errorShow.textContent = tmp.error?.message || 'An error occurred during sign in'
-				}
-			})
-	</script>
+    document
+      .getElementById('signin-form')
+      ?.addEventListener('submit', async (event: Event) => {
+        event.preventDefault()
+        errorShow.textContent = '' // Clear previous errors
+        
+        const email = (event.target as HTMLFormElement).email.value
+        const password = (event.target as HTMLFormElement).password.value
+        const tmp = await authClient.signIn.email({
+          email,
+          password,
+        })
+        if (Boolean(tmp.error) === false) {
+          window.location.href = '/'
+        } else {
+          errorShow.textContent = tmp.error?.message || 'An error occurred during sign in'
+        }
+      })
+  </script>
 </Layout>
 
 <style>
-	.auth-container {
-		max-width: 400px;
-		margin: 0 auto;
-	}
+  .auth-container {
+    max-width: 400px;
+    margin: 0 auto;
+  }
 
-	h1 {
-		font-size: 1.5rem;
-		margin-bottom: 1.5rem;
-		font-weight: 500;
-	}
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
 
-	.auth-form {
-		background-color: #f9f9f9;
-		border: 1px solid var(--color-border);
-		border-radius: 6px;
-		padding: 1.5rem;
-		margin-bottom: 1rem;
-	}
+  .auth-form {
+    background-color: #f9f9f9;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
 
-	.form-group {
-		margin-bottom: 1rem;
-	}
+  .form-group {
+    margin-bottom: 1rem;
+  }
 
-	label {
-		display: block;
-		margin-bottom: 0.5rem;
-		font-size: var(--font-size-small);
-		font-weight: 500;
-	}
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: var(--font-size-small);
+    font-weight: 500;
+  }
 
-	.submit-button {
-		width: 100%;
-		margin-top: 1rem;
-	}
+  .submit-button {
+    width: 100%;
+    margin-top: 1rem;
+  }
 
-	.error-message {
-		color: #d32f2f;
-		font-size: var(--font-size-small);
-		margin-bottom: 1rem;
-	}
+  .error-message {
+    color: #d32f2f;
+    font-size: var(--font-size-small);
+    margin-bottom: 1rem;
+  }
 
-	.auth-link {
-		text-align: center;
-		font-size: var(--font-size-small);
-	}
+  .auth-link {
+    text-align: center;
+    font-size: var(--font-size-small);
+  }
 </style>

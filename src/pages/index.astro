@@ -8,38 +8,38 @@ const session = Astro.locals.session
 ---
 
 <Layout>
-	<div class="dashboard">
-		<h1>Dashboard</h1>
-		{session && <Welcome initialSession={session} />}
-		<div class="actions">
-			<button id='signOutButton'>Sign Out</button>
-		</div>
-	</div>
-	<script>
-		import { authClient } from '../lib/auth-client'
+  <div class="dashboard">
+    <h1>Dashboard</h1>
+    {session && <Welcome initialSession={session} />}
+    <div class="actions">
+      <button id='signOutButton'>Sign Out</button>
+    </div>
+  </div>
+  <script>
+    import { authClient } from '../lib/auth-client'
 
-		document
-			.getElementById('signOutButton')
-			?.addEventListener('click', async () => {
-				await authClient.signOut()
-				window.location.href = '/signin'
-			})
-	</script>
+    document
+      .getElementById('signOutButton')
+      ?.addEventListener('click', async () => {
+        await authClient.signOut()
+        window.location.href = '/signin'
+      })
+  </script>
 </Layout>
 
 <style>
-	.dashboard {
-		max-width: 100%;
-	}
-	
-	h1 {
-		font-size: 1.5rem;
-		margin-bottom: 1.5rem;
-		font-weight: 500;
-	}
-	
-	.actions {
-		display: flex;
-		justify-content: flex-end;
-	}
+  .dashboard {
+    max-width: 100%;
+  }
+  
+  h1 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: flex-end;
+  }
 </style>
