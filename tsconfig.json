@@ -2,6 +2,13 @@
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"],
+
+  // Best practices
+  "strict": true,
+  "skipLibCheck": true,
+  "strictNullChecks": true,
+  "noFallthroughCasesInSwitch": true,
+
   // Path aliases
   "baseUrl": ".",
   "paths": {
