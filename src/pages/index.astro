@@ -8,9 +8,12 @@ const session = Astro.locals.session
 ---
 
 <Layout>
-	<div>
+	<div class="dashboard">
+		<h1>Dashboard</h1>
 		{session && <Welcome initialSession={session} />}
-		<button id='signOutButton'>Sign Out</button>
+		<div class="actions">
+			<button id='signOutButton'>Sign Out</button>
+		</div>
 	</div>
 	<script>
 		import { authClient } from '../lib/auth-client'
@@ -25,11 +28,18 @@ const session = Astro.locals.session
 </Layout>
 
 <style>
-	div {
+	.dashboard {
+		max-width: 100%;
+	}
+	
+	h1 {
+		font-size: 1.5rem;
+		margin-bottom: 1.5rem;
+		font-weight: 500;
+	}
+	
+	.actions {
 		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		gap: 1rem;
+		justify-content: flex-end;
 	}
 </style>

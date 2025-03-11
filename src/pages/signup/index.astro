@@ -4,23 +4,37 @@ import Layout from '../../layouts/Layout.astro'
 ---
 
 <Layout>
-	<div class='container'>
-		<h2>Sign up here</h2>
-		<form id='signup-form'>
-			<input type='text' name='name' placeholder='Name' required />
-			<input type='email' name='email' placeholder='Email' required />
-			<input required type='password' name='password' placeholder='Password' />
-			<button type='submit'>Sign up</button>
+	<div class='auth-container'>
+		<h1>Create Account</h1>
+		<p id='error' class='error-message'></p>
+		<form id='signup-form' class='auth-form'>
+			<div class='form-group'>
+				<label for='name'>Name</label>
+				<input type='text' id='name' name='name' required />
+			</div>
+			<div class='form-group'>
+				<label for='email'>Email</label>
+				<input type='email' id='email' name='email' required />
+			</div>
+			<div class='form-group'>
+				<label for='password'>Password</label>
+				<input type='password' id='password' name='password' required />
+			</div>
+			<button type='submit' class='submit-button'>Sign Up</button>
 		</form>
-		<p>Already have an account? <a href='/signin'>Sign in here</a>.</p>
+		<p class='auth-link'>Already have an account? <a href='/signin'>Sign in here</a></p>
 	</div>
 	<script>
 		import { authClient } from '../../lib/auth-client'
+
+		const errorShow = document.getElementById('error') as HTMLParagraphElement
 
 		document
 			.getElementById('signup-form')
 			?.addEventListener('submit', async (event) => {
 				event.preventDefault()
+				errorShow.textContent = '' // Clear previous errors
+				
 				const name = (event.target as HTMLFormElement).name.value as string
 				const email = (event.target as HTMLFormElement).email.value
 				const password = (event.target as HTMLFormElement).password.value
@@ -29,17 +43,59 @@ import Layout from '../../layouts/Layout.astro'
 					email,
 					password,
 				})
-				if (Boolean(tmp.error) === false) window.location.href = '/'
+				if (Boolean(tmp.error) === false) {
+					window.location.href = '/'
+				} else {
+					errorShow.textContent = tmp.error?.message || 'An error occurred during sign up'
+				}
 			})
 	</script>
 </Layout>
 
 <style>
-	.container {
-		max-width: 500px;
+	.auth-container {
+		max-width: 400px;
+		margin: 0 auto;
+	}
 
-		h2 {
-			text-align: center;
-		}
+	h1 {
+		font-size: 1.5rem;
+		margin-bottom: 1.5rem;
+		font-weight: 500;
+	}
+
+	.auth-form {
+		background-color: #f9f9f9;
+		border: 1px solid var(--color-border);
+		border-radius: 6px;
+		padding: 1.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.form-group {
+		margin-bottom: 1rem;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 0.5rem;
+		font-size: var(--font-size-small);
+		font-weight: 500;
+	}
+
+	.submit-button {
+		width: 100%;
+		margin-top: 1rem;
+	}
+
+	.error-message {
+		color: #d32f2f;
+		font-size: var(--font-size-small);
+		margin-bottom: 1rem;
+	}
+
+	.auth-link {
+		text-align: center;
+		font-size: var(--font-size-small);
 	}
 </style>
