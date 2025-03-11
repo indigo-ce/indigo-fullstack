@@ -3,16 +3,18 @@
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"],
 
-  // Best practices
-  "strict": true,
-  "skipLibCheck": true,
-  "strictNullChecks": true,
-  "noFallthroughCasesInSwitch": true,
+  "compilerOptions": {
+    // Best practices
+    "strict": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noFallthroughCasesInSwitch": true,
 
-  // Path aliases
-  "baseUrl": ".",
-  "paths": {
-    "@drizzle/*": ["drizzle/*"],
-    "@/*": ["./src/*"]
+    // Path aliases
+    "baseUrl": ".",
+    "paths": {
+      "@drizzle/*": ["drizzle/*"],
+      "@/*": ["./src/*"]
+    }
   }
 }
