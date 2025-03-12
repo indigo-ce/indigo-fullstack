@@ -1,48 +1,51 @@
 ---
-if (Astro.locals.user?.id) return Astro.redirect('/')
-import Layout from '../../layouts/Layout.astro'
+if (Astro.locals.user?.id) return Astro.redirect("/");
+import Layout from "@/layouts/Layout.astro";
 ---
 
 <Layout>
-  <div class='auth-container'>
+  <div class="auth-container">
     <h1>Sign In</h1>
-    <p id='error' class='error-message'></p>
-    <form id='signin-form' class='auth-form'>
-      <div class='form-group'>
-        <label for='email'>Email</label>
-        <input type='email' id='email' name='email' required />
+    <p id="error" class="error-message"></p>
+    <form id="signin-form" class="auth-form">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required />
       </div>
-      <div class='form-group'>
-        <label for='password'>Password</label>
-        <input type='password' id='password' name='password' required />
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
       </div>
-      <button type='submit' class='submit-button'>Sign In</button>
+      <button type="submit" class="submit-button">Sign In</button>
     </form>
-    <p class='auth-link'>Don't have an account? <a href='/signup'>Sign up here</a></p>
+    <p class="auth-link">
+      Don't have an account? <a href="/signup">Sign up here</a>
+    </p>
   </div>
   <script>
-    import { authClient } from '../../lib/auth-client'
+    import {authClient} from "../../lib/auth-client";
 
-    const errorShow = document.getElementById('error') as HTMLParagraphElement
+    const errorShow = document.getElementById("error") as HTMLParagraphElement;
 
     document
-      .getElementById('signin-form')
-      ?.addEventListener('submit', async (event: Event) => {
-        event.preventDefault()
-        errorShow.textContent = '' // Clear previous errors
-        
-        const email = (event.target as HTMLFormElement).email.value
-        const password = (event.target as HTMLFormElement).password.value
+      .getElementById("signin-form")
+      ?.addEventListener("submit", async (event: Event) => {
+        event.preventDefault();
+        errorShow.textContent = ""; // Clear previous errors
+
+        const email = (event.target as HTMLFormElement).email.value;
+        const password = (event.target as HTMLFormElement).password.value;
         const tmp = await authClient.signIn.email({
           email,
           password,
-        })
+        });
         if (Boolean(tmp.error) === false) {
-          window.location.href = '/'
+          window.location.href = "/";
         } else {
-          errorShow.textContent = tmp.error?.message || 'An error occurred during sign in'
+          errorShow.textContent =
+            tmp.error?.message || "An error occurred during sign in";
         }
-      })
+      });
   </script>
 </Layout>
 

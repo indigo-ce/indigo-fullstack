@@ -1,21 +1,22 @@
 ---
-import { eq } from 'drizzle-orm'
-import { db } from '../db'
-import { user } from '../db/schema'
+import {eq} from "drizzle-orm";
+import {db} from "@/db";
+import {user} from "@/db/schema";
 
 export interface Props {
-  initialSession: import('better-auth').Session
+  initialSession: import("better-auth").Session;
 }
-const { initialSession } = Astro.props
+
+const {initialSession} = Astro.props;
 
 const User = await db
   .select()
   .from(user)
   .where(eq(user.id, initialSession.userId))
-  .get()
+  .get();
 ---
 
-<div class='user-profile'>
+<div class="user-profile">
   <h2>
     👋 Hello, <span class="user-name">{User?.name}</span>
   </h2>
@@ -26,7 +27,7 @@ const User = await db
     </div>
     <div class="info-item">
       <span class="label">Email verified:</span>
-      <span>{User?.emailVerified ? 'Yes' : 'No'}</span>
+      <span>{User?.emailVerified ? "Yes" : "No"}</span>
     </div>
   </div>
 </div>

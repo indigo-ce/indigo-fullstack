@@ -1,55 +1,62 @@
 ---
-if (Astro.locals.user?.id) return Astro.redirect('/')
-import Layout from '../../layouts/Layout.astro'
+if (Astro.locals.user?.id) return Astro.redirect("/");
+import Layout from "@/layouts/Layout.astro";
 ---
 
 <Layout>
-  <div class='auth-container'>
+  <div class="auth-container">
     <h1>Create Account</h1>
-    <p id='error' class='error-message'></p>
-    <form id='signup-form' class='auth-form'>
-      <div class='form-group'>
-        <label for='name'>Name</label>
-        <input type='text' id='name' name='name' required />
+    <p id="error" class="error-message"></p>
+    <form id="signup-form" class="auth-form">
+      <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required />
       </div>
-      <div class='form-group'>
-        <label for='email'>Email</label>
-        <input type='email' id='email' name='email' required />
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required />
       </div>
-      <div class='form-group'>
-        <label for='password'>Password</label>
-        <input type='password' id='password' name='password' required />
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
       </div>
-      <button type='submit' class='submit-button'>Sign Up</button>
+      <button type="submit" class="submit-button">Sign Up</button>
     </form>
-    <p class='auth-link'>Already have an account? <a href='/signin'>Sign in here</a></p>
+    <p class="auth-link">
+      Already have an account? <a href="/signin">Sign in here</a>
+    </p>
   </div>
   <script>
-    import { authClient } from '../../lib/auth-client'
+    import { authClient } from "../../lib/auth-client";
 
-    const errorShow = document.getElementById('error') as HTMLParagraphElement
+    const errorShow = document.getElementById("error") as HTMLParagraphElement;
 
     document
-      .getElementById('signup-form')
-      ?.addEventListener('submit', async (event) => {
-        event.preventDefault()
-        errorShow.textContent = '' // Clear previous errors
-        
+      .getElementById("signup-form")
+      ?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        errorShow.textContent = ""; // Clear previous errors
+
         const form = event.target as HTMLFormElement;
-        const name = (form.elements.namedItem('name') as HTMLInputElement).value;
-        const email = (form.elements.namedItem('email') as HTMLInputElement).value;
-        const password = (form.elements.namedItem('password') as HTMLInputElement).value;
+        const name = (form.elements.namedItem("name") as HTMLInputElement)
+          .value;
+        const email = (form.elements.namedItem("email") as HTMLInputElement)
+          .value;
+        const password = (
+          form.elements.namedItem("password") as HTMLInputElement
+        ).value;
         const tmp = await authClient.signUp.email({
           name,
           email,
           password,
-        })
+        });
         if (Boolean(tmp.error) === false) {
-          window.location.href = '/'
+          window.location.href = "/";
         } else {
-          errorShow.textContent = tmp.error?.message || 'An error occurred during sign up'
+          errorShow.textContent =
+            tmp.error?.message || "An error occurred during sign up";
         }
-      })
+      });
   </script>
 </Layout>
 
