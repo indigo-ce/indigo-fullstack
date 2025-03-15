@@ -9,40 +9,6 @@ This starter kit integrates Astro with Better Auth for authentication and Drizzl
 - **Server-side Rendering**: Full SSR support with Astro
 - **Type Safety**: Built with TypeScript for better developer experience
 
-## 📁 Project Structure
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Welcome.astro
-│   ├── db/
-│   │   ├── index.ts
-│   │   └── schema.ts
-│   ├── layouts/
-│   │   └── Layout.astro
-│   ├── lib/
-│   │   ├── auth-client.ts
-│   │   └── auth.ts
-│   ├── pages/
-│   │   ├── api/
-│   │   │   └── auth/
-│   │   │       └── [...all].ts
-│   │   ├── signin/
-│   │   │   └── index.astro
-│   │   ├── signup/
-│   │   │   └── index.astro
-│   │   └── index.astro
-│   └── middleware.ts
-├── .env.example
-├── astro.config.mjs
-├── drizzle.config.ts
-├── env.d.ts
-└── package.json
-```
-
 ## 🛠️ Getting Started
 
 1. **Clone the repository**:
@@ -95,6 +61,50 @@ The application uses SQLite with Drizzle ORM. The database schema includes:
 - Sessions
 - Accounts
 - Verification tokens
+- Todos (user tasks)
+
+## 📊 Database Queries
+
+Here's an example of how to fetch a user's todos from the database using Drizzle ORM:
+
+```typescript
+import {eq} from "drizzle-orm";
+import {db} from "@/db";
+import {todo, user} from "@/db/schema";
+
+// Fetch all todos for a user
+const todos = await db
+  .select()
+  .from(todo)
+  .where(eq(todo.userId, currentUserId));
+
+// Create a new todo
+const newTodo = await db
+  .insert(todo)
+  .values({
+    title: "Build an Astro app",
+    completed: false,
+    userId: currentUserId,
+  })
+  .returning();
+
+// Update todo status
+await db.update(todo).set({completed: true}).where(eq(todo.id, todoId));
+
+// Delete a todo
+await db.delete(todo).where(eq(todo.id, todoId));
+
+// Join example: Fetch todos with user info
+const todosWithUser = await db
+  .select({
+    id: todo.id,
+    title: todo.title,
+    userName: user.name,
+  })
+  .from(todo)
+  .leftJoin(user, eq(todo.userId, user.id))
+  .where(eq(todo.userId, currentUserId));
+```
 
 ## 📚 Learn More
 

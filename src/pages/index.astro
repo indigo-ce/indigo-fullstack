@@ -5,12 +5,13 @@ import Layout from "@/layouts/Layout.astro";
 if (!Astro.locals.user?.id) return Astro.redirect("/signin");
 
 const session = Astro.locals.session;
+const user = Astro.locals.user;
 ---
 
 <Layout>
   <div class="dashboard">
     <h1>Dashboard</h1>
-    {session && <Welcome initialSession={session} />}
+    {session && <Welcome initialSession={session} user={user} />}
     <div class="actions">
       <button id="signOutButton">Sign Out</button>
     </div>

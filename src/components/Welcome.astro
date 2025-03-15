@@ -1,33 +1,24 @@
 ---
-import {eq} from "drizzle-orm";
-import {db} from "@/db";
-import {user} from "@/db/schema";
-
 export interface Props {
   initialSession: import("better-auth").Session;
+  user: import("better-auth").User;
 }
 
-const {initialSession} = Astro.props;
-
-const User = await db
-  .select()
-  .from(user)
-  .where(eq(user.id, initialSession.userId))
-  .get();
+const {user} = Astro.props;
 ---
 
 <div class="user-profile">
   <h2>
-    👋 Hello, <span class="user-name">{User?.name}</span>
+    👋 Hello, <span class="user-name">{user.name}</span>
   </h2>
   <div class="user-info">
     <div class="info-item">
       <span class="label">Email:</span>
-      <span>{User?.email}</span>
+      <span>{user.email}</span>
     </div>
     <div class="info-item">
       <span class="label">Email verified:</span>
-      <span>{User?.emailVerified ? "Yes" : "No"}</span>
+      <span>{user.emailVerified ? "Yes" : "No"}</span>
     </div>
   </div>
 </div>
