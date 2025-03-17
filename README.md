@@ -1,40 +1,24 @@
-# Astro Starter Kit with Better Auth and Drizzle ORM
+# Astro Starter Kit
 
-This starter kit integrates Astro with Better Auth for authentication and Drizzle ORM for database operations. It includes a complete authentication system with sign-up, sign-in, and user profile functionality.
+A feature-rich web application starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM.
 
-## 🚀 Features
+## 🚀 Tech Stack
 
-- **User Authentication**: Complete authentication flow with Better Auth
-- **Database Integration**: SQLite database with Drizzle ORM
-- **Server-side Rendering**: Full SSR support with Astro
-- **Type Safety**: Built with TypeScript for better developer experience
+- **[Astro](https://astro.build)** - Fast, modern web framework
+- **[React](https://react.dev)** - UI component library used for component hydration
+- **[TailwindCSS](https://tailwindcss.com)** - Utility-first CSS framework
+  - With Typography plugin for elegant content styling
+- **[Better Auth](https://better-auth.com)** - Authentication system
+- **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
 
-## 🛠️ Getting Started
+## 🛠️ Features
 
-1. **Clone the repository**:
-
-```bash
-git clone https://github.com/yourusername/astro-starter.git
-cd astro-starter
-```
-
-1. **Install dependencies**:
-
-```bash
-pnpm install
-```
-
-1. **Set up environment variables**:
-
-```bash
-cp .env.example .env
-```
-
-1. **Start the development server**:
-
-```bash
-pnpm dev
-```
+- **Server-side Rendering** with Astro's Node adapter
+- **Type Safety** with TypeScript
+- **User Authentication** flow with Better Auth
+- **Database Integration** with Drizzle ORM
+- **Modern UI** with TailwindCSS v4
+- **Development Tools**: Prettier for code formatting
 
 ## 🧞 Commands
 
@@ -44,13 +28,14 @@ pnpm dev
 | `pnpm dev`      | Starts local dev server with DB setup    |
 | `pnpm build`    | Build your production site with DB setup |
 | `pnpm preview`  | Preview your build locally               |
+| `pnpm astro`    | Run Astro CLI commands                   |
 | `pnpm db-setup` | Generate and push Drizzle migrations     |
 
 ## 🔐 Authentication Flow
 
 1. **Sign Up**: Users can create an account with name, email, and password
 2. **Sign In**: Users can log in with their email and password
-3. **Protected Routes**: The home page is protected and requires authentication
+3. **Protected Routes**: The dashboard is protected and requires authentication
 4. **Sign Out**: Users can log out from their account
 
 ## 🗄️ Database
@@ -111,3 +96,5 @@ const todosWithUser = await db
 - [Astro Documentation](https://docs.astro.build)
 - [Better Auth Documentation](https://github.com/zenstackhq/better-auth)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [React Documentation](https://react.dev/reference/react)

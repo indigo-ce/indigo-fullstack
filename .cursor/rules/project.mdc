@@ -4,7 +4,6 @@ globs:
 alwaysApply: true
 ---
 
-# Your rule content
+# Astro Starter
 
-- You can @ files here
-- You can use markdown but dont have to
+- A web-app starter template for Astro.
