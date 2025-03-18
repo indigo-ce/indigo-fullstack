@@ -1,138 +1,100 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import "@/styles.css";
+import {
+  CircleStackIcon,
+  LifebuoyIcon,
+  KeyIcon,
+  ServerIcon,
+} from "@heroicons/react/24/solid";
 ---
 
 <Layout>
   <div class="bg-white dark:bg-gray-900 py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center">
-        <h2
-          class="text-base/7 font-semibold text-indigo-600 dark:text-indigo-400"
+        <span
+          class="text-xs/7 font-mono text-indigo-600 dark:text-indigo-400 border border-indigo-600 dark:border-indigo-400 rounded-full px-2 py-1"
         >
-          Deploy faster
-        </h2>
+          v1.0.0
+        </span>
         <p
           class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl lg:text-balance"
         >
-          Everything you need to deploy your app
+          Astro Starter Kit
         </p>
         <p class="mt-6 text-lg/8 text-gray-600 dark:text-gray-300">
-          Quis tellus eget adipiscing convallis sit sit eget aliquet quis.
-          Suspendisse eget egestas a elementum pulvinar et feugiat blandit at.
-          In mi viverra elit nunc.
+          A feature-rich starter template built with Astro, React, TailwindCSS,
+          Better Auth, and Drizzle ORM. Get started quickly with authentication,
+          database integration, and a modern UI.
         </p>
       </div>
-      <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
-        <dl
-          class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3"
-        >
-          <div class="flex flex-col">
-            <dt
-              class="flex items-center gap-x-3 text-base/7 font-semibold text-gray-900 dark:text-white"
+    </div>
+    <div class="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+      <dl
+        class="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16"
+      >
+        <div class="relative pl-16">
+          <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">
+            <div
+              class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-pink-600"
             >
-              <svg
-                class="size-5 flex-none text-indigo-600 dark:text-indigo-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-                data-slot="icon"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M5.5 17a4.5 4.5 0 0 1-1.44-8.765 4.5 4.5 0 0 1 8.302-3.046 3.5 3.5 0 0 1 4.504 4.272A4 4 0 0 1 15 17H5.5Zm3.75-2.75a.75.75 0 0 0 1.5 0V9.66l1.95 2.1a.75.75 0 1 0 1.1-1.02l-3.25-3.5a.75.75 0 0 0-1.1 0l-3.25 3.5a.75.75 0 1 0 1.1 1.02l1.95-2.1v4.59Z"
-                  clip-rule="evenodd"></path>
-              </svg>
-              Push to deploy
-            </dt>
-            <dd
-              class="mt-4 flex flex-auto flex-col text-base/7 text-gray-600 dark:text-gray-300"
+              <ServerIcon className="size-6 text-white" />
+            </div>
+            Static + SSR + React
+          </dt>
+          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
+            Astro offers the flexibility to build static, server-side rendered,
+            and client-side hydrated pages in the same project.
+          </dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">
+            <div
+              class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-indigo-600"
             >
-              <p class="flex-auto">
-                Commodo nec sagittis tortor mauris sed. Turpis tortor quis
-                scelerisque diam id accumsan nullam tempus. Pulvinar etiam lacus
-                volutpat eu. Phasellus praesent ligula sit faucibus.
-              </p>
-              <p class="mt-6">
-                <a
-                  href="#"
-                  class="text-sm/6 font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
-                  >Learn more <span aria-hidden="true">→</span></a
-                >
-              </p>
-            </dd>
-          </div>
-          <div class="flex flex-col">
-            <dt
-              class="flex items-center gap-x-3 text-base/7 font-semibold text-gray-900 dark:text-white"
+              <LifebuoyIcon className="size-6 text-white" />
+            </div>
+            TypeScript
+          </dt>
+          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
+            Full TypeScript support throughout the codebase providing better
+            developer experience, fewer bugs, and enhanced code quality.
+          </dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">
+            <div
+              class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-blue-600"
             >
-              <svg
-                class="size-5 flex-none text-indigo-600 dark:text-indigo-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-                data-slot="icon"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z"
-                  clip-rule="evenodd"></path>
-              </svg>
-              SSL certificates
-            </dt>
-            <dd
-              class="mt-4 flex flex-auto flex-col text-base/7 text-gray-600 dark:text-gray-300"
+              <KeyIcon className="size-6 text-white" />
+            </div>
+            Authentication
+          </dt>
+          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
+            Complete authentication flow with <a
+              href="https://better-auth.vercel.app/docs/integrations/astro"
+              class="text-blue-600 hover:underline dark:text-blue-400"
+              >Better Auth</a
+            >. Sign up, sign in, protected routes, and user sessions out of the
+            box.
+          </dd>
+        </div>
+        <div class="relative pl-16">
+          <dt class="text-base/7 font-semibold text-gray-900 dark:text-white">
+            <div
+              class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-lime-600"
             >
-              <p class="flex-auto">
-                Pellentesque enim a commodo malesuada turpis eleifend risus.
-                Facilisis donec placerat sapien consequat tempor fermentum nibh.
-              </p>
-              <p class="mt-6">
-                <a
-                  href="#"
-                  class="text-sm/6 font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
-                  >Learn more <span aria-hidden="true">→</span></a
-                >
-              </p>
-            </dd>
-          </div>
-          <div class="flex flex-col">
-            <dt
-              class="flex items-center gap-x-3 text-base/7 font-semibold text-gray-900 dark:text-white"
-            >
-              <svg
-                class="size-5 flex-none text-indigo-600 dark:text-indigo-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-                data-slot="icon"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H3.989a.75.75 0 0 0-.75.75v4.242a.75.75 0 0 0 1.5 0v-2.43l.31.31a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm1.23-3.723a.75.75 0 0 0 .219-.53V2.929a.75.75 0 0 0-1.5 0V5.36l-.31-.31A7 7 0 0 0 3.239 8.188a.75.75 0 1 0 1.448.389A5.5 5.5 0 0 1 13.89 6.11l.311.31h-2.432a.75.75 0 0 0 0 1.5h4.243a.75.75 0 0 0 .53-.219Z"
-                  clip-rule="evenodd"></path>
-              </svg>
-              Simple queues
-            </dt>
-            <dd
-              class="mt-4 flex flex-auto flex-col text-base/7 text-gray-600 dark:text-gray-300"
-            >
-              <p class="flex-auto">
-                Pellentesque sit elit congue ante nec amet. Dolor aenean
-                curabitur viverra suspendisse iaculis eget. Nec mollis placerat
-                ultricies euismod ut condimentum.
-              </p>
-              <p class="mt-6">
-                <a
-                  href="#"
-                  class="text-sm/6 font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
-                  >Learn more <span aria-hidden="true">→</span></a
-                >
-              </p>
-            </dd>
-          </div>
-        </dl>
-      </div>
+              <CircleStackIcon className="size-6 text-white" />
+            </div>
+            Database Integration
+          </dt>
+          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
+            SQLite database with Drizzle ORM for type-safe database operations.
+            Easily manage users, sessions, and application data.
+          </dd>
+        </div>
+      </dl>
     </div>
   </div>
 </Layout>
