@@ -10,7 +10,7 @@ import {
 ---
 
 <Layout>
-  <div class="py-24 sm:py-32">
+  <div class="py-24 sm:py-32 bg-white dark:bg-gray-900">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center">
         <span
@@ -100,28 +100,15 @@ import {
   </div>
 </Layout>
 
-<script is:inline>
-  const getThemePreference = () => {
-    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
-      return localStorage.getItem("theme");
-    }
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  };
+<script>
+  import {
+    initializeTheme,
+    setupColorSchemeMediaQueryObserver,
+  } from "../lib/theme";
 
-  const isDark = getThemePreference() === "dark";
-  document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+  // Initialize theme on page load
+  initializeTheme();
 
-  if (typeof localStorage !== "undefined") {
-    const observer = new MutationObserver(() => {
-      const isDark = document.documentElement.classList.contains("dark");
-      localStorage.setItem("theme", isDark ? "dark" : "light");
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-  }
+  // Setup observer for color scheme changes
+  setupColorSchemeMediaQueryObserver();
 </script>
