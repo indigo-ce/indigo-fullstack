@@ -23,7 +23,7 @@ const user = Astro.locals.user;
       .getElementById("signOutButton")
       ?.addEventListener("click", async () => {
         await authClient.signOut();
-        window.location.href = "/sign-in";
+        window.location.href = "/";
       });
   </script>
 </Layout>
