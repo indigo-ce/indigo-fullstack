@@ -51,14 +51,10 @@ export default function UserProfile({name, email, imageUrl}: UserProfileProps) {
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent sideOffset={10}>
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel className="text-muted-foreground">
+            Hi, <span className="text-foreground">{name}</span>!
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" /> Profile
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" /> Settings
-          </DropdownMenuItem>
           <DropdownMenuItem
             className="text-destructive"
             onClick={handleSignOut}
