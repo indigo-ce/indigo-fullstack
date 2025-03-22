@@ -5,9 +5,10 @@ A feature-rich web application starter template built with Astro, React, Tailwin
 ## 🚀 Tech Stack
 
 - **[Astro](https://astro.build)** - Fast, modern web framework
-- **[React](https://react.dev)** - UI component library used for component hydration
+- **[Svelte](https://svelte.dev)** - UI component library used for component hydration
 - **[TailwindCSS](https://tailwindcss.com)** - Utility-first CSS framework
   - With Typography plugin for elegant content styling
+- **[Shadcn UI](https://next.shadcn-svelte.com)** - UI component library
 - **[Better Auth](https://better-auth.com)** - Authentication system
 - **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
 
@@ -97,4 +98,4 @@ const todosWithUser = await db
 - [Better Auth Documentation](https://github.com/zenstackhq/better-auth)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
-- [React Documentation](https://react.dev/reference/react)
+- [Svelte Documentation](https://svelte.dev/docs)
