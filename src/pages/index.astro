@@ -1,11 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import {
-  CircleStackIcon,
-  PaintBrushIcon,
-  KeyIcon,
-  ServerIcon,
-} from "@heroicons/react/24/solid";
+import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
 ---
 
 <Layout>
@@ -38,7 +33,7 @@ import {
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-pink-600"
             >
-              <ServerIcon className="size-6 text-white" />
+              <Icon src={Server} className="size-6 text-white" solid />
             </div>
             Static + SSR + React
           </dt>
@@ -52,7 +47,7 @@ import {
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-amber-500"
             >
-              <PaintBrushIcon className="size-6 text-white" />
+              <Icon src={PaintBrush} className="size-6 text-white" solid />
             </div>
             TailwindCSS
           </dt>
@@ -67,7 +62,7 @@ import {
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-blue-600"
             >
-              <KeyIcon className="size-6 text-white" />
+              <Icon src={Key} className="size-6 text-white" solid />
             </div>
             Authentication
           </dt>
@@ -85,7 +80,7 @@ import {
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-lime-600"
             >
-              <CircleStackIcon className="size-6 text-white" />
+              <Icon src={CircleStack} className="size-6 text-white" solid />
             </div>
             Database Integration
           </dt>
