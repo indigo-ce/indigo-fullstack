@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/primitives/dropdown-menu";
-import {LogOut, Settings, User} from "lucide-react";
+import {LogOut} from "lucide-react";
 
 interface UserProfileProps {
   name: string;
