@@ -12,12 +12,12 @@
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/components/primitives/dropdown-menu";
-  import { LogOut } from "lucide-svelte";
-  
+  import {LogOut} from "lucide-svelte";
+
   export let name: string;
   export let email: string;
   export let imageUrl: string | undefined = undefined;
-  
+
   // Create initials from name for the avatar fallback
   $: initials = name
     .split(" ")
@@ -25,10 +25,10 @@
     .join("")
     .toUpperCase()
     .substring(0, 2);
-  
+
   const handleSignOut = async () => {
     try {
-      const { authClient } = await import("@/lib/auth-client");
+      const {authClient} = await import("@/lib/auth-client");
       await authClient.signOut();
       window.location.href = "/";
     } catch (error) {
@@ -53,10 +53,10 @@
         Hi, <span class="text-foreground">{name}</span>!
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem
-        class="text-destructive"
-        on:click={handleSignOut}
-      >
+      <DropdownMenuItem class="cursor-default text-muted-foreground" disabled>
+        {email}
+      </DropdownMenuItem>
+      <DropdownMenuItem class="text-destructive" onSelect={handleSignOut}>
         <LogOut class="mr-2 h-4 w-4" /> Logout
       </DropdownMenuItem>
     </DropdownMenuContent>
