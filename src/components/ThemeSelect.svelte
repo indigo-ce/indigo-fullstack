@@ -1,41 +1,28 @@
 <script lang="ts">
   import * as Select from "@/components/primitives/select";
 
-  import {
-    Moon as MoonIcon,
-    Sun as SunIcon,
-    MonitorIcon as ComputerDesktopIcon,
-  } from "lucide-svelte";
+  import Moon from "lucide-svelte/icons/moon";
+  import Sun from "lucide-svelte/icons/sun";
+  import SunMoon from "lucide-svelte/icons/sun-moon";
   import {onMount} from "svelte";
-  import {initializeTheme, setThemePreference} from "@/lib/theme";
+  import {getThemePreference, setThemePreference} from "@/lib/theme";
   import type {Theme} from "@/lib/theme";
 
   let theme: Theme = "system";
-  let isDark = false;
 
   onMount(() => {
-    // Initialize theme from utility
-    theme = initializeTheme();
-    updateIsDark();
+    theme = getThemePreference();
   });
-
-  function updateIsDark() {
-    isDark =
-      theme === "system"
-        ? window.matchMedia("(prefers-color-scheme: dark)").matches
-        : theme === "dark";
-  }
 
   function handleThemeChange(newTheme: Theme) {
     theme = newTheme;
     setThemePreference(theme);
-    updateIsDark();
   }
 
   const themes = [
-    {value: "light", label: "Light", icon: SunIcon},
-    {value: "dark", label: "Dark", icon: MoonIcon},
-    {value: "system", label: "System", icon: ComputerDesktopIcon},
+    {value: "light", label: "Light", icon: Sun},
+    {value: "dark", label: "Dark", icon: Moon},
+    {value: "system", label: "System", icon: SunMoon},
   ];
 </script>
 
@@ -45,11 +32,10 @@
   onValueChange={(value) => handleThemeChange(value as Theme)}
 >
   <Select.Trigger class="w-16">
-    {#if isDark}
-      <MoonIcon class="h-4 w-4" />
-    {:else}
-      <SunIcon class="h-4 w-4" />
-    {/if}
+    <svelte:component
+      this={themes.find((t) => t.value === theme)?.icon}
+      class="h-4 w-4"
+    />
   </Select.Trigger>
   <Select.Content>
     {#each themes as themeOption (themeOption.value)}

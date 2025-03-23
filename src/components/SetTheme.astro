@@ -1,0 +1,35 @@
+---
+
+---
+
+<script is:inline>
+  function getThemePreference() {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+      return localStorage.getItem("theme");
+    }
+
+    return "system";
+  }
+
+  // Initialize theme on page load
+  const theme = getThemePreference();
+
+  const isDark =
+    theme === "dark" ||
+    (theme === "system" &&
+      window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+  document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+
+  // Setup observer for color scheme changes
+  if (typeof window !== "undefined") {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    mediaQuery.addEventListener("change", () => {
+      // Only update if we're using system theme
+      if (!localStorage.getItem("theme")) {
+        applyTheme("system");
+      }
+    });
+  }
+</script>
