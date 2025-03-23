@@ -18,9 +18,28 @@ import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
           Astro Starter Kit
         </p>
         <p class="mt-6 text-lg/8 text-gray-600 dark:text-gray-300">
-          A feature-rich starter template built with Astro, React, TailwindCSS,
-          Better Auth, and Drizzle ORM. Get started quickly with authentication,
-          database integration, and a modern UI.
+          A starter template built with <a
+            href="https://astro.build/"
+            class="text-indigo-600 dark:text-indigo-400 hover:underline"
+            >Astro</a
+          >, <a
+            href="https://svelte.dev/"
+            class="text-indigo-600 dark:text-indigo-400 hover:underline"
+            >Svelte</a
+          >, <a
+            href="https://tailwindcss.com/"
+            class="text-indigo-600 dark:text-indigo-400 hover:underline"
+            >TailwindCSS</a
+          >, <a
+            href="https://better-auth.vercel.app/docs/integrations/astro"
+            class="text-indigo-600 dark:text-indigo-400 hover:underline"
+            >Better Auth</a
+          >, and <a
+            href="https://drizzle.dev/"
+            class="text-indigo-600 dark:text-indigo-400 hover:underline"
+            >Drizzle ORM</a
+          >. Get started with authentication, database integration, and a modern
+          UI.
         </p>
       </div>
     </div>
@@ -33,13 +52,13 @@ import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-pink-600"
             >
-              <Icon src={Server} className="size-6 text-white" solid />
+              <Icon src={Server} class="size-6 text-white" solid />
             </div>
             Static + SSR + React
           </dt>
-          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
-            Astro offers the flexibility to build static, server-side rendered,
-            and client-side hydrated pages in the same project.
+          <dd class="mt-2 text-base/7 text-muted-foreground">
+            Build static or server-side rendered pages with client-side
+            hydration.
           </dd>
         </div>
         <div class="relative pl-16">
@@ -47,14 +66,12 @@ import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-amber-500"
             >
-              <Icon src={PaintBrush} className="size-6 text-white" solid />
+              <Icon src={PaintBrush} class="size-6 text-white" solid />
             </div>
-            TailwindCSS
+            TailwindCSS + Shadcn UI
           </dt>
-          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
-            Modern styling with TailwindCSS, pre-configured Shadcn UI
-            components, and a comprehensive icon set from both HeroIcons and
-            Lucide Icons.
+          <dd class="mt-2 text-base/7 text-muted-foreground">
+            Quickly build modern, responsive, and accessible UI components.
           </dd>
         </div>
         <div class="relative pl-16">
@@ -62,17 +79,16 @@ import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-blue-600"
             >
-              <Icon src={Key} className="size-6 text-white" solid />
+              <Icon src={Key} class="size-6 text-white" solid />
             </div>
             Authentication
           </dt>
-          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
-            Complete authentication flow with <a
+          <dd class="mt-2 text-base/7 text-muted-foreground">
+            Complete authentication and authorization flow with <a
               href="https://better-auth.vercel.app/docs/integrations/astro"
               class="text-blue-600 hover:underline dark:text-blue-400"
               >Better Auth</a
-            >. Sign up, sign in, protected routes, and user sessions out of the
-            box.
+            >.
           </dd>
         </div>
         <div class="relative pl-16">
@@ -80,13 +96,12 @@ import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-lime-600"
             >
-              <Icon src={CircleStack} className="size-6 text-white" solid />
+              <Icon src={CircleStack} class="size-6 text-white" solid />
             </div>
             Database Integration
           </dt>
-          <dd class="mt-2 text-base/7 text-gray-600 dark:text-gray-300">
+          <dd class="mt-2 text-base/7 text-muted-foreground">
             SQLite database with Drizzle ORM for type-safe database operations.
-            Easily manage users, sessions, and application data.
           </dd>
         </div>
       </dl>
