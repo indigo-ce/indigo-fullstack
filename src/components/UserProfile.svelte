@@ -15,7 +15,6 @@
   import LogOut from "lucide-svelte/icons/log-out";
 
   export let name: string;
-  export let email: string;
   export let imageUrl: string | undefined = undefined;
 
   // Create initials from name for the avatar fallback
@@ -53,8 +52,8 @@
         Hi, <span class="text-foreground">{name}</span>!
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
-      <DropdownMenuItem class="cursor-default text-muted-foreground" disabled>
-        {email}
+      <DropdownMenuItem>
+        <a href="/dashboard" class="flex w-full items-center"> Dashboard </a>
       </DropdownMenuItem>
       <DropdownMenuItem class="text-destructive" onSelect={handleSignOut}>
         <LogOut class="mr-2 h-4 w-4" /> Logout

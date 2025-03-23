@@ -2,6 +2,8 @@
 import Welcome from "@/components/Welcome.astro";
 import Layout from "@/layouts/Layout.astro";
 import "@/styles.css";
+import User from "@/assets/user.svg";
+import Email from "@/assets/mail.svg";
 
 if (!Astro.locals.user?.id) return Astro.redirect("/sign-in");
 
@@ -9,21 +11,31 @@ const user = Astro.locals.user;
 ---
 
 <Layout>
-  <div class="dashboard">
-    <h1>Dashboard</h1>
+  <div class="dashboard p-6 max-w-4xl mx-auto pt-20">
+    <h1 class="text-2xl font-bold text-foreground mb-4">Dashboard</h1>
+
     <Welcome user={user} />
-    <div class="actions">
-      <button id="signOutButton">Sign Out</button>
+
+    <div class="mt-8 rounded-lg bg-card border border-border shadow-sm p-6">
+      <div class="flex items-center gap-x-4">
+        <dt class="flex-none">
+          <span class="sr-only">User</span>
+          <User class="h-6 w-5 text-muted-foreground" />
+        </dt>
+        <dd class="text-sm font-medium text-foreground">
+          {user.name || "User"}
+        </dd>
+      </div>
+
+      <div class="mt-4 flex items-center gap-x-4">
+        <dt class="flex-none">
+          <span class="sr-only">Email</span>
+          <Email class="h-6 w-5 text-muted-foreground" />
+        </dt>
+        <dd class="text-sm text-muted-foreground">
+          {user.email || "user@example.com"}
+        </dd>
+      </div>
     </div>
   </div>
-  <script>
-    import {authClient} from "@/lib/auth-client";
-
-    document
-      .getElementById("signOutButton")
-      ?.addEventListener("click", async () => {
-        await authClient.signOut();
-        window.location.href = "/";
-      });
-  </script>
 </Layout>
