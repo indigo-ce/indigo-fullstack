@@ -13,6 +13,10 @@ export default defineConfig({
     mode: "standalone",
   }),
 
+  experimental: {
+    svg: true,
+  },
+
   vite: {
     plugins: [tailwindcss()],
   },

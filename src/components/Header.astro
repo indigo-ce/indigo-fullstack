@@ -1,5 +1,5 @@
 ---
-import Logo from "@/components/Logo.svelte";
+import Logo from "@/assets/logo.svg";
 import UserProfile from "@/components/UserProfile.svelte";
 
 const user = Astro.locals.user;
@@ -128,7 +128,7 @@ const user = Astro.locals.user;
   </div>
 </header>
 
-<script is:inline>
+<!-- <script is:inline>
   import {authClient} from "@/lib/auth-client";
 
   const mobileMenu = document.getElementById("mobile-menu");
@@ -149,4 +149,4 @@ const user = Astro.locals.user;
     await authClient.signOut();
     window.location.href = "/";
   });
-</script>
+</script> -->
