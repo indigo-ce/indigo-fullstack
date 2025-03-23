@@ -11,15 +11,17 @@
     return "system";
   }
 
+  function applyTheme(theme) {
+    const isDark =
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+  }
+
   // Initialize theme on page load
-  const theme = getThemePreference();
-
-  const isDark =
-    theme === "dark" ||
-    (theme === "system" &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-  document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+  applyTheme(getThemePreference());
 
   // Setup observer for color scheme changes
   if (typeof window !== "undefined") {

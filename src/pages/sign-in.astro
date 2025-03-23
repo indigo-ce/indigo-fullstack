@@ -1,17 +1,19 @@
 ---
-if (Astro.locals.user?.id) return Astro.redirect("/");
+if (Astro.locals.user?.id) return Astro.redirect("/dashboard");
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
 import PasswordField from "@/components/PasswordField.svelte";
 import Mail from "@/assets/mail.svg";
-import {authClient} from "@/lib/auth-client";
+import {auth} from "@/lib/auth";
+import {APIError} from "better-auth/api";
 
 const errors = {
   email: "",
   password: "",
   server: "",
 };
+
 const prefilled = {
   email: "",
   password: "",
@@ -31,26 +33,34 @@ if (Astro.request.method === "POST") {
       return;
     }
 
-    const result = await authClient.signIn.email({
-      email,
-      password,
+    const response = await auth.api.signInEmail({
+      body: {
+        email,
+        password,
+      },
+      asResponse: true,
     });
 
-    console.log(result.error);
-
-    if (Boolean(result.error) === false) {
-      return Astro.redirect("/dashboard");
+    if (!response.ok) {
+      throw new APIError("UNAUTHORIZED");
     } else {
-      if (result.error?.code === "invalid_credentials") {
-        errors.server = "Invalid credentials";
-      } else {
-        errors.server =
-          result.error?.message || "An error occurred during sign in";
-      }
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: "/dashboard",
+          "Set-Cookie": response.headers.get("set-cookie") || "",
+        },
+      });
     }
   } catch (error) {
-    console.error(error);
-    errors.server = "Something went wrong: " + error;
+    if (error instanceof APIError) {
+      if (error.status === "UNAUTHORIZED") {
+        errors.server = "Invalid email or password. Please try again.";
+      }
+      if (error.status === "FORBIDDEN") {
+        errors.server = "Email not verified. Please verify your email.";
+      }
+    }
   }
 }
 ---
@@ -66,7 +76,7 @@ if (Astro.request.method === "POST") {
         <div
           class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
         >
-          <Mail class="h-5 w-5 text-muted-foreground" />
+          <Mail class="h-5 w-5 text-muted-foreground mr-1" />
           <Input
             type="email"
             placeholder="Email"
