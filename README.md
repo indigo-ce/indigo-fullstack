@@ -1,6 +1,6 @@
 # Astro Starter Kit
 
-A feature-rich web application starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM.
+A feature-rich web application starter template built with Astro, React, TailwindCSS, Better Auth, Drizzle ORM.
 
 ## 🚀 Tech Stack
 
@@ -11,6 +11,7 @@ A feature-rich web application starter template built with Astro, React, Tailwin
 - **[Shadcn UI](https://next.shadcn-svelte.com)** - UI component library
 - **[Better Auth](https://better-auth.com)** - Authentication system
 - **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
+- **[Resend](https://resend.com)** - Modern email API for sending emails
 
 ## 🛠️ Features
 
@@ -19,6 +20,7 @@ A feature-rich web application starter template built with Astro, React, Tailwin
 - **User Authentication** flow with Better Auth
 - **Database Integration** with Drizzle ORM
 - **Modern UI** with TailwindCSS v4
+- **Email Functionality** with Resend API and templating using React Email
 - **Development Tools**: Prettier for code formatting
 
 ## 🧞 Commands
@@ -92,6 +94,59 @@ const todosWithUser = await db
   .where(eq(todo.userId, currentUserId));
 ```
 
+## 📨 Email Functionality
+
+The application includes built-in email functionality using [Resend](https://resend.com) with fallback to SMTP/Ethereal for development.
+
+### Configuration
+
+Add these environment variables to your `.env` file:
+
+```
+# Resend API configuration (recommended for production)
+RESEND_API_KEY=your_resend_api_key
+SEND_EMAIL_FROM="Your App Name <noreply@yourdomain.com>"
+
+# Alternative: SMTP configuration
+# SMTP_HOST=smtp.example.com
+# SMTP_PORT=587
+# SMTP_USER=username
+# SMTP_PASS=password
+# SMTP_SECURE=false
+```
+
+### Email Templates
+
+Email templates are built with React Email for improved type safety, maintainability, and design consistency. Templates are stored in `src/emails/`:
+
+- `WelcomeEmail.tsx` - Template for welcome emails
+- `CustomEmail.tsx` - Template for custom message emails
+- `BaseLayout.tsx` - Reusable email layout component
+
+### Sending Emails
+
+```typescript
+import {sendEmail} from "../utils/email";
+
+// Send a welcome email
+await sendEmail({
+  to: "user@example.com",
+  subject: "Welcome to Astro Starter!",
+  template: {name: "welcome", params: {name: "John"}},
+});
+
+// Send a custom email
+await sendEmail({
+  to: "user@example.com",
+  subject: "Important Information",
+  template: {name: "custom", params: {html: "<p>Your custom message here</p>"}},
+});
+```
+
+### Demo Page
+
+Visit `/email-demo` to try the email functionality. In development, emails are sent to Ethereal (a test SMTP service) and you'll see preview links in the console.
+
 ## 📚 Learn More
 
 - [Astro Documentation](https://docs.astro.build)
@@ -99,3 +154,5 @@ const todosWithUser = await db
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
 - [Svelte Documentation](https://svelte.dev/docs)
+- [Resend Documentation](https://resend.com/docs)
+- [React Email](https://react.email/docs/introduction)
