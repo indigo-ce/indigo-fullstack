@@ -143,9 +143,19 @@ await sendEmail({
 });
 ```
 
-### Demo Page
+### Sending Test Emails
 
 Visit `/email-demo` to try the email functionality. In development, emails are sent to Ethereal (a test SMTP service) and you'll see preview links in the console.
+
+### Preview Emails Templates
+
+To preview emails locally, run:
+
+```bash
+pnpm email-preview
+```
+
+This command starts a local email viewer using the templates from the `src/components/email` directory.
 
 ## 📚 Learn More
 
