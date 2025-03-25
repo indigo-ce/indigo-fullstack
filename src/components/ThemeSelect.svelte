@@ -1,9 +1,9 @@
 <script lang="ts">
   import * as Select from "@/components/primitives/select";
 
-  import Moon from "lucide-svelte/icons/moon";
-  import Sun from "lucide-svelte/icons/sun";
-  import SunMoon from "lucide-svelte/icons/sun-moon";
+  import Moon from "@lucide/svelte/icons/moon";
+  import Sun from "@lucide/svelte/icons/sun";
+  import SunMoon from "@lucide/svelte/icons/sun-moon";
   import {onMount} from "svelte";
   import {getThemePreference, setThemePreference} from "@/lib/theme";
   import type {Theme} from "@/lib/theme";

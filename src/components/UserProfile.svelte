@@ -12,7 +12,7 @@
     DropdownMenuSeparator,
     DropdownMenuTrigger,
   } from "@/components/primitives/dropdown-menu";
-  import LogOut from "lucide-svelte/icons/log-out";
+  import LogOut from "@lucide/svelte/icons/log-out";
 
   export let name: string;
   export let imageUrl: string | undefined = undefined;

@@ -8,7 +8,7 @@ import Layout from "@/layouts/Layout.astro";
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div class="bg-card p-6 rounded-lg shadow-sm border border-border">
-        <form action="/api/email/send-custom" method="post" class="space-y-4">
+        <form id="send-custom-email" class="space-y-4">
           <h2 class="text-xl font-semibold mb-4">Send Custom Email</h2>
           <div>
             <label
@@ -62,11 +62,6 @@ import Layout from "@/layouts/Layout.astro";
               class="w-full rounded-md border border-input bg-background px-3 py-2"
               required></textarea>
           </div>
-          <input
-            type="hidden"
-            name="redirectPath"
-            value="/email-demo?sent=true"
-          />
           <button
             type="submit"
             class="inline-flex items-center justify-center rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
@@ -77,7 +72,7 @@ import Layout from "@/layouts/Layout.astro";
       </div>
 
       <div class="bg-card p-6 rounded-lg shadow-sm border border-border">
-        <form action="/api/email/send-welcome" method="post" class="space-y-4">
+        <form id="send-welcome-email" class="space-y-4">
           <h2 class="text-xl font-semibold mb-4">Send Welcome Email</h2>
           <div>
             <label
@@ -105,11 +100,7 @@ import Layout from "@/layouts/Layout.astro";
               required
             />
           </div>
-          <input
-            type="hidden"
-            name="redirectPath"
-            value="/email-demo?sent=true"
-          />
+          <button></button>
           <button
             type="submit"
             class="inline-flex items-center justify-center rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
@@ -153,3 +144,40 @@ SEND_EMAIL_FROM=Your App &lt;noreply@yourdomain.com&gt;
     </div>
   </div>
 </Layout>
+
+<script>
+  import {actions} from "astro:actions";
+  import {navigate} from "astro:transitions/client";
+
+  const sendCustomEmailForm = document.querySelector("#send-custom-email");
+  sendCustomEmailForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (sendCustomEmailForm instanceof HTMLFormElement) {
+      const formData = new FormData(sendCustomEmailForm);
+
+      const email = formData.get("recipient") as string;
+      const subject = formData.get("subject") as string;
+      const html = formData.get("message") as string;
+
+      const {error} = await actions.sendCustomEmail({
+        email,
+        subject,
+        html,
+      });
+      if (!error) navigate("/email-demo?sent=true");
+    }
+  });
+
+  const sendWelcomeEmailForm = document.querySelector("#send-welcome-email");
+  sendWelcomeEmailForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (sendWelcomeEmailForm instanceof HTMLFormElement) {
+      const formData = new FormData(sendWelcomeEmailForm);
+      const {error} = await actions.sendWelcomeEmail({
+        email: formData.get("recipient") as string,
+        name: formData.get("name") as string,
+      });
+      if (!error) navigate("/email-demo?sent=true");
+    }
+  });
+</script>

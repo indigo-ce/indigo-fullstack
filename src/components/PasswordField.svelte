@@ -1,8 +1,8 @@
 <script lang="ts">
   import {Input} from "@/components/primitives/input";
-  import Eye from "lucide-svelte/icons/eye";
-  import EyeOff from "lucide-svelte/icons/eye-off";
-  import Lock from "lucide-svelte/icons/lock";
+  import Eye from "@lucide/svelte/icons/eye";
+  import EyeOff from "@lucide/svelte/icons/eye-off";
+  import Lock from "@lucide/svelte/icons/lock";
 
   export let value = "";
   export let placeholder = "Password";
