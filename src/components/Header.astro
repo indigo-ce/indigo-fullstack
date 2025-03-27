@@ -38,13 +38,6 @@ const user = Astro.locals.user;
       </button>
     </div>
     <div class="hidden lg:flex lg:gap-x-12">
-      <a
-        href="/email-demo"
-        class="text-sm/6 font-semibold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300"
-      >
-        Email Demo
-      </a>
-      
       {
         user ? (
           <UserProfile name={user.name} email={user.email} client:load />
@@ -101,11 +94,6 @@ const user = Astro.locals.user;
       <div class="mt-6 flow-root">
         <div class="-my-6 divide-y divide-gray-500/10 dark:divide-white/10">
           <div class="space-y-2 py-6">
-            <a
-              href="/email-demo"
-              class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
-              >Email Demo</a
-            >
             <a
               href="/dashboard"
               class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
