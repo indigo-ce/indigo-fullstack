@@ -159,7 +159,7 @@ SEND_EMAIL_FROM=Your App &lt;noreply@yourdomain.com&gt;
       const subject = formData.get("subject") as string;
       const html = formData.get("message") as string;
 
-      const {error} = await actions.sendCustomEmail({
+      const {error} = await actions.email.sendCustomEmail({
         email,
         subject,
         html,
@@ -173,7 +173,7 @@ SEND_EMAIL_FROM=Your App &lt;noreply@yourdomain.com&gt;
     event.preventDefault();
     if (sendWelcomeEmailForm instanceof HTMLFormElement) {
       const formData = new FormData(sendWelcomeEmailForm);
-      const {error} = await actions.sendWelcomeEmail({
+      const {error} = await actions.email.sendWelcomeEmail({
         email: formData.get("recipient") as string,
         name: formData.get("name") as string,
       });
