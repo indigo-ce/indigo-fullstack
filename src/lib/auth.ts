@@ -1,7 +1,7 @@
 import {betterAuth} from "better-auth";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
 import {db} from "@/db";
-import {render} from "astro:content";
+import {render} from "@react-email/render";
 import PasswordReset from "@/components/email/PasswordReset";
 import {sendEmail} from "./email";
 
