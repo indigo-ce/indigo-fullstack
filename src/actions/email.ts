@@ -4,7 +4,6 @@ import {z} from "astro:schema";
 
 import WelcomeEmail from "@/components/email/WelcomeEmail";
 import CustomEmail from "@/components/email/CustomEmail";
-import PasswordReset from "@/components/email/PasswordReset";
 import EmailVerification from "@/components/email/EmailVerification";
 import {sendEmail} from "@/lib/email";
 
@@ -30,20 +29,6 @@ export const email = {
     }),
     handler: async ({email, subject, html}) => {
       await sendEmail(email, subject, await render(CustomEmail({html})));
-    },
-  }),
-  sendPasswordResetEmail: defineAction({
-    input: z.object({
-      email: z.string().email(),
-      name: z.string().optional(),
-      resetLink: z.string(),
-    }),
-    handler: async ({email, name, resetLink}) => {
-      await sendEmail(
-        email,
-        "Reset Your Password",
-        await render(PasswordReset({name: name || "friend", resetLink})),
-      );
     },
   }),
   sendEmailVerificationEmail: defineAction({

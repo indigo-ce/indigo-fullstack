@@ -1,7 +1,9 @@
 import {betterAuth} from "better-auth";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
 import {db} from "@/db";
-import {actions} from "astro:actions";
+import {render} from "astro:content";
+import PasswordReset from "@/components/email/PasswordReset";
+import {sendEmail} from "./email";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -9,12 +11,14 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    sendResetPassword: async ({user, url, token}, request) => {
-      await actions.email.sendPasswordResetEmail({
-        email: user.email,
-        name: user.name,
-        resetLink: url,
-      });
+    sendResetPassword: async ({user, url}) => {
+      await sendEmail(
+        user.email,
+        "Reset Your Password",
+        await render(
+          PasswordReset({name: user.name || "friend", resetLink: url}),
+        ),
+      );
     },
   },
 });
