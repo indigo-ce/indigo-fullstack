@@ -16,28 +16,12 @@ const errors = {
   server: "",
 };
 
-const prefilled = {
-  name: "",
-  email: "",
-  password: "",
-};
-
 if (Astro.request.method === "POST") {
   try {
     const formData = await Astro.request.formData();
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    prefilled.name = name;
-    prefilled.email = email;
-    prefilled.password = password;
-
-    if (!name || !email || !password) {
-      if (!name) errors.name = "Name is required";
-      if (!email) errors.email = "Email is required";
-      if (!password) errors.password = "Password is required";
-      return;
-    }
 
     const response = await auth.api.signUpEmail({
       body: {
@@ -105,7 +89,7 @@ if (Astro.request.method === "POST") {
             placeholder="Name"
             class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
             name="name"
-            value={prefilled.name}
+            transition:persist
             required
           />
         </div>
@@ -119,7 +103,7 @@ if (Astro.request.method === "POST") {
             placeholder="Email"
             class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
             name="email"
-            value={prefilled.email}
+            transition:persist
             required
           />
         </div>
@@ -128,7 +112,7 @@ if (Astro.request.method === "POST") {
           name="password"
           required
           client:load
-          value={prefilled.password}
+          transition:persist
         />
         {
           (errors.password || errors.server || errors.email) && (
