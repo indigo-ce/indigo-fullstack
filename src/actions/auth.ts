@@ -14,6 +14,7 @@ export const authentication = {
         await auth.api.forgetPassword({
           body: {
             email,
+            redirectTo: "/reset-password",
           },
         });
 
