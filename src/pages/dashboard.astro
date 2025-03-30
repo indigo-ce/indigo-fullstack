@@ -2,8 +2,6 @@
 import Welcome from "@/components/Welcome.astro";
 import Layout from "@/layouts/Layout.astro";
 import "@/styles.css";
-import User from "@/assets/user.svg";
-import Email from "@/assets/mail.svg";
 import {Button} from "@/components/primitives/button";
 
 if (!Astro.locals.user?.id) return Astro.redirect("/sign-in");
@@ -17,29 +15,25 @@ const user = Astro.locals.user;
 
     <Welcome user={user} />
 
-    <div class="mt-8 rounded-lg bg-card border border-border shadow-sm p-6">
-      <div class="flex items-center gap-x-4">
-        <dt class="flex-none">
-          <span class="sr-only">User</span>
-          <User class="h-6 w-5 text-muted-foreground" />
-        </dt>
-        <dd class="text-sm font-medium text-foreground">
-          {user.name || "User"}
-        </dd>
-      </div>
-
-      <div class="mt-4 flex items-center gap-x-4">
-        <dt class="flex-none">
-          <span class="sr-only">Email</span>
-          <Email class="h-6 w-5 text-muted-foreground" />
-        </dt>
-        <dd class="text-sm text-muted-foreground">
-          {user.email || "user@example.com"}
-        </dd>
-      </div>
+    <div class="flex items-center gap-x-4">
+      <dt class="flex-none">
+        <span class="text-sm font-medium text-muted-foreground">User</span>
+      </dt>
+      <dd class="text-sm font-medium text-foreground">
+        {user.name || "User"}
+      </dd>
     </div>
-    <Button href="/email-demo" variant="outline" size="sm" class="mt-2">
-      Email Demo
+
+    <div class="mt-4 flex items-center gap-x-4">
+      <dt class="flex-none">
+        <span class="text-sm font-medium text-muted-foreground">Email</span>
+      </dt>
+      <dd class="text-sm font-medium text-foreground">
+        {user.email || "user@example.com"}
+      </dd>
+    </div>
+    <Button href="/email-demo" variant="outline" size="sm" class="mt-5">
+      Email Demo →
     </Button>
   </div>
 </Layout>
