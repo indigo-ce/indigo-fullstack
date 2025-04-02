@@ -1,7 +1,6 @@
 ---
 if (Astro.locals.user?.id) return Astro.redirect("/dashboard");
 
-import {ClientRouter} from "astro:transitions";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
@@ -16,11 +15,19 @@ const errors = {
   server: "",
 };
 
+const fields = {
+  email: "",
+  password: "",
+};
+
 if (Astro.request.method === "POST") {
   try {
     const formData = await Astro.request.formData();
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
+
+    fields.email = email;
+    fields.password = password;
 
     const response = await auth.api.signInEmail({
       body: {
@@ -59,7 +66,6 @@ if (Astro.request.method === "POST") {
   <div
     class="flex flex-col items-center justify-center w-full py-12 min-h-[70dvh]"
   >
-    <ClientRouter />
     <div class="w-full max-w-xs">
       <h1 class="text-2xl font-bold mb-8 text-center">Sign In</h1>
 
@@ -73,8 +79,8 @@ if (Astro.request.method === "POST") {
             placeholder="Email"
             class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
             name="email"
-            transition:persist
             required
+            value={fields.email}
           />
           {
             errors.email && (
@@ -83,12 +89,7 @@ if (Astro.request.method === "POST") {
           }
         </div>
 
-        <PasswordField
-          name="password"
-          required
-          client:load
-          transition:persist
-        />
+        <PasswordField requried client:load value={fields.password} />
 
         {
           errors.password && (
