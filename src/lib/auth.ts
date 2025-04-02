@@ -6,7 +6,7 @@ import PasswordReset from "@/components/email/PasswordReset";
 import {sendEmail} from "./email";
 
 export const auth = betterAuth({
-  baseURL: import.meta.env.BASE_URL || "http://localhost:3000",
+  baseURL: import.meta.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",
   database: drizzleAdapter(db, {
     provider: "sqlite",
   }),
