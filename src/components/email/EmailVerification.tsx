@@ -3,13 +3,10 @@ import BaseLayout from "./BaseLayout";
 
 type EmailVerificationProps = {
   name: string;
-  verificationLink: string;
+  url: string;
 };
 
-const EmailVerification = ({
-  name,
-  verificationLink,
-}: EmailVerificationProps) => {
+const EmailVerification = ({name, url}: EmailVerificationProps) => {
   const safeName = typeof name === "string" ? name : String(name || "friend");
 
   return (
@@ -23,10 +20,7 @@ const EmailVerification = ({
         Click the link below to verify your email:
       </Text>
       <Text>
-        <a
-          href={verificationLink}
-          style={{color: "#0070f3", textDecoration: "underline"}}
-        >
+        <a href={url} style={{color: "#0070f3", textDecoration: "underline"}}>
           Verify Email
         </a>
       </Text>
