@@ -1,7 +1,6 @@
 import {ActionError, defineAction} from "astro:actions";
 import {z} from "astro:schema";
 import {auth} from "@/lib/auth";
-import {APIError} from "better-auth/api";
 
 export const authentication = {
   resetPassword: defineAction({
@@ -33,6 +32,19 @@ export const authentication = {
           message: "Failed to reset password",
         });
       }
+    },
+  }),
+  resendVerificationEmail: defineAction({
+    input: z.object({
+      email: z.string().email(),
+    }),
+    handler: async ({email}) => {
+      await auth.api.sendVerificationEmail({
+        body: {
+          email,
+          callbackUrl: "/dashboard",
+        },
+      });
     },
   }),
 };

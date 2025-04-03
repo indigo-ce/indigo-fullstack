@@ -42,7 +42,7 @@ export const email = {
         email,
         "Verify Your Email",
         await render(
-          EmailVerification({name: name || "friend", verificationLink}),
+          EmailVerification({name: name || "friend", url: verificationLink}),
         ),
       );
     },

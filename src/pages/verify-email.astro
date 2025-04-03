@@ -1,0 +1,72 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {Button} from "@/components/primitives/button";
+import {actions} from "astro:actions";
+if (!Astro.locals.user?.id) return Astro.redirect("/sign-in");
+
+const user = Astro.locals.user;
+
+if (user.emailVerified) return Astro.redirect("/dashboard");
+
+const emailSent = Astro.url.searchParams.get("emailSent");
+
+const errors = {
+  server: "",
+};
+
+if (Astro.request.method === "POST") {
+  const {error} = await Astro.callAction(
+    actions.authentication.resendVerificationEmail,
+    {
+      email: user.email,
+    },
+  );
+
+  if (error) {
+    errors.server = "Failed to resend verification email. Please try again.";
+  } else {
+    return Astro.redirect("/verify-email?emailSent=true");
+  }
+}
+---
+
+<Layout>
+  <div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="bg-card rounded-lg shadow-sm p-6">
+      <h1 class="text-2xl font-bold mb-4">Verify Your Email</h1>
+
+      <p class="text-muted-foreground mb-6">
+        We've sent a verification email to <strong>{user.email}</strong>. Please
+        check your inbox and click the verification link.
+      </p>
+
+      <div>
+        {
+          errors.server && (
+            <p class="text-red-500 text-xs ml-2" id="error">
+              {errors.server}
+            </p>
+          )
+        }
+
+        {
+          emailSent ? (
+            <p class="text-green-500 text-xs" id="success">
+              ✅ Verification email sent.
+            </p>
+          ) : (
+            <form method="POST">
+              <Button type="submit" variant="default" size="lg">
+                Resend Verification Email
+              </Button>
+            </form>
+          )
+        }
+      </div>
+
+      <p class="text-sm text-muted-foreground mt-6">
+        Didn't receive the email? Check your spam folder or try resending.
+      </p>
+    </div>
+  </div>
+</Layout>
