@@ -5,6 +5,7 @@ import {render} from "@react-email/render";
 import PasswordReset from "@/components/email/PasswordReset";
 import EmailVerification from "@/components/email/EmailVerification";
 import {sendEmail} from "./email";
+import AccountDeleted from "@/components/email/AccountDeleted";
 
 export const auth = betterAuth({
   baseURL: import.meta.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",
@@ -14,6 +15,13 @@ export const auth = betterAuth({
   user: {
     deleteUser: {
       enabled: true,
+      afterDelete: async (user) => {
+        await sendEmail(
+          user.email,
+          "Account Deleted",
+          await render(AccountDeleted({name: user.name || "friend"})),
+        );
+      },
     },
   },
   emailAndPassword: {
