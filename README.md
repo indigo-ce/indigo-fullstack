@@ -2,6 +2,14 @@
 
 A feature-rich web application starter template built with Astro, React, TailwindCSS, Better Auth, Drizzle ORM.
 
+## Getting Started
+
+```bash
+pnpm install
+cp .env.example .env
+pnpm run dev
+```
+
 ## 🚀 Tech Stack
 
 - **[Astro](https://astro.build)** - Fast, modern web framework
