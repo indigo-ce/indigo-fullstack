@@ -11,12 +11,14 @@ import {auth} from "@/lib/auth";
 import type {APIError} from "better-auth/api";
 
 const errors = {
+  name: "",
   email: "",
   currentPassword: "",
   newPassword: "",
 };
 
 const fields = {
+  name: Astro.locals.user.name || "",
   email: Astro.locals.user.email,
   currentPassword: "",
   newPassword: "",
@@ -25,6 +27,22 @@ const fields = {
 if (Astro.request.method === "POST") {
   const formData = await Astro.request.formData();
   const action = formData.get("action") as string;
+
+  if (action === "update-profile") {
+    const name = formData.get("name") as string;
+    fields.name = name;
+
+    try {
+      await auth.api.updateUser({
+        body: {name},
+        headers: Astro.request.headers,
+      });
+      return Astro.redirect("/account?success=profile-updated");
+    } catch (error) {
+      console.error(error);
+      errors.name = "Something went wrong. Please try again.";
+    }
+  }
 
   if (action === "change-email") {
     const email = formData.get("email") as string;
@@ -90,6 +108,14 @@ const success = Astro.url.searchParams.get("success");
       <h1 class="text-2xl font-bold mb-8">Account Settings</h1>
 
       {
+        success === "profile-updated" && (
+          <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
+            Profile updated successfully.
+          </div>
+        )
+      }
+
+      {
         success === "email-verification-sent" && (
           <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
             Check your email for a verification link to complete the email
@@ -105,6 +131,33 @@ const success = Astro.url.searchParams.get("success");
           </div>
         )
       }
+
+      <div class="bg-card p-6 rounded-lg border">
+        <h2 class="text-xl font-semibold mb-4">Profile</h2>
+        <form method="POST" class="space-y-4">
+          <input type="hidden" name="action" value="update-profile" />
+          {
+            errors.name && (
+              <div class="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 p-4 rounded-md mb-4">
+                {errors.name}
+              </div>
+            )
+          }
+          <div
+            class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring px-2"
+          >
+            <Input
+              type="text"
+              placeholder="Name"
+              class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+              name="name"
+              required
+              value={fields.name}
+            />
+          </div>
+          <Button type="submit" class="w-full">Update Profile</Button>
+        </form>
+      </div>
 
       <div class="bg-card p-6 rounded-lg border">
         <h2 class="text-xl font-semibold mb-4">Email</h2>
