@@ -3,10 +3,12 @@
   import Eye from "@lucide/svelte/icons/eye";
   import EyeOff from "@lucide/svelte/icons/eye-off";
   import Lock from "@lucide/svelte/icons/lock";
+  import {cn} from "@/lib/utils";
 
   export let value = "";
   export let placeholder = "Password";
   export let required = false;
+  export let className = "";
 
   let showPassword = false;
   export let name = "password";
@@ -17,7 +19,10 @@
 </script>
 
 <div
-  class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring px-2"
+  class={cn(
+    "relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring px-2",
+    className,
+  )}
 >
   <Lock class="h-5 w-5 text-muted-foreground" />
   <Input

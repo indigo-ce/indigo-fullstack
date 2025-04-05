@@ -6,6 +6,7 @@ import PasswordReset from "@/components/email/PasswordReset";
 import EmailVerification from "@/components/email/EmailVerification";
 import {sendEmail} from "./email";
 import AccountDeleted from "@/components/email/AccountDeleted";
+import ChangeEmailVerification from "@/components/email/ChangeEmailVerification";
 
 export const auth = betterAuth({
   baseURL: import.meta.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",
@@ -13,6 +14,22 @@ export const auth = betterAuth({
     provider: "sqlite",
   }),
   user: {
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailVerification: async ({user, newEmail, url}) => {
+        await sendEmail(
+          user.email,
+          "Email Change Request",
+          await render(
+            ChangeEmailVerification({
+              name: user.name || "friend",
+              url,
+              newEmail,
+            }),
+          ),
+        );
+      },
+    },
     deleteUser: {
       enabled: true,
       afterDelete: async (user) => {
