@@ -4,7 +4,6 @@ import Layout from "@/layouts/Layout.astro";
 import "@/styles.css";
 import {Button} from "@/components/primitives/button";
 import DeleteConfirmation from "@/components/DeleteConfirmation.svelte";
-import {authClient} from "@/lib/auth-client";
 
 if (!Astro.locals.user?.id) return Astro.redirect("/sign-in");
 if (!Astro.locals.user.emailVerified) return Astro.redirect("/verify-email");
@@ -31,6 +30,9 @@ const user = Astro.locals.user;
 
     <Welcome user={user} />
     <div class="flex gap-4 items-center">
+      <Button href="/account" variant="outline" size="sm">
+        Account Settings
+      </Button>
       <Button href="/email-demo" variant="outline" size="sm">
         Email Demo →
       </Button>
