@@ -59,6 +59,9 @@ importers:
       drizzle-orm:
         specifier: ^0.40.0
         version: 0.40.0(@libsql/client@0.14.0)(gel@2.0.1)(kysely@0.27.6)
+      hono:
+        specifier: ^4.7.5
+        version: 4.7.5
       nodemailer:
         specifier: ^6.10.0
         version: 6.10.0
@@ -2214,6 +2217,10 @@ packages:
 
   hastscript@9.0.1:
     resolution: {integrity: sha512-g7df9rMFX/SPi34tyGCyUBREQoKkapwdY/T04Qn9TDWfHhAYt4/I0gMVirzK5wEzeUqIjEB+LXC/ypb7Aqno5w==}
+
+  hono@4.7.5:
+    resolution: {integrity: sha512-fDOK5W2C1vZACsgLONigdZTRZxuBqFtcKh7bUQ5cVSbwI2RWjloJDcgFOVzbQrlI6pCmhlTsVYZ7zpLj4m4qMQ==}
+    engines: {node: '>=16.9.0'}
 
   html-escaper@3.0.3:
     resolution: {integrity: sha512-RuMffC89BOWQoY0WKGpIhn5gX3iI54O6nRA0yC124NYVtzjmFWBIiFd8M0x+ZdX0P9R4lADg1mgP8C7PxGOWuQ==}
@@ -5532,6 +5539,8 @@ snapshots:
       hast-util-parse-selector: 4.0.0
       property-information: 7.0.0
       space-separated-tokens: 2.0.2
+
+  hono@4.7.5: {}
 
   html-escaper@3.0.3: {}
 
