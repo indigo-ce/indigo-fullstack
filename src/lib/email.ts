@@ -54,23 +54,18 @@ async function sendEmailWithSMTP(
   html: string,
 ): Promise<any> {
   const transporter = await getEmailTransporter();
+  const from =
+    import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
+  const message = {to, subject, html, from};
 
-  return new Promise(async (resolve, reject) => {
-    // Build the email message
-    const from =
-      import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
-    const message = {to, subject, html, from};
-
-    // Send the email
+  return new Promise((resolve, reject) => {
     transporter.sendMail(message, (err, info) => {
-      // Log the error if one occurred
       if (err) {
         console.error(err);
         reject(err);
         return;
       }
 
-      // Log the message ID and preview URL if available.
       console.log("Message sent:", info.messageId);
       const testUrl = getTestMessageUrl(info);
       if (testUrl) console.log("Preview URL:", testUrl);

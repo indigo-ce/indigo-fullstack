@@ -59,6 +59,7 @@ if (Astro.request.method === "POST") {
 
       if (!status) {
         errors.email = "Something went wrong. Please try again.";
+        return;
       }
 
       return Astro.redirect("/account?success=email-verification-sent");

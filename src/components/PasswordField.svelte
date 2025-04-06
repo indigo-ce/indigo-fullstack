@@ -37,6 +37,8 @@
     type="button"
     on:click={togglePasswordVisibility}
     class="focus:outline-none"
+    aria-label={showPassword ? "Hide password" : "Show password"}
+    aria-pressed={showPassword}
   >
     {#if showPassword}
       <EyeOff class="h-5 w-5 text-muted-foreground" />

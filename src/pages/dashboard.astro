@@ -6,7 +6,6 @@ import {Button} from "@/components/primitives/button";
 import DeleteConfirmation from "@/components/DeleteConfirmation.svelte";
 
 if (!Astro.locals.user?.id) return Astro.redirect("/sign-in");
-if (!Astro.locals.user.emailVerified) return Astro.redirect("/verify-email");
 
 const user = Astro.locals.user;
 ---

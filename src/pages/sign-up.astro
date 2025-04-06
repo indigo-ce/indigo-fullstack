@@ -126,9 +126,17 @@ if (Astro.request.method === "POST") {
         />
         {
           (errors.password || errors.server || errors.email) && (
-            <span class="text-red-500 text-xs ml-2">
-              {errors.password || errors.server || errors.email}
-            </span>
+            <div class="space-y-1">
+              {errors.password && (
+                <p class="text-red-500 text-xs">{errors.password}</p>
+              )}
+              {errors.email && (
+                <p class="text-red-500 text-xs">{errors.email}</p>
+              )}
+              {errors.server && (
+                <p class="text-red-500 text-xs">{errors.server}</p>
+              )}
+            </div>
           )
         }
 

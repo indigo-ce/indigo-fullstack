@@ -4,30 +4,38 @@
 
   let showConfirmation = false;
   let isDeleting = false;
+  let error: string | null = null;
 
   function handleDelete() {
+    error = null;
     showConfirmation = true;
   }
 
   async function confirmDelete() {
     try {
+      error = null;
       isDeleting = true;
       await authClient.deleteUser();
       window.location.href = "/sign-in";
-    } catch (error) {
-      console.error("Failed to delete account:", error);
+    } catch (err) {
+      error = err instanceof Error ? err.message : "Failed to delete account";
+      showConfirmation = false;
     } finally {
       isDeleting = false;
-      showConfirmation = false;
     }
   }
 
   function cancelDelete() {
+    error = null;
     showConfirmation = false;
   }
 </script>
 
 <div class="relative">
+  {#if error}
+    <p class="text-sm text-destructive mt-2">{error}</p>
+  {/if}
+
   {#if !showConfirmation}
     <Button variant="destructive" size="sm" onclick={handleDelete}>
       Delete Account
