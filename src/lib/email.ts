@@ -34,18 +34,12 @@ async function sendEmailWithResend(
     import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
   const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
-  try {
-    const data = await resend.emails.send({
-      from,
-      to,
-      subject,
-      html,
-    });
-
-    return data;
-  } catch (error) {
-    throw error;
-  }
+  return await resend.emails.send({
+    from,
+    to,
+    subject,
+    html,
+  });
 }
 
 async function sendEmailWithSMTP(

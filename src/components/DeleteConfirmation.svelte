@@ -19,7 +19,6 @@
       window.location.href = "/sign-in";
     } catch (err) {
       error = err instanceof Error ? err.message : "Failed to delete account";
-      showConfirmation = false;
     } finally {
       isDeleting = false;
     }
