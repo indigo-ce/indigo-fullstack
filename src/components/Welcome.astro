@@ -6,59 +6,13 @@ export interface Props {
 const {user} = Astro.props;
 ---
 
-<div class="user-profile">
-  <h2>
-    👋 Hello, <span class="user-name">{user.name}</span>
+<div
+  class="bg-card border border-border rounded-[var(--radius)] p-6 mb-6 shadow-sm"
+>
+  <h2 class="text-lg text-foreground mt-0 mb-2">
+    Hello, <span class="font-bold text-primary">{user.name}</span>
   </h2>
-  <div class="user-info">
-    <div class="info-item">
-      <span class="label">Email:</span>
-      <span>{user.email}</span>
-    </div>
-    <div class="info-item">
-      <span class="label">Email verified:</span>
-      <span>{user.emailVerified ? "Yes" : "No"}</span>
-    </div>
-  </div>
+  <p class="text-sm text-muted-foreground m-0">
+    Welcome back to your dashboard. Your email is <strong>{user.email}</strong>.
+  </p>
 </div>
-
-<style>
-  .user-profile {
-    background-color: #f9f9f9;
-    border: 1px solid var(--color-border);
-    border-radius: 6px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-  }
-
-  h2 {
-    font-size: 1.2rem;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    font-weight: 500;
-  }
-
-  .user-name {
-    font-weight: 600;
-  }
-
-  .user-info {
-    text-align: left;
-    font-size: var(--font-size-small);
-  }
-
-  .info-item {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .info-item:last-child {
-    border-bottom: none;
-  }
-
-  .label {
-    font-weight: 500;
-    margin-right: 0.5rem;
-  }
-</style>

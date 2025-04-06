@@ -1,12 +1,14 @@
 ---
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
+import SetTheme from "@/components/SetTheme.astro";
 import "@/styles.css";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
+    <SetTheme />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -15,7 +17,7 @@ import "@/styles.css";
   </head>
   <body>
     <Header />
-    <main>
+    <main class="min-h-[80dvh] bg-white dark:bg-gray-900">
       <slot />
     </main>
     <Footer />

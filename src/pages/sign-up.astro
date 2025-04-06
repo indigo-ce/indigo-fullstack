@@ -1,0 +1,152 @@
+---
+if (Astro.locals.user?.id) return Astro.redirect("/dashboard");
+import Layout from "@/layouts/Layout.astro";
+import {Button} from "@/components/primitives/button";
+import {Input} from "@/components/primitives/input";
+import PasswordField from "@/components/PasswordField.svelte";
+import Mail from "@/assets/mail.svg";
+import User from "@/assets/user.svg";
+import {auth} from "@/lib/auth";
+import {APIError} from "better-auth/api";
+
+const errors = {
+  name: "",
+  email: "",
+  password: "",
+  server: "",
+};
+
+const fields = {
+  name: "",
+  email: "",
+  password: "",
+};
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    fields.name = name;
+    fields.email = email;
+    fields.password = password;
+
+    const response = await auth.api.signUpEmail({
+      body: {
+        name,
+        email,
+        password,
+      },
+      asResponse: true,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new APIError(
+        errorData.status || "INTERNAL_SERVER_ERROR",
+        errorData,
+      );
+    } else {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: "/dashboard",
+          "Set-Cookie": response.headers.get("set-cookie") || "",
+        },
+      });
+    }
+  } catch (error) {
+    if (error instanceof APIError) {
+      if (error.status === "CONFLICT") {
+        errors.server = "Email already exists. Please use a different email.";
+      } else {
+        if (error.body?.code === "PASSWORD_TOO_SHORT") {
+          errors.password = "Password must be at least 8 characters long.";
+        } else if (error.body?.code === "USER_ALREADY_EXISTS") {
+          errors.email = "Email already exists. Please use a different email.";
+        } else {
+          errors.server =
+            (error.body?.message || "An error occurred during sign up") + ".";
+        }
+      }
+    }
+  }
+}
+---
+
+<Layout>
+  <div
+    class="flex flex-col items-center justify-center w-full py-12 min-h-[70dvh]"
+  >
+    <div class="w-full max-w-xs">
+      <h1 class="text-2xl font-bold mb-8 text-center">Create Account</h1>
+
+      {
+        errors.server && (
+          <p class="text-red-500 mb-4 text-sm">{errors.server}</p>
+        )
+      }
+
+      <form method="POST" class="space-y-4">
+        <div
+          class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
+        >
+          <User class="h-5 w-5 text-muted-foreground mr-1" />
+          <Input
+            type="text"
+            placeholder="Name"
+            class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+            name="name"
+            required
+            value={fields.name}
+          />
+        </div>
+
+        <div
+          class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
+        >
+          <Mail class="h-5 w-5 text-muted-foreground mr-1" />
+          <Input
+            type="email"
+            placeholder="Email"
+            class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+            name="email"
+            required
+            value={fields.email}
+          />
+        </div>
+
+        <PasswordField
+          name="password"
+          required
+          client:load
+          value={fields.password}
+        />
+        {
+          (errors.password || errors.server || errors.email) && (
+            <div class="space-y-1">
+              {errors.password && (
+                <p class="text-red-500 text-xs">{errors.password}</p>
+              )}
+              {errors.email && (
+                <p class="text-red-500 text-xs">{errors.email}</p>
+              )}
+              {errors.server && (
+                <p class="text-red-500 text-xs">{errors.server}</p>
+              )}
+            </div>
+          )
+        }
+
+        <Button type="submit" class="w-full mt-4">Sign Up</Button>
+
+        <p class="text-center text-sm mt-4">
+          Already have an account?{" "}
+          <a href="/sign-in" class="text-primary underline">Sign in here</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</Layout>

@@ -26,22 +26,3 @@ export function applyTheme(theme: Theme): void {
 
   document.documentElement.classList[isDark ? "add" : "remove"]("dark");
 }
-
-export function setupColorSchemeMediaQueryObserver(): void {
-  if (typeof window !== "undefined") {
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-
-    mediaQuery.addEventListener("change", () => {
-      // Only update if we're using system theme
-      if (!localStorage.getItem("theme")) {
-        applyTheme("system");
-      }
-    });
-  }
-}
-
-export function initializeTheme(): Theme {
-  const theme = getThemePreference();
-  applyTheme(theme);
-  return theme;
-}

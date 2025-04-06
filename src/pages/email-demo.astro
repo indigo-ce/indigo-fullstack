@@ -1,0 +1,183 @@
+---
+import Layout from "@/layouts/Layout.astro";
+---
+
+<Layout title="Email Demo | Astro Starter">
+  <div class="max-w-4xl mx-auto px-6 py-8 pt-12">
+    <h1 class="text-2xl font-bold mb-8 text-foreground">Email Demo</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-card p-6 rounded-lg shadow-sm border border-border">
+        <form id="send-custom-email" class="space-y-4">
+          <h2 class="text-xl font-semibold mb-4">Send Custom Email</h2>
+          <div>
+            <label
+              for="send-email__recipient"
+              class="block text-sm font-medium mb-1">Recipient</label
+            >
+            <input
+              type="email"
+              name="recipient"
+              id="send-email__recipient"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              required
+            />
+          </div>
+          <div>
+            <label
+              for="send-email__subject"
+              class="block text-sm font-medium mb-1">Subject</label
+            >
+            <input
+              type="text"
+              name="subject"
+              id="send-email__subject"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              required
+            />
+          </div>
+          <div>
+            <label
+              for="send-email__title"
+              class="block text-sm font-medium mb-1"
+              >Email Title (optional)</label
+            >
+            <input
+              type="text"
+              name="title"
+              id="send-email__title"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              placeholder="Astro Starter"
+            />
+          </div>
+          <div>
+            <label
+              for="send-email__message"
+              class="block text-sm font-medium mb-1">Message</label
+            >
+            <textarea
+              name="message"
+              id="send-email__message"
+              rows="5"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              required></textarea>
+          </div>
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Send Custom Email
+          </button>
+        </form>
+      </div>
+
+      <div class="bg-card p-6 rounded-lg shadow-sm border border-border">
+        <form id="send-welcome-email" class="space-y-4">
+          <h2 class="text-xl font-semibold mb-4">Send Welcome Email</h2>
+          <div>
+            <label
+              for="welcome-email__recipient"
+              class="block text-sm font-medium mb-1">Recipient</label
+            >
+            <input
+              type="email"
+              name="recipient"
+              id="welcome-email__recipient"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              required
+            />
+          </div>
+          <div>
+            <label
+              for="welcome-email__name"
+              class="block text-sm font-medium mb-1">Name</label
+            >
+            <input
+              type="text"
+              name="name"
+              id="welcome-email__name"
+              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              required
+            />
+          </div>
+          <button></button>
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            Send Welcome Email
+          </button>
+        </form>
+      </div>
+    </div>
+
+    {
+      Astro.url.searchParams.get("sent") === "true" && (
+        <div class="mt-8 p-4 bg-muted text-foreground rounded-md border border-border">
+          <p class="font-medium">✅ Email sent successfully!</p>
+          <p class="text-sm mt-1 text-muted-foreground">
+            Check the console logs for more information about delivery.
+          </p>
+        </div>
+      )
+    }
+
+    <div class="mt-8 p-4 bg-muted rounded-md border border-border">
+      <h3 class="font-semibold mb-2">Setup Instructions</h3>
+      <p class="mb-4 text-muted-foreground">
+        To use Resend for email sending, add the following environment
+        variables:
+      </p>
+      <pre
+        class="p-3 bg-card rounded-md overflow-x-auto border border-border">
+RESEND_API_KEY=your_resend_api_key
+SEND_EMAIL_FROM=Your App &lt;noreply@yourdomain.com&gt;
+      </pre>
+      <p class="mt-4 text-muted-foreground">
+        Email templates are built with React Email for improved maintainability
+        and design consistency.
+      </p>
+      <p class="mt-2 text-muted-foreground">
+        For development, the app will use Ethereal for testing emails without
+        sending real messages.
+      </p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import {actions} from "astro:actions";
+  import {navigate} from "astro:transitions/client";
+
+  const sendCustomEmailForm = document.querySelector("#send-custom-email");
+  sendCustomEmailForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (sendCustomEmailForm instanceof HTMLFormElement) {
+      const formData = new FormData(sendCustomEmailForm);
+
+      const email = formData.get("recipient") as string;
+      const subject = formData.get("subject") as string;
+      const html = formData.get("message") as string;
+
+      const {error} = await actions.email.sendCustomEmail({
+        email,
+        subject,
+        html,
+      });
+      if (!error) navigate("/email-demo?sent=true");
+    }
+  });
+
+  const sendWelcomeEmailForm = document.querySelector("#send-welcome-email");
+  sendWelcomeEmailForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (sendWelcomeEmailForm instanceof HTMLFormElement) {
+      const formData = new FormData(sendWelcomeEmailForm);
+      const {error} = await actions.email.sendWelcomeEmail({
+        email: formData.get("recipient") as string,
+        name: formData.get("name") as string,
+      });
+      if (!error) navigate("/email-demo?sent=true");
+    }
+  });
+</script>

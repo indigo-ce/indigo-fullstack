@@ -1,9 +1,0 @@
----
-if (Astro.locals.user?.id) return Astro.redirect("/");
-import Layout from "@/layouts/Layout.astro";
-import {SignIn} from "@/components/SignIn";
----
-
-<Layout>
-  <SignIn client:load />
-</Layout>

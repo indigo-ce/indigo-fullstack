@@ -1,0 +1,123 @@
+---
+if (Astro.locals.user?.id) return Astro.redirect("/dashboard");
+
+import Layout from "@/layouts/Layout.astro";
+import {Button} from "@/components/primitives/button";
+import {Input} from "@/components/primitives/input";
+import PasswordField from "@/components/PasswordField.svelte";
+import Mail from "@/assets/mail.svg";
+import {auth} from "@/lib/auth";
+import {APIError} from "better-auth/api";
+
+const errors = {
+  email: "",
+  password: "",
+  server: "",
+};
+
+const fields = {
+  email: "",
+  password: "",
+};
+
+if (Astro.request.method === "POST") {
+  try {
+    const formData = await Astro.request.formData();
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    fields.email = email;
+    fields.password = password;
+
+    const response = await auth.api.signInEmail({
+      body: {
+        email,
+        password,
+      },
+      asResponse: true,
+    });
+
+    if (!response.ok) {
+      throw new APIError("UNAUTHORIZED");
+    } else {
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: "/dashboard",
+          "Set-Cookie": response.headers.get("set-cookie") || "",
+        },
+      });
+    }
+  } catch (error) {
+    if (error instanceof APIError) {
+      if (error.status === "UNAUTHORIZED") {
+        errors.server = "Invalid email or password. Please try again.";
+      } else if (error.status === "FORBIDDEN") {
+        errors.server = "Email not verified. Please verify your email.";
+      } else {
+        errors.server = "Something went wrong. Please try again.";
+      }
+    }
+  }
+}
+---
+
+<Layout>
+  <div
+    class="flex flex-col items-center justify-center w-full py-12 min-h-[70dvh]"
+  >
+    <div class="w-full max-w-xs">
+      <h1 class="text-2xl font-bold mb-8 text-center">Sign In</h1>
+
+      <form method="POST" class="space-y-4">
+        <div
+          class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
+        >
+          <Mail class="h-5 w-5 text-muted-foreground mr-1" />
+          <Input
+            type="email"
+            placeholder="Email"
+            class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+            name="email"
+            required
+            value={fields.email}
+          />
+          {
+            errors.email && (
+              <span class="text-red-500 text-xs ml-2">{errors.email}</span>
+            )
+          }
+        </div>
+
+        <PasswordField required client:load value={fields.password} />
+
+        {
+          errors.password && (
+            <span class="text-red-500 text-xs ml-2">{errors.password}</span>
+          )
+        }
+
+        <div class="flex justify-end">
+          <a
+            href="/forgot-password"
+            class="pt-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            >Forgot password?</a
+          >
+        </div>
+
+        {
+          errors.server && (
+            <span class="text-red-500 text-xs ml-2">{errors.server}</span>
+          )
+        }
+
+        <Button type="submit" class="w-full mt-4">Sign In</Button>
+
+        <p class="text-center text-sm mt-4">
+          Don't have an account?{" "}
+          <a href="/sign-up" class="text-primary underline">Sign up here</a>
+        </p>
+      </form>
+    </div>
+  </div>
+</Layout>

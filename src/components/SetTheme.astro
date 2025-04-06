@@ -1,0 +1,41 @@
+---
+
+---
+
+<script is:inline>
+  function getThemePreference() {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+      const storedTheme = localStorage.getItem("theme");
+      // Validate that the stored theme is valid
+      if (["light", "dark", "system"].includes(storedTheme)) {
+        return storedTheme;
+      }
+    }
+
+    return "system";
+  }
+
+  function applyTheme(theme) {
+    const isDark =
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+    document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+  }
+
+  // Initialize theme on page load
+  applyTheme(getThemePreference());
+
+  // Setup observer for color scheme changes
+  if (typeof window !== "undefined") {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    mediaQuery.addEventListener("change", () => {
+      // Only update if we're using system theme
+      if (!localStorage.getItem("theme")) {
+        applyTheme("system");
+      }
+    });
+  }
+</script>
