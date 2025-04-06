@@ -34,7 +34,7 @@ async function sendEmailWithResend(
     import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
   const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
-  return await resend.emails.send({
+  return resend.emails.send({
     from,
     to,
     subject,
