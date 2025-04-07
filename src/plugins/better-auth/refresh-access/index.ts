@@ -1,15 +1,12 @@
-import type {
-  BetterAuthPlugin,
-  GenericEndpointContext,
-  Session,
-  User,
+import {
+  generateId,
+  type BetterAuthPlugin,
+  type GenericEndpointContext,
+  type Session,
 } from "better-auth";
 import {getJwtToken, type JwtOptions} from "better-auth/plugins/jwt";
-import {
-  createAuthEndpoint,
-  createAuthMiddleware,
-  sessionMiddleware,
-} from "better-auth/api";
+import {APIError, createAuthEndpoint} from "better-auth/api";
+import {z} from "astro:content";
 
 /**
  * Options for the combined JWT + Refresh Token plugin
@@ -18,16 +15,16 @@ export interface RefreshAccessTokenOptions extends JwtOptions {
   accessToken?: {
     /**
      * Expiration time for the access token
-     * @default "60m"
+     * @default 60 minutes
      */
-    expiresIn?: number | string | Date;
+    expiresIn?: number;
   };
   refreshToken?: {
     /**
      * Expiration time for the refresh token
-     * @default "30d"
+     * @default 30 days
      */
-    expiresIn?: number | string | Date;
+    expiresIn?: number;
 
     /**
      * Rotate the refresh token on each use
@@ -35,60 +32,6 @@ export interface RefreshAccessTokenOptions extends JwtOptions {
      */
     rotate?: boolean;
   };
-}
-
-/**
- * Creates a new session token (refresh token)
- */
-async function createSessionToken(
-  ctx: GenericEndpointContext,
-  options?: RefreshAccessTokenOptions,
-): Promise<string> {
-  const sessionId = ctx.context.generateId({model: "session"});
-  const token = ctx.context.generateId({model: "refresh_token"});
-  const now = new Date();
-
-  // Calculate expiration (default 30 days)
-  let expiresIn = 60 * 60 * 24 * 30; // 30 days in seconds
-
-  if (options?.refreshToken?.expiresIn) {
-    if (typeof options.refreshToken.expiresIn === "number") {
-      expiresIn = options.refreshToken.expiresIn;
-    } else if (typeof options.refreshToken.expiresIn === "string") {
-      const units: Record<string, number> = {
-        s: 1,
-        m: 60,
-        h: 3600,
-        d: 86400,
-        w: 604800,
-        y: 31536000,
-      };
-
-      const match = options.refreshToken.expiresIn.match(/^(\d+)([smhdwy])$/);
-      if (match) {
-        const [_, value, unit] = match;
-        expiresIn = parseInt(value) * (units[unit] || expiresIn);
-      }
-    }
-  }
-
-  const expiresAt = new Date(now.getTime() + expiresIn * 1000);
-
-  await ctx.context.adapter.create<Session>({
-    model: "session",
-    data: {
-      id: sessionId,
-      userId: ctx.context.session!.user.id,
-      token,
-      createdAt: now,
-      updatedAt: now,
-      expiresAt,
-      ipAddress: ctx.context.ip,
-      userAgent: ctx.context.userAgent,
-    },
-  });
-
-  return token;
 }
 
 /**
@@ -127,7 +70,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
       ...options,
       jwt: {
         ...options?.jwt,
-        expirationTime: options?.accessToken?.expiresIn || "60m",
+        expirationTime: options?.accessToken?.expiresIn || 60,
       },
     };
   };
@@ -135,29 +78,153 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
   return {
     id: "refresh-access-token",
     endpoints: {
-      // Get tokens endpoint - used after login
-      getTokens: createAuthEndpoint(
-        "/tokens",
+      // Login with email/password and get tokens endpoint
+      login: createAuthEndpoint(
+        "/basic",
         {
           method: "POST",
-          requireHeaders: true,
-          use: [sessionMiddleware],
+          requireHeaders: false,
         },
         async (ctx) => {
-          if (!ctx.context.session) {
-            return ctx.json({error: "Unauthorized"}, {status: 401});
+          if (!ctx.context.options?.emailAndPassword?.enabled) {
+            ctx.context.logger.error(
+              "Email and password is not enabled. Make sure to enable it in the options on you `auth.ts` file. Check `https://better-auth.com/docs/authentication/email-password` for more!",
+            );
+            throw new APIError("BAD_REQUEST", {
+              message: "Email and password is not enabled",
+            });
           }
 
-          // Generate access token (JWT)
-          const jwtOptions = getJwtOptions();
-          const accessToken = await getJwtToken(ctx, jwtOptions);
+          let request = ctx.request;
+          // Basic auth
+          const authHeader = request?.headers.get("authorization");
+          if (!authHeader) {
+            return ctx.json(
+              {error: "Email and password are required"},
+              {status: 400},
+            );
+          }
 
-          // Generate refresh token (stored in database)
-          const refreshToken = await createSessionToken(ctx, options);
+          const [email, password] = Buffer.from(
+            authHeader.split(" ")[1],
+            "base64",
+          )
+            .toString()
+            .split(":");
+
+          const isValidEmail = z.string().email().safeParse(email);
+
+          if (!isValidEmail.success) {
+            throw new APIError("BAD_REQUEST", {
+              message: "Invalid email",
+            });
+          }
+
+          // User
+          const user = await ctx.context.internalAdapter.findUserByEmail(
+            email,
+            {
+              includeAccounts: true,
+            },
+          );
+
+          if (!user) {
+            await ctx.context.password.hash(password);
+            ctx.context.logger.error("User not found", {email});
+            throw new APIError("UNAUTHORIZED", {
+              message: "Invalid email or password",
+            });
+          }
+
+          const credentialAccount = user.accounts.find(
+            (a) => a.providerId === "credential",
+          );
+
+          if (!credentialAccount) {
+            throw new APIError("UNAUTHORIZED", {
+              message: "Invalid email or password",
+            });
+          }
+
+          const currentPassword = credentialAccount?.password;
+          if (!currentPassword) {
+            ctx.context.logger.error("Password not found", {email});
+            throw new APIError("UNAUTHORIZED", {
+              message: "Invalid email or password",
+            });
+          }
+          const validPassword = await ctx.context.password.verify({
+            hash: currentPassword,
+            password,
+          });
+          if (!validPassword) {
+            ctx.context.logger.error("Invalid password");
+            throw new APIError("UNAUTHORIZED", {
+              message: "Invalid email or password",
+            });
+          }
+
+          if (
+            ctx.context.options?.emailAndPassword?.requireEmailVerification &&
+            !user.user.emailVerified
+          ) {
+            throw new APIError("UNAUTHORIZED", {
+              message: "Email not verified",
+            });
+          }
+
+          const jwtOptions = getJwtOptions();
+
+          // Create a session for the user
+          const session = await ctx.context.internalAdapter.createSession(
+            user.user.id,
+            ctx.headers,
+            true,
+            {
+              // Additional session properties can be added here
+              ipAddress: ctx.request?.headers.get("x-forwarded-for") || null,
+              userAgent: ctx.request?.headers.get("user-agent") || null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              expiresAt: new Date(
+                Date.now() +
+                  (options?.refreshToken?.expiresIn || 30) *
+                    24 *
+                    60 *
+                    60 *
+                    1000,
+              ), // Days
+            },
+            ctx,
+            false,
+          );
+
+          if (!session) {
+            ctx.context.logger.error("Failed to create session");
+            throw new APIError("UNAUTHORIZED", {
+              message: "Failed to create session",
+            });
+          }
+
+          // Set session in context for JWT generation
+          ctx.context.session = {
+            session,
+            user: user.user,
+          };
+
+          // Generate access token (JWT)
+          const accessToken = await getJwtToken(ctx, jwtOptions);
+          const refreshToken = session.token;
 
           return ctx.json({
-            accessToken,
-            refreshToken,
+            user: {
+              id: user.user.id,
+              email: user.user.email,
+              name: user.user.name,
+              image: user.user.image,
+            },
+            access: accessToken,
+            refresh: refreshToken,
             tokenType: "Bearer",
           });
         },
@@ -165,7 +232,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
 
       // Refresh token endpoint
       refreshToken: createAuthEndpoint(
-        "/refresh",
+        "/basic/refresh",
         {
           method: "POST",
           requireHeaders: false,
@@ -191,34 +258,17 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           let newRefreshToken = refreshToken;
           if (options?.refreshToken?.rotate ?? true) {
             // Generate new token, update session
-            newRefreshToken = ctx.context.generateId({model: "refresh_token"});
-            await ctx.context.adapter.update<Session>({
-              model: "session",
-              where: [
-                {
-                  field: "id",
-                  operator: "eq",
-                  value: session.id,
-                },
-              ],
-              update: {
-                token: newRefreshToken,
-                updatedAt: new Date(),
-              },
+            newRefreshToken = generateId(32);
+            await ctx.context.internalAdapter.updateSession(session.id, {
+              token: newRefreshToken,
+              updatedAt: new Date(),
             });
           }
 
           // Load user info
-          const user = await ctx.context.adapter.findOne<User>({
-            model: "user",
-            where: [
-              {
-                field: "id",
-                operator: "eq",
-                value: session.userId,
-              },
-            ],
-          });
+          const user = await ctx.context.internalAdapter.findUserById(
+            session.userId,
+          );
 
           if (!user) {
             return ctx.json({error: "User not found"}, {status: 404});
@@ -263,67 +313,10 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
             return ctx.json({success: true});
           }
 
-          await ctx.context.adapter.delete({
-            model: "session",
-            where: [
-              {
-                field: "id",
-                operator: "eq",
-                value: session.id,
-              },
-            ],
-          });
-
+          await ctx.context.internalAdapter.deleteSession(session.id);
           return ctx.json({success: true});
         },
       ),
-    },
-
-    // Automatically issue tokens during sign-in/sign-up operations
-    hooks: {
-      after: [
-        {
-          matcher(context) {
-            return (
-              context.path === "/sign-in/email" ||
-              context.path === "/sign-in/magic-link" ||
-              context.path === "/sign-in/social" ||
-              context.path === "/sign-up/email"
-            );
-          },
-          handler: createAuthMiddleware(async (ctx) => {
-            if (!ctx.context.session) return;
-
-            try {
-              // Generate access token
-              const jwtOptions = getJwtOptions();
-              const accessToken = await getJwtToken(ctx, jwtOptions);
-
-              // Generate refresh token
-              const refreshToken = await createSessionToken(ctx, options);
-
-              // Add tokens to response data
-              if (!ctx.context.responseData) {
-                ctx.context.responseData = {};
-              }
-
-              ctx.context.responseData.accessToken = accessToken;
-              ctx.context.responseData.refreshToken = refreshToken;
-              ctx.context.responseData.tokenType = "Bearer";
-
-              // Also add as headers for frameworks that handle headers better
-              ctx.setHeader("x-access-token", accessToken);
-              ctx.setHeader("x-refresh-token", refreshToken);
-              ctx.setHeader(
-                "Access-Control-Expose-Headers",
-                "x-access-token, x-refresh-token",
-              );
-            } catch (error) {
-              console.error("Error issuing tokens:", error);
-            }
-          }),
-        },
-      ],
     },
   } satisfies BetterAuthPlugin;
 };
