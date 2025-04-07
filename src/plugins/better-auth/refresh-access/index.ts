@@ -79,10 +79,13 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
     id: "refresh-access-token",
     endpoints: {
       // Login with email/password and get tokens endpoint
-      login: createAuthEndpoint(
+      signInTokens: createAuthEndpoint(
         "/basic",
         {
           method: "POST",
+          body: z.object({
+            basicToken: z.string(),
+          }),
           requireHeaders: false,
         },
         async (ctx) => {
@@ -95,9 +98,8 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
             });
           }
 
-          let request = ctx.request;
           // Basic auth
-          const authHeader = request?.headers.get("authorization");
+          const authHeader = ctx.body?.basicToken;
           if (!authHeader) {
             return ctx.json(
               {error: "Email and password are required"},
