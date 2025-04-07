@@ -7,6 +7,7 @@ import EmailVerification from "@/components/email/EmailVerification";
 import {sendEmail} from "./email";
 import AccountDeleted from "@/components/email/AccountDeleted";
 import ChangeEmailVerification from "@/components/email/ChangeEmailVerification";
+import {refreshAccessToken} from "@/plugins/better-auth/refresh-access";
 
 export const auth = betterAuth({
   baseURL: import.meta.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",
@@ -65,4 +66,5 @@ export const auth = betterAuth({
       );
     },
   },
+  plugins: [refreshAccessToken()],
 });
