@@ -80,7 +80,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
     endpoints: {
       // Login with email/password and get tokens endpoint
       signInTokens: createAuthEndpoint(
-        "/basic",
+        "/auth-tokens",
         {
           method: "POST",
           body: z.object({
@@ -101,10 +101,9 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           // Basic auth
           const authHeader = ctx.body?.basicToken;
           if (!authHeader) {
-            return ctx.json(
-              {error: "Email and password are required"},
-              {status: 400},
-            );
+            throw new APIError("BAD_REQUEST", {
+              message: "Email and password are required",
+            });
           }
 
           const [email, password] = Buffer.from(
@@ -234,7 +233,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
 
       // Refresh token endpoint
       refreshToken: createAuthEndpoint(
-        "/basic/refresh",
+        "/auth-tokens/refresh",
         {
           method: "POST",
           requireHeaders: false,
@@ -296,7 +295,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
 
       // Revoke token endpoint
       revokeToken: createAuthEndpoint(
-        "/revoke",
+        "/auth-tokens/revoke",
         {
           method: "POST",
           requireHeaders: false,
