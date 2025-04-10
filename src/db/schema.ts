@@ -51,3 +51,10 @@ export const verification = sqliteTable("verification", {
   createdAt: integer("createdAt", {mode: "timestamp"}),
   updatedAt: integer("updatedAt", {mode: "timestamp"}),
 });
+
+export const jwks = sqliteTable("jwks", {
+  id: text("id").primaryKey(),
+  publicKey: text("publicKey").notNull(),
+  privateKey: text("privateKey").notNull(),
+  createdAt: integer("createdAt", {mode: "timestamp"}).notNull(),
+});

@@ -95,6 +95,9 @@ importers:
       typescript:
         specifier: ^5.8.2
         version: 5.8.2
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
     devDependencies:
       '@types/react':
         specifier: ^19.0.12

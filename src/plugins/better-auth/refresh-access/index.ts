@@ -6,7 +6,7 @@ import {
 } from "better-auth";
 import {getJwtToken, type JwtOptions} from "better-auth/plugins/jwt";
 import {APIError, createAuthEndpoint} from "better-auth/api";
-import {z} from "astro:content";
+import {z} from "zod";
 
 /**
  * Options for the combined JWT + Refresh Token plugin
@@ -130,7 +130,6 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           );
 
           if (!user) {
-            await ctx.context.password.hash(password);
             ctx.context.logger.error("User not found", {email});
             throw new APIError("UNAUTHORIZED", {
               message: "Invalid email or password",
