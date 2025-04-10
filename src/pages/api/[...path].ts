@@ -3,7 +3,8 @@ import type {APIRoute} from "astro";
 import {auth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
 import type {ContentfulStatusCode} from "hono/utils/http-status";
-import responseTime from "@/lib/hono/middleware/response-time";
+import responseTimeMiddleware from "@/lib/hono/middleware/response-time";
+import jwtMiddleware from "@/lib/hono/middleware/jwt";
 
 const app = new Hono<{
   Variables: {
@@ -11,7 +12,8 @@ const app = new Hono<{
   };
 }>().basePath("/api/");
 
-app.use("*", responseTime);
+app.use("*", responseTimeMiddleware);
+app.use("*/account/*", jwtMiddleware);
 
 app.get("/health", (c) => {
   return c.json({
@@ -19,7 +21,14 @@ app.get("/health", (c) => {
   });
 });
 
-app.get("/v1/posts", (c) => {
+app.get("/v1/account/profile", (c) => {
+  const user = c.get("user");
+  return c.json({
+    user,
+  });
+});
+
+app.get("/v1/account/posts", (c) => {
   return c.json({
     posts: [
       {id: 1, title: "Hello World"},

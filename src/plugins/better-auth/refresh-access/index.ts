@@ -15,9 +15,9 @@ export interface RefreshAccessTokenOptions extends JwtOptions {
   accessToken?: {
     /**
      * Expiration time for the access token
-     * @default 60 minutes
+     * @default 60min
      */
-    expiresIn?: number;
+    expiresIn?: string;
   };
   refreshToken?: {
     /**
@@ -70,7 +70,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
       ...options,
       jwt: {
         ...options?.jwt,
-        expirationTime: options?.accessToken?.expiresIn || 60,
+        expirationTime: options?.accessToken?.expiresIn || "60min",
       },
     };
   };
