@@ -3,12 +3,15 @@ import type {APIRoute} from "astro";
 import {auth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
 import type {ContentfulStatusCode} from "hono/utils/http-status";
+import responseTime from "@/lib/hono/middleware/response-time";
 
 const app = new Hono<{
   Variables: {
     user: typeof auth.$Infer.Session.user | null;
   };
 }>().basePath("/api/");
+
+app.use("*", responseTime);
 
 app.get("/health", (c) => {
   return c.json({
