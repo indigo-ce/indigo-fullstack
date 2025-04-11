@@ -1,8 +1,8 @@
 import {createMiddleware} from "hono/factory";
 import {jwtVerify, createLocalJWKSet} from "jose";
-import {auth} from "@/lib/auth";
 import {JOSEError} from "jose/errors";
-import {user} from "@/db/schema";
+import jwksCache from "@/lib/jwks-cache";
+import {auth} from "@/lib/auth";
 
 const jwtMiddleware = createMiddleware(async (c, next) => {
   const token = c.req.header("Authorization")?.split(" ")[1];
@@ -12,7 +12,7 @@ const jwtMiddleware = createMiddleware(async (c, next) => {
   }
 
   try {
-    const jwks = await auth.api.getJwks();
+    const jwks = await jwksCache.getKeys();
     const jwksSet = createLocalJWKSet(jwks);
 
     const {payload} = await jwtVerify(token, jwksSet, {
