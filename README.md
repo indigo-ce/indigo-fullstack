@@ -174,3 +174,7 @@ This command starts a local email viewer using the templates from the `src/compo
 - [Svelte Documentation](https://svelte.dev/docs)
 - [Resend Documentation](https://resend.com/docs)
 - [React Email](https://react.email/docs/introduction)
+
+## Resources
+
+- [Shadcn UI Blocks](https://www.shadcnui-blocks.com/)
