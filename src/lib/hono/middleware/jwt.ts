@@ -15,6 +15,14 @@ const jwtMiddleware = createMiddleware(async (c, next) => {
     const jwks = await jwksCache.getKeys();
     const jwksSet = createLocalJWKSet(jwks);
 
+    if (!import.meta.env.BETTER_AUTH_BASE_URL) {
+      console.error("Missing BETTER_AUTH_BASE_URL environment variable");
+      return c.json(
+        {error: "Server misconfiguration", code: "SERVER_ERROR"},
+        500,
+      );
+    }
+
     const {payload} = await jwtVerify(token, jwksSet, {
       issuer: import.meta.env.BETTER_AUTH_BASE_URL,
       audience: import.meta.env.BETTER_AUTH_BASE_URL,
