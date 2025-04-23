@@ -16,8 +16,8 @@ const user = Astro.locals.user;
 
     {
       !user.emailVerified && (
-        <div class="bg-destructive px-2 py-2 rounded-lg mb-4 flex justify-between items-center">
-          <p class="text-sm ml-2 text-primary-foreground">
+        <div class="bg-orange-100 dark:bg-yellow-900 px-2 py-2 rounded-lg mb-4 flex justify-between items-center">
+          <p class="text-sm ml-2 text-orange-900 dark:text-yellow-100">
             Email <strong>{user.email}</strong> is not verified
           </p>
           <Button href="/verify-email" variant="outline" size="sm">

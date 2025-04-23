@@ -110,7 +110,7 @@ The application includes built-in email functionality using [Resend](https://res
 
 Add these environment variables to your `.env` file:
 
-```
+```env
 # Resend API configuration (recommended for production)
 RESEND_API_KEY=your_resend_api_key
 SEND_EMAIL_FROM="Your App Name <noreply@yourdomain.com>"
@@ -174,3 +174,7 @@ This command starts a local email viewer using the templates from the `src/compo
 - [Svelte Documentation](https://svelte.dev/docs)
 - [Resend Documentation](https://resend.com/docs)
 - [React Email](https://react.email/docs/introduction)
+
+## Resources
+
+- [Shadcn UI Blocks](https://www.shadcnui-blocks.com/)
