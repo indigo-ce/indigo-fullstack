@@ -5,15 +5,12 @@ import tailwindcss from "@tailwindcss/vite";
 import svelte from "@astrojs/svelte";
 import react from "@astrojs/react";
 
+import cloudflare from "@astrojs/cloudflare";
+
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  adapter: node({
-    mode: "standalone",
-  }),
-  experimental: {
-    svg: true,
-  },
+  adapter: cloudflare(),
   vite: {
     plugins: [tailwindcss()],
   },

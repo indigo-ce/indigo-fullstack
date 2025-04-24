@@ -12,6 +12,7 @@
     "email-preview": "email dev --dir src/components/email"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^12.5.1",
     "@astrojs/node": "^9.2.1",
     "@astrojs/react": "^4.2.5",
     "@astrojs/svelte": "^7.0.11",
