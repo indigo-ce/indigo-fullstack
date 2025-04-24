@@ -165,6 +165,47 @@ pnpm email-preview
 
 This command starts a local email viewer using the templates from the `src/components/email` directory.
 
+## API
+
+The API is built using Hono and comes with a hybrid JWT and refresh token authentication system, primarily for mobile applications
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant JWTMiddleware
+    participant JWKSCache
+    participant AuthPlugin
+    participant DB
+
+    Client->>API: POST /api/auth/v1/sign-in (with Basic Auth)
+    API->>AuthPlugin: Validate credentials
+    AuthPlugin->>DB: Fetch user, verify password
+    AuthPlugin->>DB: Create session (refresh token)
+    AuthPlugin->>JWKSCache: Get JWKS for JWT signing
+    AuthPlugin-->>API: Return access token, refresh token, user info
+    API-->>Client: Respond with tokens and user
+
+    Client->>API: POST /api/auth-tokens/refresh (with refresh token)
+    API->>AuthPlugin: Verify refresh token
+    AuthPlugin->>DB: Lookup session
+    AuthPlugin->>JWKSCache: Get JWKS for JWT signing
+    AuthPlugin-->>API: Return new access token (and possibly new refresh token)
+    API-->>Client: Respond with new tokens
+
+    Client->>API: GET /api/account/v1/profile (with JWT)
+    API->>JWTMiddleware: Extract and verify JWT
+    JWTMiddleware->>JWKSCache: Get JWKS
+    JWTMiddleware-->>API: Attach user to context
+    API-->>Client: Respond with user profile
+
+    Client->>API: POST /api/auth-tokens/revoke (with refresh token)
+    API->>AuthPlugin: Revoke refresh token
+    AuthPlugin->>DB: Delete session
+    AuthPlugin-->>API: Respond success
+    API-->>Client: Respond with revocation confirmation
+```
+
 ## 📚 Learn More
 
 - [Astro Documentation](https://docs.astro.build)
