@@ -9,7 +9,7 @@
           "binding": "DB",
           "database_name": "astro-starter",
           "database_id": "astro-starter",
-          "migrations_dir": "./d1/migrations"
+          "migrations_dir": "./drizzle"
         }
       ]
     }

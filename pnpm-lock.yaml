@@ -101,9 +101,6 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
-      wrangler:
-        specifier: ^4.13.2
-        version: 4.13.2(@cloudflare/workers-types@4.20250424.0)
       zod:
         specifier: ^3.24.3
         version: 3.24.3
@@ -126,6 +123,9 @@ importers:
       react-email:
         specifier: ^4.0.7
         version: 4.0.7(@babel/core@7.26.10)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      wrangler:
+        specifier: ^4.13.2
+        version: 4.13.2(@cloudflare/workers-types@4.20250424.0)
 
 packages:
 
