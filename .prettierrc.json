@@ -2,5 +2,6 @@
   "plugins": [
     "prettier-plugin-astro"
   ],
-  "bracketSpacing": false
+  "bracketSpacing": false,
+  "trailingComma": "none"
 }

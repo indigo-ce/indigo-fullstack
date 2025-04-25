@@ -4,12 +4,13 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "pnpm db-setup && astro dev",
-    "build": "pnpm db-setup && astro build",
+    "build:local": "pnpm db-setup && astro build",
+    "build": "astro build",
     "preview": "pnpm build && astro preview",
     "astro": "astro",
     "db-setup": "drizzle-kit generate & drizzle-kit push",
     "add-component": "pnpm dlx shadcn-svelte@next add",
-    "email-preview": "email dev --dir src/components/email"
+    "preview-email": "email dev --dir src/components/email"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.5.1",
@@ -43,6 +44,7 @@
     "tailwindcss": "^4.1.4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.8.3",
+    "wrangler": "^4.13.2",
     "zod": "^3.24.3"
   },
   "devDependencies": {
