@@ -3,14 +3,19 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "pnpm db-setup && astro dev",
-    "build:local": "pnpm db-setup && astro build",
+    "dev": "pnpm db:setup:local && astro dev",
+    "build:local": "pnpm db:setup:local && astro build",
     "build": "astro build",
     "preview": "pnpm build && astro preview",
     "astro": "astro",
-    "db-setup": "drizzle-kit generate & drizzle-kit push",
     "add-component": "pnpm dlx shadcn-svelte@next add",
-    "preview-email": "email dev --dir src/components/email"
+    "preview-email": "email dev --dir src/components/email",
+    "db": "wrangler d1",
+    "db:setup:local": "drizzle-kit generate & drizzle-kit push",
+    "d1:migrate:local": "wrangler d1 migrations apply astro-starter --local",
+    "d1:list-migrations:local": "wrangler d1 migrations list astro-starter --local",
+    "d1:migrate": "wrangler d1 migrations apply astro-starter --remote",
+    "d1:list-migrations": "wrangler d1 migrations list astro-starter --remote"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.5.1",

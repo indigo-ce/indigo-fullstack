@@ -42,12 +42,46 @@ pnpm run dev
 | `pnpm astro`    | Run Astro CLI commands                   |
 | `pnpm db-setup` | Generate and push Drizzle migrations     |
 
-## 🔐 Authentication Flow
+## ☑️ New Project Checklist
+
+- [] Add a KV session namespace then add binding to `wrangler.jsonc`
+- [] Remove `wrangler.jsonc` from `.gitignore`
+- [] Update `wrangler.jsonc` with your project details
+- [] Delete `example.wrangler.jsonc` with your project details
+- [] Copy `example.env` to `.env` and update with your project details
+- [] Update project name in `package.json`
+
+## 🔐 Authentication
 
 1. **Sign Up**: Users can create an account with name, email, and password
 2. **Sign In**: Users can log in with their email and password
 3. **Protected Routes**: The dashboard is protected and requires authentication
 4. **Sign Out**: Users can log out from their account
+
+### Astro Session
+
+The Astro Sessions API allows you to easily store user data between requests.
+This can be used for things like user data and preferences, shopping carts, and
+authentication credentials. Unlike cookie storage, there are no size limits on
+the data, and it can be restored on different devices.
+
+Before using sessions, you need to create a KV namespace to store the data and
+configure a KV binding in your Wrangler config file.
+
+```bash
+pnpm wrangler kv namespace create "SESSION" # default name
+```
+
+Add the returned ID to `wrangler.jsonc`:
+
+```json
+"kv_namespaces": [
+  {
+    "binding": "SESSION",
+    "id": "<KV_NAMESPACE_ID>"
+  }
+]
+```
 
 ## 🗄️ Database
 
@@ -58,6 +92,23 @@ The application uses SQLite with Drizzle ORM. The database schema includes:
 - Accounts
 - Verification tokens
 - Todos (user tasks)
+
+### Migrations
+
+To generate migrations:
+
+```bash
+pnpm db-setup
+```
+
+To apply migrations:
+
+```bash
+pnpm db:list-migrations:local
+pnpm db:migrate:local
+pnpm db:list-migrations
+pnpm db:migrate
+```
 
 ## 📊 Database Queries
 
@@ -80,7 +131,7 @@ const newTodo = await db
   .values({
     title: "Build an Astro app",
     completed: false,
-    userId: currentUserId,
+    userId: currentUserId
   })
   .returning();
 
@@ -95,7 +146,7 @@ const todosWithUser = await db
   .select({
     id: todo.id,
     title: todo.title,
-    userName: user.name,
+    userName: user.name
   })
   .from(todo)
   .leftJoin(user, eq(todo.userId, user.id))
@@ -140,14 +191,14 @@ import {sendEmail} from "../utils/email";
 await sendEmail({
   to: "user@example.com",
   subject: "Welcome to Astro Starter!",
-  template: {name: "welcome", params: {name: "John"}},
+  template: {name: "welcome", params: {name: "John"}}
 });
 
 // Send a custom email
 await sendEmail({
   to: "user@example.com",
   subject: "Important Information",
-  template: {name: "custom", params: {html: "<p>Your custom message here</p>"}},
+  template: {name: "custom", params: {html: "<p>Your custom message here</p>"}}
 });
 ```
 
@@ -167,7 +218,7 @@ This command starts a local email viewer using the templates from the `src/compo
 
 ## API
 
-The API is built using Hono and comes with a hybrid JWT and refresh token authentication system, primarily for mobile applications
+The API is built using Hono and comes with a hybrid JWT and refresh token authentication system, primarily for mobile applications.
 
 ```mermaid
 sequenceDiagram

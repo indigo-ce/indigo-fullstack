@@ -15,6 +15,13 @@ CREATE TABLE `account` (
 	FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
+CREATE TABLE `jwks` (
+	`id` text PRIMARY KEY NOT NULL,
+	`publicKey` text NOT NULL,
+	`privateKey` text NOT NULL,
+	`createdAt` integer NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `session` (
 	`id` text PRIMARY KEY NOT NULL,
 	`expiresAt` integer NOT NULL,

@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # drizzle database
 *.db
+
+# REMOVE THIS FILE
+wrangler.jsonc
