@@ -26,5 +26,11 @@ pnpm-debug.log*
 # drizzle database
 *.db
 
+# Cloudflare
+.wrangler/
+
+# generated types
+worker-configuration.d.ts
+
 # REMOVE THIS FILE
 wrangler.jsonc

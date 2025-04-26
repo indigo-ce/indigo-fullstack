@@ -50,6 +50,8 @@ pnpm run dev
 - [] Delete `example.wrangler.jsonc` with your project details
 - [] Copy `example.env` to `.env` and update with your project details
 - [] Update project name in `package.json`
+- [] Get D1 database ID, Account ID, and Token from Cloudflare Dashboard/ More info [here](https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit)
+- [] Add D1 database ID, Account ID, and Token to `.env`
 
 ## 🔐 Authentication
 
@@ -85,7 +87,14 @@ Add the returned ID to `wrangler.jsonc`:
 
 ## 🗄️ Database
 
-The application uses SQLite with Drizzle ORM. The database schema includes:
+This template uses Drizzle ORM with Cloudflare D1 for a modern, type-safe, serverless SQL database.
+
+- The schema is defined using Drizzle's sqliteTable helpers for tables.
+- The Drizzle config (drizzle.config.ts) auto-detects local vs. production and sets up credentials for Drizzle Kit.
+
+### Database Schema
+
+The database schema includes:
 
 - Users
 - Sessions
@@ -95,19 +104,26 @@ The application uses SQLite with Drizzle ORM. The database schema includes:
 
 ### Migrations
 
-To generate migrations:
+- Run `pnpm db:generate` to generate migrations from your schema.
+- Run `pnpm d1:migrate:local` to apply them locally.
+- Run `pnpm d1:migrate:prod` to apply them to production.
+
+To apply migrations to your production database, you'll need to set up a D1 database in Cloudflare and add the following environment variables:
+
+- CLOUDFLARE_DATABASE_ID
+- CLOUDFLARE_ACCOUNT_ID
+- CLOUDFLARE_TOKEN
+
+See the checklist above for more details.
+
+> **Note:** You need to manually apply the migrations to your production database after every schema change.
+
+### Studio
+
+You can use the Drizzle Studio to view and edit your local database data.
 
 ```bash
-pnpm db-setup
-```
-
-To apply migrations:
-
-```bash
-pnpm db:list-migrations:local
-pnpm db:migrate:local
-pnpm db:list-migrations
-pnpm db:migrate
+pnpm d1:studio:local
 ```
 
 ## 📊 Database Queries

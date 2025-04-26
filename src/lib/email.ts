@@ -1,34 +1,27 @@
-import {
-  createTestAccount,
-  createTransport,
-  getTestMessageUrl,
-} from "nodemailer";
-import type {Transporter} from "nodemailer";
 import {Resend} from "resend";
 
 export async function sendEmail(
   to: string,
   subject: string,
-  html: string,
+  html: string
 ): Promise<any> {
-  // Modern approach using Resend API
+  // Use Resend in production or if API key is set
   if (import.meta.env.PROD && import.meta.env.RESEND_API_KEY) {
     return sendEmailWithResend(to, subject, html);
   }
 
-  // Check if we have a Resend API key in development
   if (import.meta.env.RESEND_API_KEY) {
     return sendEmailWithResend(to, subject, html);
   }
 
-  // Fallback to using SMTP (useful for development)
+  // Fallback to SMTP (dev only)
   return sendEmailWithSMTP(to, subject, html);
 }
 
 async function sendEmailWithResend(
   to: string,
   subject: string,
-  html: string,
+  html: string
 ): Promise<any> {
   const from =
     import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
@@ -38,15 +31,18 @@ async function sendEmailWithResend(
     from,
     to,
     subject,
-    html,
+    html
   });
 }
 
 async function sendEmailWithSMTP(
   to: string,
   subject: string,
-  html: string,
+  html: string
 ): Promise<any> {
+  const {getEmailTransporter, getTestMessageUrl} = await import(
+    "./nodemailer-util"
+  );
   const transporter = await getEmailTransporter();
   const from =
     import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
@@ -64,55 +60,6 @@ async function sendEmailWithSMTP(
       const testUrl = getTestMessageUrl(info);
       if (testUrl) console.log("Preview URL:", testUrl);
       resolve(info);
-    });
-  });
-}
-
-async function getEmailTransporter(): Promise<Transporter> {
-  return new Promise((resolve, reject) => {
-    // Use SMTP configuration if available
-    if (
-      import.meta.env.SMTP_HOST &&
-      import.meta.env.SMTP_USER &&
-      import.meta.env.SMTP_PASS
-    ) {
-      const host = import.meta.env.SMTP_HOST;
-      const port = parseInt(import.meta.env.SMTP_PORT || "587");
-      const secure = import.meta.env.SMTP_SECURE === "true";
-
-      const transporter = createTransport({
-        host,
-        port,
-        secure,
-        auth: {
-          user: import.meta.env.SMTP_USER,
-          pass: import.meta.env.SMTP_PASS,
-        },
-      });
-
-      resolve(transporter);
-      return;
-    }
-
-    // Create a test email account using ethereal.email when in development
-    createTestAccount((err, account) => {
-      if (err) {
-        console.error("Failed to create a testing account", err);
-        reject(err);
-        return;
-      }
-
-      const {user, pass, smtp} = account;
-      const {host, port, secure} = smtp;
-
-      console.log(`Test email account created: ${user}`);
-      const transporter = createTransport({
-        host,
-        port,
-        secure,
-        auth: {user, pass},
-      });
-      resolve(transporter);
     });
   });
 }

@@ -1,13 +1,15 @@
 import {defineMiddleware} from "astro:middleware";
-import {auth} from "@/lib/auth";
+import {createAuth} from "@/lib/auth";
 
 export const onRequest = defineMiddleware(async (context, next) => {
   if (context.request.url.includes("/api/")) {
     return next();
   }
 
-  const isAuthenticated = await auth.api.getSession({
-    headers: context.request.headers,
+  const isAuthenticated = await createAuth(
+    context.locals.runtime.env.DB
+  ).api.getSession({
+    headers: context.request.headers
   });
 
   if (isAuthenticated) {

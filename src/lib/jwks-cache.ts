@@ -1,5 +1,4 @@
-// src/lib/jwksCache.ts
-import {auth} from "@/lib/auth";
+import {createAuth} from "./auth";
 
 interface JWKS {
   keys: any[];
@@ -19,23 +18,20 @@ class JWKSCache {
     this.ttlMs = ttlMs;
   }
 
-  async getKeys(): Promise<JWKS> {
+  async getKeys(db: D1Database): Promise<JWKS> {
     if (this.cache && Date.now() < this.cache.expiresAt) {
       return this.cache.keys;
     }
-
-    return this.refreshKeys();
+    return this.refreshKeys(db);
   }
 
-  private async refreshKeys(): Promise<JWKS> {
+  private async refreshKeys(db: D1Database): Promise<JWKS> {
     try {
-      const keys = await auth.api.getJwks();
-
+      const keys = await createAuth(db).api.getJwks();
       this.cache = {
         keys,
-        expiresAt: Date.now() + this.ttlMs,
+        expiresAt: Date.now() + this.ttlMs
       };
-
       return keys;
     } catch (error) {
       console.error("Failed to refresh JWKS:", error);

@@ -1,7 +1,13 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "<PROJECT_NAME>",
+  "main": "./dist/_worker.js/index.js",
   "pages_build_output_dir": "dist",
   "compatibility_date": "2025-04-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
   "kv_namespaces": [
     {
       "binding": "SESSION",

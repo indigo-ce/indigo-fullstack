@@ -1,27 +1,29 @@
 import {ActionError, defineAction} from "astro:actions";
 import {z} from "astro:schema";
-import {auth} from "@/lib/auth";
+import {createAuth} from "@/lib/auth";
 
 export const authentication = {
   resetPassword: defineAction({
     input: z.object({
       newPassword: z.string(),
       confirmPassword: z.string(),
-      token: z.string(),
+      token: z.string()
     }),
-    handler: async ({newPassword, confirmPassword, token}) => {
+    handler: async ({newPassword, confirmPassword, token}, context) => {
       if (newPassword !== confirmPassword) {
         throw new ActionError({
           code: "BAD_REQUEST",
-          message: "Passwords do not match",
+          message: "Passwords do not match"
         });
       }
 
-      const {status} = await auth.api.resetPassword({
+      const {status} = await createAuth(
+        context.locals.runtime.env.DB
+      ).api.resetPassword({
         body: {
           newPassword: newPassword,
-          token,
-        },
+          token
+        }
       });
 
       if (status) {
@@ -29,22 +31,24 @@ export const authentication = {
       } else {
         throw new ActionError({
           code: "BAD_REQUEST",
-          message: "Failed to reset password",
+          message: "Failed to reset password"
         });
       }
-    },
+    }
   }),
   resendVerificationEmail: defineAction({
     input: z.object({
-      email: z.string().email(),
+      email: z.string().email()
     }),
-    handler: async ({email}) => {
-      await auth.api.sendVerificationEmail({
-        body: {
-          email,
-          callbackUrl: "/dashboard",
-        },
-      });
-    },
-  }),
+    handler: async ({email}, context) => {
+      await createAuth(context.locals.runtime.env.DB).api.sendVerificationEmail(
+        {
+          body: {
+            email,
+            callbackURL: "/dashboard"
+          }
+        }
+      );
+    }
+  })
 };

@@ -7,24 +7,25 @@ import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
 import PasswordField from "@/components/PasswordField.svelte";
 import Mail from "@/assets/mail.svg";
-import {auth} from "@/lib/auth";
+import {createAuth} from "@/lib/auth";
 import type {APIError} from "better-auth/api";
 
 const errors = {
   name: "",
   email: "",
   currentPassword: "",
-  newPassword: "",
+  newPassword: ""
 };
 
 const fields = {
   name: Astro.locals.user.name || "",
   email: Astro.locals.user.email,
   currentPassword: "",
-  newPassword: "",
+  newPassword: ""
 };
 
 if (Astro.request.method === "POST") {
+  const auth = createAuth(Astro.locals.runtime.env.DB);
   const formData = await Astro.request.formData();
   const action = formData.get("action") as string;
 
@@ -35,7 +36,7 @@ if (Astro.request.method === "POST") {
     try {
       await auth.api.updateUser({
         body: {name},
-        headers: Astro.request.headers,
+        headers: Astro.request.headers
       });
       return Astro.redirect("/account?success=profile-updated");
     } catch (error) {
@@ -52,9 +53,9 @@ if (Astro.request.method === "POST") {
       const {status} = await auth.api.changeEmail({
         body: {
           newEmail: email,
-          callbackURL: "/account",
+          callbackURL: "/account"
         },
-        headers: Astro.request.headers,
+        headers: Astro.request.headers
       });
 
       if (!status) {
@@ -81,9 +82,9 @@ if (Astro.request.method === "POST") {
         body: {
           currentPassword,
           newPassword,
-          revokeOtherSessions: true,
+          revokeOtherSessions: true
         },
-        headers: Astro.request.headers,
+        headers: Astro.request.headers
       });
       return Astro.redirect("/account?success=password-changed");
     } catch (error) {
