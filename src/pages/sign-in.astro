@@ -22,6 +22,7 @@ const fields = {
 
 if (Astro.request.method === "POST") {
   const auth = createAuth(Astro.locals.runtime.env.DB);
+
   try {
     const formData = await Astro.request.formData();
     const email = formData.get("email") as string;
