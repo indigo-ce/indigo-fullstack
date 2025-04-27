@@ -17,7 +17,7 @@ export const jwtMiddleware = async (
   }
 
   try {
-    const jwks = await jwksCache.getKeys(c.get("db"));
+    const jwks = await jwksCache.getKeys(c.get("auth"));
     const jwksSet = createLocalJWKSet(jwks);
 
     if (!import.meta.env.BETTER_AUTH_BASE_URL) {

@@ -88,7 +88,6 @@ if (Astro.request.method === "POST") {
       });
       return Astro.redirect("/account?success=password-changed");
     } catch (error) {
-      console.error(error);
       const apiError = error as APIError;
       if (apiError.body?.code === "PASSWORD_TOO_SHORT") {
         errors.newPassword = "New password must be at least 8 characters long";

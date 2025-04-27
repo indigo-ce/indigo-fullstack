@@ -1,6 +1,6 @@
 ---
 if (Astro.locals.user?.id) return Astro.redirect("/dashboard");
-
+import {Debug} from "astro:components";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
@@ -59,6 +59,8 @@ if (Astro.request.method === "POST") {
       } else {
         errors.server = "Something went wrong. Please try again.";
       }
+    } else {
+      throw error;
     }
   }
 }

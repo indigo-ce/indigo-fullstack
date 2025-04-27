@@ -1,22 +1,19 @@
 import {betterAuth} from "better-auth";
+import {createDrizzle} from "@/db";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
+import {jwt} from "better-auth/plugins/jwt";
+import {refreshAccessToken} from "@/plugins/better-auth/refresh-access";
 import {render} from "@react-email/render";
-import PasswordReset from "@/components/email/PasswordReset";
-import EmailVerification from "@/components/email/EmailVerification";
 import {sendEmail} from "./email";
 import AccountDeleted from "@/components/email/AccountDeleted";
 import ChangeEmailVerification from "@/components/email/ChangeEmailVerification";
-import {refreshAccessToken} from "@/plugins/better-auth/refresh-access";
-import {jwt} from "better-auth/plugins/jwt";
-
-console.log(import.meta.env.DB);
+import EmailVerification from "@/components/email/EmailVerification";
+import PasswordReset from "@/components/email/PasswordReset";
 
 export function createAuth(db: D1Database) {
   return betterAuth({
     baseURL: import.meta.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",
-    database: drizzleAdapter(db, {
-      provider: "sqlite"
-    }),
+    database: drizzleAdapter(createDrizzle(db), {provider: "sqlite"}),
     user: {
       changeEmail: {
         enabled: true,

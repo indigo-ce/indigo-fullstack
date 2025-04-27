@@ -1,0 +1,31 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {Button} from "@/components/primitives/button";
+interface Props {
+  error: unknown;
+}
+
+const {error} = Astro.props;
+
+console.error("Error:", error);
+---
+
+<Layout>
+  <div
+    class="flex flex-col items-center justify-center w-full py-24 min-h-[70dvh]"
+  >
+    <div
+      class="bg-card border border-border rounded-[var(--radius)] p-8 shadow-sm flex flex-col items-center max-w-md w-full"
+    >
+      <h1 class="text-4xl font-bold text-destructive mb-2">500</h1>
+      <h2 class="text-xl font-semibold mb-4 text-foreground">
+        Internal Server Error
+      </h2>
+      <p class="text-muted-foreground mb-8 text-center">
+        Something went wrong on our end.<br />Please try again later or return
+        to the homepage.
+      </p>
+      <Button href="/" size="lg" class="w-full">Go Home</Button>
+    </div>
+  </div>
+</Layout>

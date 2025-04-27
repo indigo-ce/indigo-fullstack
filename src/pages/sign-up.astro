@@ -44,9 +44,12 @@ if (Astro.request.method === "POST") {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = (await response.json()) as {
+        status?: string;
+        [key: string]: any;
+      };
       throw new APIError(
-        errorData.status || "INTERNAL_SERVER_ERROR",
+        (errorData.status as any) || "INTERNAL_SERVER_ERROR",
         errorData
       );
     } else {
@@ -72,6 +75,8 @@ if (Astro.request.method === "POST") {
             (error.body?.message || "An error occurred during sign up") + ".";
         }
       }
+    } else {
+      throw error;
     }
   }
 }

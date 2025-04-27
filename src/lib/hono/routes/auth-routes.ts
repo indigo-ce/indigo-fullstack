@@ -8,7 +8,7 @@ const authRoutes = new Hono<APIRouteContext>();
 
 authRoutes.get("/v1/sign-in", async (c) => {
   try {
-    const auth = createAuth(c.get("db"));
+    const auth = c.get("auth");
     const response = await auth.api.signInTokens({
       body: {
         basicToken: c.req.header("Authorization") ?? ""

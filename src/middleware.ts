@@ -1,7 +1,7 @@
-import {defineMiddleware} from "astro:middleware";
+import {defineMiddleware, sequence} from "astro:middleware";
 import {createAuth} from "@/lib/auth";
 
-export const onRequest = defineMiddleware(async (context, next) => {
+const authMiddleware = defineMiddleware(async (context, next) => {
   if (context.request.url.includes("/api/")) {
     return next();
   }
@@ -22,3 +22,5 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   return next();
 });
+
+export const onRequest = sequence(authMiddleware);
