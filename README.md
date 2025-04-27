@@ -45,9 +45,7 @@ pnpm run dev
 ## ☑️ New Project Checklist
 
 - [] Add a KV session namespace then add binding to `wrangler.jsonc`
-- [] Remove `wrangler.jsonc` from `.gitignore`
 - [] Update `wrangler.jsonc` with your project details
-- [] Delete `example.wrangler.jsonc` with your project details
 - [] Copy `example.env` to `.env` and update with your project details
 - [] Update project name in `package.json`
 - [] Get D1 database ID, Account ID, and Token from Cloudflare Dashboard/ More info [here](https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit)
