@@ -19,7 +19,7 @@ const getLocalD1 = () => {
     const url = path.resolve(basePath, dbFile);
     return url;
   } catch (err) {
-    console.log(`Error  ${err}`);
+    throw new Error(`Failed to locate local D1 database: ${err}`);
   }
 };
 

@@ -63,6 +63,9 @@ pnpm run dev
 3. **Protected Routes**: The dashboard is protected and requires authentication
 4. **Sign Out**: Users can log out from their account
 
+> [!IMPORTANT]
+> By default, email verification is not required to sign in. You may want to change this behavior in `src/lib/auth.ts`.
+
 ### Astro Session
 
 The Astro Sessions API allows you to easily store user data between requests.
