@@ -1,4 +1,3 @@
-import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
 import {Hono} from "hono";
 import type {ContentfulStatusCode} from "hono/utils/http-status";
@@ -6,7 +5,7 @@ import type {APIRouteContext} from "@/pages/api/[...path]";
 
 const authRoutes = new Hono<APIRouteContext>();
 
-authRoutes.get("/v1/sign-in", async (c) => {
+authRoutes.get("/sign-in", async (c) => {
   try {
     const auth = c.get("auth");
     const response = await auth.api.signInTokens({

@@ -1,14 +1,13 @@
+import {authMiddleware} from "@/lib/hono/middleware/authMiddleware";
 import {createAuth} from "@/lib/auth";
 import {createDrizzle} from "@/db";
 import {d1Middleware} from "@/lib/hono/middleware/d1Middleware";
 import {Hono} from "hono";
-import {jwtMiddleware} from "@/lib/hono/middleware/jwtMiddleware";
 import {user} from "@/db/schema";
 import accountRoutes from "@/lib/hono/routes/account-routes";
 import authRoutes from "@/lib/hono/routes/auth-routes";
 import responseTimeMiddleware from "@/lib/hono/middleware/response-time";
 import type {APIRoute} from "astro";
-import {authMiddleware} from "@/lib/hono/middleware/authMiddleware";
 
 export type APIRouteContext = {
   Variables: {
@@ -20,17 +19,30 @@ export type APIRouteContext = {
 
 export const createHonoApp = (db: D1Database) => {
   const app = new Hono<APIRouteContext>();
-  app.use("*", d1Middleware(db));
-  app.use("*", authMiddleware(db));
-  app.use("*", responseTimeMiddleware);
-  app.use("*/account/*", jwtMiddleware);
+  const v1 = new Hono<APIRouteContext>();
 
-  app.get("/health", (c) => {
+  // Apply middlewares to all v1 routes
+  v1.use("*", d1Middleware(db));
+  v1.use("*", authMiddleware(db));
+  v1.use("*", responseTimeMiddleware);
+
+  v1.get("/health", (c) => {
     return c.json({status: "ok"});
   });
 
-  app.route("/auth", authRoutes);
-  app.route("/account", accountRoutes);
+  v1.route("/auth", authRoutes);
+  v1.route("/account", accountRoutes);
+
+  v1.get("/routes", (c) => {
+    return c.json(
+      v1.routes
+        .filter((route) => route.method !== "ALL")
+        .map((route) => `${route.method} /api/v1${route.path}`)
+    );
+  });
+
+  // Mount the v1 API
+  app.route("/api/v1", v1);
 
   return app;
 };

@@ -1,4 +1,3 @@
-import {createMiddleware} from "hono/factory";
 import {jwtVerify, createLocalJWKSet} from "jose";
 import {JOSEError} from "jose/errors";
 import jwksCache from "@/lib/jwks-cache";
@@ -11,6 +10,8 @@ export const jwtMiddleware = async (
   next: Next
 ) => {
   const token = c.req.header("Authorization")?.split(" ")[1];
+
+  console.log("JWT MIDDLEWARE");
 
   if (!token) {
     return c.json({error: "Unauthorized"}, 401);
