@@ -2,7 +2,6 @@
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 export const title = "500: Internal Server Error";
-export const prerender = true;
 
 interface Props {
   error: unknown;
@@ -11,6 +10,8 @@ interface Props {
 const {error} = Astro.props;
 
 console.error("Error:", error);
+
+Astro.response.status = 500;
 ---
 
 <Layout>

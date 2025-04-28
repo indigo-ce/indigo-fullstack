@@ -3,9 +3,8 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "pnpm cf-types && pnpm d1:migrate:local && astro dev",
-    "build": "astro build",
-    "preview": "pnpm build && wrangler pages dev ./dist --d1=DB",
+    "dev": "astro dev",
+    "build": "pnpm cf-types && astro build",
     "astro": "astro",
     "add-component": "pnpm dlx shadcn-svelte@next add",
     "preview-email": "email dev --dir src/components/email",
