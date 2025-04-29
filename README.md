@@ -49,6 +49,7 @@ pnpm run dev
 
 ## ☑️ New Project Checklist
 
+- [ ] Copy `.env.example` to `.env` and set the required environment variables for local development
 - [ ] Add a KV session namespace then add binding to `wrangler.jsonc`
 - [ ] Update `wrangler.jsonc` with your project details
 - [ ] Update project name in `package.json`
@@ -66,7 +67,7 @@ To use the script, run `node scripts/bootstrap.js <project-name>`.
 
 > [!IMPORTANT]
 > The script assumes you have a working installation of Claude Code.
-> if you don't have or rather use another tool, you can copy the prompt from the script and run it manually.
+> if you don't have or rather use another tool, you can run the script with the `--prompt-only` flag to get the prompt and apply it manually in your favorite AI tooling.
 
 ## 🔐 Authentication
 

@@ -2,6 +2,7 @@ import {spawn} from "child_process";
 
 // Take an argument from the command line
 const projectName = process.argv[2];
+const isPromptOnly = process.argv.includes("--prompt-only");
 
 if (!projectName) {
   console.error("Please provide a project name");
@@ -12,7 +13,7 @@ const trainCaseProjectName = projectName
   .replace(/[^a-zA-Z0-9]+/g, " ")
   .trim()
   .split(" ")
-  .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+  .map((word) => word.toLowerCase())
   .join("-");
 
 // Check if Claude is installed
@@ -32,22 +33,26 @@ try {
   process.exit(1);
 }
 
-const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}). Update the following files that contain "Combolab" (and any others not listed) to use the new project name. Do not update the /scripts folder.
+const filesToUpdate = [
+  "src/pages/email-demo.astro",
+  "src/pages/index.astro",
+  "src/layouts/Layout.astro",
+  "src/lib/email.ts",
+  "src/actions/email.ts",
+  "src/components/email/WelcomeEmail.tsx",
+  "src/components/email/CustomEmail.tsx",
+  "src/components/email/BaseLayout.tsx",
+  "src/components/Header.astro",
+  "README.md",
+  ".cursor/rules/project.mdc",
+  "package.json",
+  ".env.example",
+  "wrangler.jsonc"
+];
 
-- src/pages/email-demo.astro
-- src/pages/index.astro
-- src/layouts/Layout.astro
-- src/lib/email.ts
-- src/actions/email.ts
-- src/components/email/WelcomeEmail.tsx
-- src/components/email/CustomEmail.tsx
-- src/components/email/BaseLayout.tsx
-- src/components/Header.astro
-- README.md
-- .cursor/rules/project.mdc
-- package.json
-- .env.example
-- wrangler.jsonc
+const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}). Update the following files that contain Astro Starter or similar text (and any others not listed) to use the new project name. Do not update the /scripts folder. Example files to update: ${filesToUpdate.join(
+  ", "
+)}
 
 Once done, go over the required environment variables listed in the README.md and provide the commands to set them using wrangler CLI. You do not need to run the commands, just provide instructions on what to do.`;
 
@@ -63,6 +68,17 @@ const args = [
   "GrepTool",
   "LS"
 ];
+
+if (isPromptOnly) {
+  const dryRunArgs = [
+    "-p",
+    `"${prompt.replace(/\n/g, " ")}"`,
+    "--allowedTools",
+    `"Edit", "Bash", "Write", "GlobTool", "GrepTool", "LS"`
+  ];
+  console.log(`${command} ${dryRunArgs.join(" ")}`);
+  process.exit(0);
+}
 
 const child = spawn(command, args, {
   stdio: ["inherit", "pipe", "pipe"]
