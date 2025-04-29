@@ -57,6 +57,17 @@ pnpm run dev
 - [ ] Set `BETTER_AUTH_SECRET` environment variable using wrangler CLI
 - [ ] Set `RESEND_API_KEY` environment variable using wrangler CLI
 
+### AI-assisted Bootstrap
+
+This project comes with a script that can help you bootstrap a new project.
+The script uses Claude Code to rename the project, update the README, and update the project name in the code.
+
+To use the script, run `node scripts/bootstrap.js <project-name>`.
+
+> [!IMPORTANT]
+> The script assumes you have a working installation of Claude Code.
+> if you don't have or rather use another tool, you can copy the prompt from the script and run it manually.
+
 ## 🔐 Authentication
 
 This template uses Better Auth for authentication. And supports these features out of the box:
