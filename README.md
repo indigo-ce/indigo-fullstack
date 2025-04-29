@@ -40,7 +40,6 @@ pnpm run dev
 | `pnpm install`          | Installs dependencies                    |
 | `pnpm dev`              | Starts local dev server with DB setup    |
 | `pnpm build`            | Build your production site with DB setup |
-| `pnpm preview`          | Preview your build locally               |
 | `pnpm astro`            | Run Astro CLI commands                   |
 | `pnpm db:generate`      | Generate Drizzle migrations              |
 | `pnpm d1:migrate:local` | Apply migrations locally                 |
@@ -55,16 +54,50 @@ pnpm run dev
 - [ ] Update project name in `package.json`
 - [ ] Get D1 database ID, Account ID, and Token from Cloudflare Dashboard. More info [here](https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit)
 - [ ] Add D1 database ID to `wrangler.jsonc` file
+- [ ] Set `BETTER_AUTH_SECRET` environment variable using wrangler CLI
+- [ ] Set `RESEND_API_KEY` environment variable using wrangler CLI
 
 ## 🔐 Authentication
+
+This template uses Better Auth for authentication. And supports these features out of the box:
 
 1. **Sign Up**: Users can create an account with name, email, and password
 2. **Sign In**: Users can log in with their email and password
 3. **Protected Routes**: The dashboard is protected and requires authentication
 4. **Sign Out**: Users can log out from their account
+5. **Email Verification**: Users can verify their email address
+6. **Password Reset**: Users can reset their password
+7. **Account Deletion**: Users can delete their account
 
 > [!IMPORTANT]
 > By default, email verification is not required to sign in. You may want to change this behavior in `src/lib/auth.ts`.
+
+### Better Auth
+
+You **must** set the `BETTER_AUTH_SECRET` environment variable in your production environment (e.g., Cloudflare Pages). If this variable is not set, Better Auth will throw an error.
+
+You can generate a secure secret using OpenSSL:
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the generated string. Then, add it as an environment variable named `BETTER_AUTH_SECRET` using wrangler CLI:
+
+```bash
+pnpm wrangler secret put BETTER_AUTH_SECRET
+```
+
+### Resend
+
+This template uses Resend for email functionality.
+During development, emails are sent via SMTP to Ethereal so that you can test the email functionality without setting up a Resend account.
+
+To set up Resend, you need to create an account and set the `RESEND_API_KEY` environment variable using wrangler CLI:
+
+```bash
+pnpm wrangler secret put RESEND_API_KEY
+```
 
 ### Astro Session
 
