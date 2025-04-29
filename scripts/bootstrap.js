@@ -2,19 +2,37 @@ import {spawn} from "child_process";
 
 // Take an argument from the command line
 const projectName = process.argv[2];
-const trainCaseProjectName = projectName
-  .replace(/[^a-zA-Z0-9]+/g, " ")
-  .trim()
-  .split(" ")
-  .map((word) => word.toLowerCase())
-  .join("-");
 
 if (!projectName) {
   console.error("Please provide a project name");
   process.exit(1);
 }
 
-const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}). Update the following files that contain "Astro Starter" (and any others not listed) to use the new project name.
+const trainCaseProjectName = projectName
+  .replace(/[^a-zA-Z0-9]+/g, " ")
+  .trim()
+  .split(" ")
+  .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+  .join("-");
+
+// Check if Claude is installed
+try {
+  const checkClaude = spawn("which", ["claude"], {stdio: "pipe"});
+  checkClaude.on("close", (code) => {
+    if (code !== 0) {
+      console.error("Claude CLI is not installed or not in your PATH.");
+      console.error(
+        "Please install Claude CLI or use another method to rename the project."
+      );
+      process.exit(1);
+    }
+  });
+} catch (error) {
+  console.error("Failed to check for Claude CLI:", error.message);
+  process.exit(1);
+}
+
+const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}). Update the following files that contain "Combolab" (and any others not listed) to use the new project name. Do not update the /scripts folder.
 
 - src/pages/email-demo.astro
 - src/pages/index.astro
@@ -47,7 +65,15 @@ const args = [
 ];
 
 const child = spawn(command, args, {
-  stdio: "inherit"
+  stdio: ["inherit", "pipe", "pipe"]
+});
+
+child.stdout.on("data", (data) => {
+  process.stdout.write(data);
+});
+
+child.stderr.on("data", (data) => {
+  process.stderr.write(data);
 });
 
 child.on("close", (code) => {
