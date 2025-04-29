@@ -6,7 +6,7 @@ const trainCaseProjectName = projectName
   .replace(/[^a-zA-Z0-9]+/g, " ")
   .trim()
   .split(" ")
-  .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+  .map((word) => word.toLowerCase())
   .join("-");
 
 if (!projectName) {
