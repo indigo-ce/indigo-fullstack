@@ -5,17 +5,13 @@ export async function sendEmail(
   subject: string,
   html: string
 ): Promise<any> {
-  // Use Resend in production or if API key is set
-  if (import.meta.env.PROD && import.meta.env.RESEND_API_KEY) {
-    return sendEmailWithResend(to, subject, html);
-  }
-
+  // Use Resend if the API key is set
   if (import.meta.env.RESEND_API_KEY) {
     return sendEmailWithResend(to, subject, html);
+  } else {
+    // Fallback to SMTP (likely dev only)
+    return sendEmailWithSMTP(to, subject, html);
   }
-
-  // Fallback to SMTP (dev only)
-  return sendEmailWithSMTP(to, subject, html);
 }
 
 async function sendEmailWithResend(
