@@ -1,7 +1,6 @@
 import "dotenv/config";
-import {drizzle} from "drizzle-orm/libsql";
+import {drizzle} from "drizzle-orm/d1";
 import * as schema from "./schema";
 
-export const db = drizzle(process.env.DB_FILE_NAME!, {
-  schema: schema,
-});
+export const createDrizzle = (database: D1Database) =>
+  drizzle(database, {schema});

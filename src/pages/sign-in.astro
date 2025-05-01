@@ -1,26 +1,28 @@
 ---
 if (Astro.locals.user?.id) return Astro.redirect("/dashboard");
-
+import {Debug} from "astro:components";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
 import PasswordField from "@/components/PasswordField.svelte";
 import Mail from "@/assets/mail.svg";
-import {auth} from "@/lib/auth";
+import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
 
 const errors = {
   email: "",
   password: "",
-  server: "",
+  server: ""
 };
 
 const fields = {
   email: "",
-  password: "",
+  password: ""
 };
 
 if (Astro.request.method === "POST") {
+  const auth = createAuth(Astro.locals.runtime.env.DB);
+
   try {
     const formData = await Astro.request.formData();
     const email = formData.get("email") as string;
@@ -32,9 +34,9 @@ if (Astro.request.method === "POST") {
     const response = await auth.api.signInEmail({
       body: {
         email,
-        password,
+        password
       },
-      asResponse: true,
+      asResponse: true
     });
 
     if (!response.ok) {
@@ -44,8 +46,8 @@ if (Astro.request.method === "POST") {
         status: 302,
         headers: {
           Location: "/dashboard",
-          "Set-Cookie": response.headers.get("set-cookie") || "",
-        },
+          "Set-Cookie": response.headers.get("set-cookie") || ""
+        }
       });
     }
   } catch (error) {
@@ -57,6 +59,8 @@ if (Astro.request.method === "POST") {
       } else {
         errors.server = "Something went wrong. Please try again.";
       }
+    } else {
+      throw error;
     }
   }
 }

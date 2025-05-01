@@ -1,25 +1,27 @@
-import type {auth} from "@/lib/auth";
 import {Hono} from "hono";
-
+import {user} from "@/db/schema";
+import {jwtMiddleware} from "@/lib/hono/middleware/jwtMiddleware";
 const accountRoutes = new Hono<{
   Variables: {
-    user: typeof auth.$Infer.Session.user | null;
+    user: typeof user.$inferSelect | null;
   };
 }>();
 
-accountRoutes.get("/v1/profile", (c) => {
+accountRoutes.use("*", jwtMiddleware);
+
+accountRoutes.get("/profile", (c) => {
   const user = c.get("user");
   return c.json({
-    user,
+    user
   });
 });
 
-accountRoutes.get("/v1/posts", (c) => {
+accountRoutes.get("/posts", (c) => {
   return c.json({
     posts: [
       {id: 1, title: "Hello World"},
-      {id: 2, title: "Good Stuff"},
-    ],
+      {id: 2, title: "Good Stuff"}
+    ]
   });
 });
 

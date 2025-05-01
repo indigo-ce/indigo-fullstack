@@ -1,6 +1,7 @@
 import type {APIRoute} from "astro";
-import {auth} from "@/lib/auth";
+import {createAuth} from "@/lib/auth";
 
-export const ALL: APIRoute = async (ctx) => {
-  return auth.handler(ctx.request);
+// Forward all /auth/* requests to the auth handler
+export const ALL: APIRoute = async (context) => {
+  return createAuth(context.locals.runtime.env.DB).handler(context.request);
 };

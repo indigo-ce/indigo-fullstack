@@ -1,25 +1,17 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [
-    ".astro/types.d.ts",
-    "**/*"
-  ],
-  "exclude": [
-    "dist"
-  ],
+  "include": [".astro/types.d.ts", "**/*", "worker-configuration.d.ts"],
+  "exclude": ["dist"],
   "compilerOptions": {
+    "allowJs": true,
     "strict": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@drizzle/*": [
-        "drizzle/*"
-      ],
-      "@/*": [
-        "./src/*"
-      ]
+      "@drizzle/*": ["drizzle/*"],
+      "@/*": ["./src/*"]
     },
     "jsx": "react-jsx",
     "jsxImportSource": "react"

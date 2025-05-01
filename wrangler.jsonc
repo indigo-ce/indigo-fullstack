@@ -1,0 +1,62 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "astro-starter",
+  "pages_build_output_dir": "dist",
+  "compatibility_date": "2025-04-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "d1_databases": [
+    // Used for Pages local development
+    {
+      "binding": "DB", // Must be same as preview_database_id
+      "database_name": "astro-starter",
+      "database_id": "930d8c84-355f-4aeb-87f4-248d97c74ea9",
+      "migrations_dir": "./drizzle/migrations",
+      "preview_database_id": "DB" // Required for Pages local development
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "SESSION",
+      "id": "f3f60002bf9a42cf9911dfe2b1b55387"
+    }
+  ],
+  "env": {
+    "preview": {
+      "kv_namespaces": [
+        {
+          "binding": "SESSION",
+          "id": "f3f60002bf9a42cf9911dfe2b1b55387"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB", // Must be same as preview_database_id
+          "database_name": "astro-starter",
+          "database_id": "930d8c84-355f-4aeb-87f4-248d97c74ea9",
+          "migrations_dir": "./drizzle/migrations",
+          "preview_database_id": "DB" // Required for Pages local development
+        }
+      ]
+    },
+    "production": {
+      "kv_namespaces": [
+        {
+          "binding": "SESSION",
+          "id": "f3f60002bf9a42cf9911dfe2b1b55387"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB", // Must be same as preview_database_id
+          "database_name": "astro-starter",
+          "database_id": "930d8c84-355f-4aeb-87f4-248d97c74ea9",
+          "migrations_dir": "./drizzle/migrations",
+          "preview_database_id": "DB" // Required for Pages local development
+        }
+      ]
+    }
+  }
+}

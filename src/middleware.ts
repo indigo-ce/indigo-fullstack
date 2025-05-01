@@ -1,13 +1,15 @@
-import {defineMiddleware} from "astro:middleware";
-import {auth} from "@/lib/auth";
+import {defineMiddleware, sequence} from "astro:middleware";
+import {createAuth} from "@/lib/auth";
 
-export const onRequest = defineMiddleware(async (context, next) => {
+const authMiddleware = defineMiddleware(async (context, next) => {
   if (context.request.url.includes("/api/")) {
     return next();
   }
 
-  const isAuthenticated = await auth.api.getSession({
-    headers: context.request.headers,
+  const isAuthenticated = await createAuth(
+    context.locals.runtime.env.DB
+  ).api.getSession({
+    headers: context.request.headers
   });
 
   if (isAuthenticated) {
@@ -20,3 +22,5 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   return next();
 });
+
+export const onRequest = sequence(authMiddleware);

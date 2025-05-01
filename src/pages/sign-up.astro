@@ -6,23 +6,24 @@ import {Input} from "@/components/primitives/input";
 import PasswordField from "@/components/PasswordField.svelte";
 import Mail from "@/assets/mail.svg";
 import User from "@/assets/user.svg";
-import {auth} from "@/lib/auth";
+import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
 
 const errors = {
   name: "",
   email: "",
   password: "",
-  server: "",
+  server: ""
 };
 
 const fields = {
   name: "",
   email: "",
-  password: "",
+  password: ""
 };
 
 if (Astro.request.method === "POST") {
+  const auth = createAuth(Astro.locals.runtime.env.DB);
   try {
     const formData = await Astro.request.formData();
     const name = formData.get("name") as string;
@@ -37,24 +38,27 @@ if (Astro.request.method === "POST") {
       body: {
         name,
         email,
-        password,
+        password
       },
-      asResponse: true,
+      asResponse: true
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = (await response.json()) as {
+        status?: string;
+        [key: string]: any;
+      };
       throw new APIError(
-        errorData.status || "INTERNAL_SERVER_ERROR",
-        errorData,
+        (errorData.status as any) || "INTERNAL_SERVER_ERROR",
+        errorData
       );
     } else {
       return new Response(null, {
         status: 302,
         headers: {
           Location: "/dashboard",
-          "Set-Cookie": response.headers.get("set-cookie") || "",
-        },
+          "Set-Cookie": response.headers.get("set-cookie") || ""
+        }
       });
     }
   } catch (error) {
@@ -71,6 +75,8 @@ if (Astro.request.method === "POST") {
             (error.body?.message || "An error occurred during sign up") + ".";
         }
       }
+    } else {
+      throw error;
     }
   }
 }

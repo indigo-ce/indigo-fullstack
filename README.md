@@ -1,6 +1,6 @@
 # Astro Starter Kit
 
-A feature-rich web application starter template built with Astro, React, TailwindCSS, Better Auth, Drizzle ORM.
+A feature-rich web application starter template built with Astro, Svelte, TailwindCSS, Better Auth, Drizzle ORM.
 
 ## Getting Started
 
@@ -14,92 +14,206 @@ pnpm run dev
 
 - **[Astro](https://astro.build)** - Fast, modern web framework
 - **[Svelte](https://svelte.dev)** - UI component library used for component hydration
-- **[TailwindCSS](https://tailwindcss.com)** - Utility-first CSS framework
+- **[TailwindCSS](https://tailwindcss.com)** - Utility-first CSS framework v4
   - With Typography plugin for elegant content styling
 - **[Shadcn UI](https://next.shadcn-svelte.com)** - UI component library
 - **[Better Auth](https://better-auth.com)** - Authentication system
 - **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
 - **[Resend](https://resend.com)** - Modern email API for sending emails
+- **[Hono](https://hono.dev)** - Lightweight, ultrafast web framework for API endpoints
 
 ## 🛠️ Features
 
-- **Server-side Rendering** with Astro's Node adapter
+- **Server-side Rendering** with Astro's Cloudflare adapter
 - **Type Safety** with TypeScript
 - **User Authentication** flow with Better Auth
-- **Database Integration** with Drizzle ORM
+- **Database Integration** with Drizzle ORM and Cloudflare D1
 - **Modern UI** with TailwindCSS v4
 - **Email Functionality** with Resend API and templating using React Email
 - **Development Tools**: Prettier for code formatting
+- **API Layer**: Built with Hono for efficient request handling
 
 ## 🧞 Commands
 
-| Command         | Action                                   |
-| :-------------- | :--------------------------------------- |
-| `pnpm install`  | Installs dependencies                    |
-| `pnpm dev`      | Starts local dev server with DB setup    |
-| `pnpm build`    | Build your production site with DB setup |
-| `pnpm preview`  | Preview your build locally               |
-| `pnpm astro`    | Run Astro CLI commands                   |
-| `pnpm db-setup` | Generate and push Drizzle migrations     |
+| Command                 | Action                                   |
+| :---------------------- | :--------------------------------------- |
+| `pnpm install`          | Installs dependencies                    |
+| `pnpm dev`              | Starts local dev server with DB setup    |
+| `pnpm build`            | Build your production site with DB setup |
+| `pnpm astro`            | Run Astro CLI commands                   |
+| `pnpm db:generate`      | Generate Drizzle migrations              |
+| `pnpm d1:migrate:local` | Apply migrations locally                 |
+| `pnpm d1:migrate:prod`  | Apply migrations to production           |
+| `pnpm d1:studio:local`  | Run Drizzle Studio for local development |
+| `pnpm preview-email`    | Start email template preview server      |
 
-## 🔐 Authentication Flow
+## ☑️ New Project Checklist
+
+- [ ] Copy `.env.example` to `.env` and set the required environment variables for local development
+- [ ] Add a KV session namespace then add binding to `wrangler.jsonc`
+- [ ] Update `wrangler.jsonc` with your project details
+- [ ] Update project name in `package.json`
+- [ ] Get D1 database ID, Account ID, and Token from Cloudflare Dashboard. More info [here](https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit)
+- [ ] Add D1 database ID to `wrangler.jsonc` file
+- [ ] Set `BETTER_AUTH_SECRET` environment variable using wrangler CLI
+- [ ] Set `RESEND_API_KEY` environment variable using wrangler CLI
+
+### AI-assisted Bootstrap
+
+This project comes with a script that can help you bootstrap a new project.
+The script uses Claude Code to rename the project, update the README, and update the project name in the code.
+
+To use the script, run `node scripts/bootstrap.js <project-name>`.
+
+> [!IMPORTANT]
+> The script assumes you have a working installation of Claude Code.
+> if you don't have or rather use another tool, you can run the script with the `--prompt-only` flag to get the prompt and apply it manually in your favorite AI tooling.
+
+## 🔐 Authentication
+
+This template uses Better Auth for authentication. And supports these features out of the box:
 
 1. **Sign Up**: Users can create an account with name, email, and password
 2. **Sign In**: Users can log in with their email and password
 3. **Protected Routes**: The dashboard is protected and requires authentication
 4. **Sign Out**: Users can log out from their account
+5. **Email Verification**: Users can verify their email address
+6. **Password Reset**: Users can reset their password
+7. **Account Deletion**: Users can delete their account
+
+> [!IMPORTANT]
+> By default, email verification is not required to sign in. You may want to change this behavior in `src/lib/auth.ts`.
+
+### Better Auth
+
+You **must** set the `BETTER_AUTH_SECRET` environment variable in your production environment (e.g., Cloudflare Pages). If this variable is not set, Better Auth will throw an error.
+
+You can generate a secure secret using OpenSSL:
+
+```bash
+openssl rand -base64 32
+```
+
+Copy the generated string. Then, add it as an environment variable named `BETTER_AUTH_SECRET` using wrangler CLI:
+
+```bash
+pnpm wrangler secret put BETTER_AUTH_SECRET
+```
+
+### Resend
+
+This template uses Resend for email functionality.
+During development, emails are sent via SMTP to Ethereal so that you can test the email functionality without setting up a Resend account.
+
+To set up Resend, you need to create an account and set the `RESEND_API_KEY` environment variable using wrangler CLI:
+
+```bash
+pnpm wrangler secret put RESEND_API_KEY
+```
+
+### Astro Session
+
+The Astro Sessions API allows you to easily store user data between requests.
+This can be used for things like user data and preferences, shopping carts, and
+authentication credentials. Unlike cookie storage, there are no size limits on
+the data, and it can be restored on different devices.
+
+Before using sessions, you need to create a KV namespace to store the data and
+configure a KV binding in your Wrangler config file.
+
+```bash
+pnpm wrangler kv namespace create "SESSION" # default name
+```
+
+Add the returned ID to `wrangler.jsonc`:
+
+```jsonc
+"kv_namespaces": [
+  {
+    "binding": "SESSION",
+    "id": "<KV_NAMESPACE_ID>"
+  }
+]
+```
 
 ## 🗄️ Database
 
-The application uses SQLite with Drizzle ORM. The database schema includes:
+This template uses Drizzle ORM with Cloudflare D1 for a modern, type-safe, serverless SQL database.
+
+- The schema is defined using Drizzle's sqliteTable helpers for tables.
+- The Drizzle config (drizzle.config.ts) auto-detects local vs. production and sets up credentials for Drizzle Kit.
+
+### Database Schema
+
+The database schema includes:
 
 - Users
 - Sessions
 - Accounts
 - Verification tokens
-- Todos (user tasks)
+
+### Migrations
+
+- Run `pnpm db:generate` to generate migrations from your schema.
+- Run `pnpm d1:migrate:local` to apply them locally.
+- Run `pnpm d1:migrate:prod` to apply them to production.
+
+To apply migrations to your production database, you'll need to set up a D1 database in Cloudflare and update your wrangler.jsonc file with the appropriate database ID:
+
+```jsonc
+"d1_databases": [
+  {
+    "binding": "DB", // Must be same as preview_database_id
+    "database_name": "your-project-name",
+    "database_id": "your-d1-database-id",
+    "migrations_dir": "./drizzle/migrations",
+    "preview_database_id": "DB" // Required for Pages local development
+  }
+]
+```
+
+See the checklist above for more details.
+
+> **Note:** You need to manually apply the migrations to your production database after every schema change.
+
+### Studio
+
+You can use the Drizzle Studio to view and edit your local database data.
+
+```bash
+pnpm d1:studio:local
+```
 
 ## 📊 Database Queries
 
-Here's an example of how to fetch a user's todos from the database using Drizzle ORM:
+Here's an example of how to query the database using Drizzle ORM:
 
 ```typescript
-import {eq} from "drizzle-orm";
-import {db} from "@/db";
-import {todo, user} from "@/db/schema";
+import {createDrizzle} from "@/db";
 
-// Fetch all todos for a user
-const todos = await db
-  .select()
-  .from(todo)
-  .where(eq(todo.userId, currentUserId));
+const db = createDrizzle(d1); // You can obtain and instance of D1Database from the context using the DB binding.
+const userData = await db.select().from(user).where(eq(user.id, userId));
 
-// Create a new todo
-const newTodo = await db
-  .insert(todo)
+// Create a new user
+const newUser = await db
+  .insert(user)
   .values({
-    title: "Build an Astro app",
-    completed: false,
-    userId: currentUserId,
+    name: "John Doe",
+    email: "john@example.com"
+    // Other user fields
   })
   .returning();
 
-// Update todo status
-await db.update(todo).set({completed: true}).where(eq(todo.id, todoId));
-
-// Delete a todo
-await db.delete(todo).where(eq(todo.id, todoId));
-
-// Join example: Fetch todos with user info
-const todosWithUser = await db
+// Join example: Fetch user with their active sessions
+const userWithSessions = await db
   .select({
-    id: todo.id,
-    title: todo.title,
-    userName: user.name,
+    id: user.id,
+    name: user.name,
+    sessionId: session.id
   })
-  .from(todo)
-  .leftJoin(user, eq(todo.userId, user.id))
-  .where(eq(todo.userId, currentUserId));
+  .from(user)
+  .leftJoin(session, eq(session.userId, user.id))
+  .where(eq(user.id, userId));
 ```
 
 ## 📨 Email Functionality
@@ -125,29 +239,33 @@ SEND_EMAIL_FROM="Your App Name <noreply@yourdomain.com>"
 
 ### Email Templates
 
-Email templates are built with React Email for improved type safety, maintainability, and design consistency. Templates are stored in `src/emails/`:
+Email templates are built with React Email for improved type safety, maintainability, and design consistency. Templates are stored in `src/components/email/`:
 
 - `WelcomeEmail.tsx` - Template for welcome emails
 - `CustomEmail.tsx` - Template for custom message emails
 - `BaseLayout.tsx` - Reusable email layout component
+- `EmailVerification.tsx` - Template for email verification
+- `PasswordReset.tsx` - Template for password reset emails
+- `ChangeEmailVerification.tsx` - Template for email change verification
+- `AccountDeleted.tsx` - Template for account deletion confirmation
 
 ### Sending Emails
 
 ```typescript
-import {sendEmail} from "../utils/email";
+import {sendEmail} from "@/actions/email";
 
 // Send a welcome email
 await sendEmail({
   to: "user@example.com",
   subject: "Welcome to Astro Starter!",
-  template: {name: "welcome", params: {name: "John"}},
+  template: {name: "welcome", params: {name: "John"}}
 });
 
 // Send a custom email
 await sendEmail({
   to: "user@example.com",
   subject: "Important Information",
-  template: {name: "custom", params: {html: "<p>Your custom message here</p>"}},
+  template: {name: "custom", params: {html: "<p>Your custom message here</p>"}}
 });
 ```
 
@@ -160,14 +278,27 @@ Visit `/email-demo` to try the email functionality. In development, emails are s
 To preview emails locally, run:
 
 ```bash
-pnpm email-preview
+pnpm preview-email
 ```
 
 This command starts a local email viewer using the templates from the `src/components/email` directory.
 
 ## API
 
-The API is built using Hono and comes with a hybrid JWT and refresh token authentication system, primarily for mobile applications
+The API is built using Hono and comes with a hybrid JWT and refresh token authentication system, primarily for mobile applications. The API endpoints are organized in the `src/lib/hono/routes` directory.
+
+Key features:
+
+- JWT-based authentication
+- Route protection using middlewares
+- Structured response handling
+- Integration with the Drizzle ORM database
+
+API routes include:
+
+- Authentication routes (`/api/auth/*`)
+- User account management
+- JWT refresh and token management
 
 ```mermaid
 sequenceDiagram
@@ -205,6 +336,25 @@ sequenceDiagram
     AuthPlugin-->>API: Respond success
     API-->>Client: Respond with revocation confirmation
 ```
+
+## Cloudflare Configuration
+
+This template is configured to deploy to Cloudflare Pages with D1 Database and KV storage.
+
+### Local Development
+
+For local development, the template uses Wrangler to emulate Cloudflare's environment. The `platformProxy` option in the Astro config makes this seamless.
+
+### Production Deployment
+
+To deploy to Cloudflare Pages:
+
+1. Create a new Pages project in the Cloudflare dashboard
+2. Link it to your GitHub repository
+3. Configure the build command: `pnpm build`
+4. Configure the build directory: `dist`
+5. Add your environment variables
+6. Deploy!
 
 ## 📚 Learn More
 
