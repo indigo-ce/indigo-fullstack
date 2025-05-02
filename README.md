@@ -2,14 +2,6 @@
 
 A feature-rich web application starter template built with Astro, Svelte, TailwindCSS, Better Auth, Drizzle ORM.
 
-## Getting Started
-
-```bash
-pnpm install
-cp .env.example .env
-pnpm run dev
-```
-
 ## 🚀 Tech Stack
 
 - **[Astro](https://astro.build)** - Fast, modern web framework
@@ -33,6 +25,25 @@ pnpm run dev
 - **Development Tools**: Prettier for code formatting
 - **API Layer**: Built with Hono for efficient request handling
 
+## Getting Started
+
+```bash
+pnpm install
+cp .env.example .env
+pnpm run dev
+```
+
+## ☑️ New Project Checklist
+
+- [ ] Copy `.env.example` to `.env` and set the required environment variables for local development
+- [ ] Add a KV session namespace then add binding to `wrangler.jsonc`
+- [ ] Update `wrangler.jsonc` with your project details
+- [ ] Update project name in `package.json`
+- [ ] Get D1 database ID, Account ID, and Token from Cloudflare Dashboard. More info [here](https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit)
+- [ ] Add D1 database ID to `wrangler.jsonc` file
+- [ ] Set `BETTER_AUTH_SECRET` environment variable using wrangler CLI
+- [ ] Set `RESEND_API_KEY` environment variable using wrangler CLI
+
 ## 🧞 Commands
 
 | Command                 | Action                                   |
@@ -46,17 +57,6 @@ pnpm run dev
 | `pnpm d1:migrate:prod`  | Apply migrations to production           |
 | `pnpm d1:studio:local`  | Run Drizzle Studio for local development |
 | `pnpm preview-email`    | Start email template preview server      |
-
-## ☑️ New Project Checklist
-
-- [ ] Copy `.env.example` to `.env` and set the required environment variables for local development
-- [ ] Add a KV session namespace then add binding to `wrangler.jsonc`
-- [ ] Update `wrangler.jsonc` with your project details
-- [ ] Update project name in `package.json`
-- [ ] Get D1 database ID, Account ID, and Token from Cloudflare Dashboard. More info [here](https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit)
-- [ ] Add D1 database ID to `wrangler.jsonc` file
-- [ ] Set `BETTER_AUTH_SECRET` environment variable using wrangler CLI
-- [ ] Set `RESEND_API_KEY` environment variable using wrangler CLI
 
 ### AI-assisted Bootstrap
 
