@@ -12,6 +12,7 @@ import PasswordReset from "@/components/email/PasswordReset";
 
 export function createAuth(db: D1Database) {
   return betterAuth({
+    secret: import.meta.env.BETTER_AUTH_SECRET,
     baseURL: import.meta.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",
     database: drizzleAdapter(createDrizzle(db), {provider: "sqlite"}),
     user: {
