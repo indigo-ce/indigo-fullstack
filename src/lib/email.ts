@@ -9,6 +9,7 @@ export async function sendEmail(
   if (import.meta.env.RESEND_API_KEY) {
     return sendEmailWithResend(to, subject, html);
   } else {
+    console.log("Falling back to SMTP due to missing RESEND_API_KEY...");
     // Fallback to SMTP (likely dev only)
     return sendEmailWithSMTP(to, subject, html);
   }
@@ -36,6 +37,15 @@ async function sendEmailWithSMTP(
   subject: string,
   html: string
 ): Promise<any> {
+  // Skip SMTP in production environments
+  if (!import.meta.env.PROD) {
+    console.log("Skipping email in production without Resend API key");
+    return {
+      id: "skipped-in-production",
+      message: "Email sending skipped in production"
+    };
+  }
+
   const {getEmailTransporter, getTestMessageUrl} = await import(
     "./nodemailer-util"
   );
