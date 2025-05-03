@@ -10,7 +10,7 @@ import ChangeEmailVerification from "@/components/email/ChangeEmailVerification"
 import EmailVerification from "@/components/email/EmailVerification";
 import PasswordReset from "@/components/email/PasswordReset";
 
-export function createAuth(env: Env & Env) {
+export function createAuth(env: Env) {
   if (!env.BETTER_AUTH_SECRET) {
     throw new Error("BETTER_AUTH_SECRET is not set");
   }

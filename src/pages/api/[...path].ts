@@ -17,7 +17,7 @@ export type APIRouteContext = {
   };
 };
 
-export const createHonoApp = (env: Env & Env) => {
+export const createHonoApp = (env: Env) => {
   const app = new Hono<APIRouteContext>();
   const v1 = new Hono<APIRouteContext>();
 

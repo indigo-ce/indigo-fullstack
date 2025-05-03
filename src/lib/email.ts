@@ -4,7 +4,7 @@ export async function sendEmail(
   to: string,
   subject: string,
   html: string,
-  env: Env & Env
+  env: Env
 ): Promise<any> {
   if (env.RESEND_API_KEY) {
     return sendEmailWithResend(
