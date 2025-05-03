@@ -11,6 +11,10 @@ import EmailVerification from "@/components/email/EmailVerification";
 import PasswordReset from "@/components/email/PasswordReset";
 
 export function createAuth(db: D1Database) {
+  if (!process.env.BETTER_AUTH_SECRET) {
+    throw new Error("BETTER_AUTH_SECRET is not set");
+  }
+
   return betterAuth({
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",

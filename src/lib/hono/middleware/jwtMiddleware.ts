@@ -11,8 +11,6 @@ export const jwtMiddleware = async (
 ) => {
   const token = c.req.header("Authorization")?.split(" ")[1];
 
-  console.log("JWT MIDDLEWARE");
-
   if (!token) {
     return c.json({error: "Unauthorized"}, 401);
   }
