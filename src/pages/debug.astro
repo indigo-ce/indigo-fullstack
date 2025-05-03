@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 
 const {env} = Astro.locals.runtime;
-const isProd = env.PROD;
+const isProd = process.env.NODE_ENV === "production";
 const betterAuthSecret = env.BETTER_AUTH_SECRET;
 const resendApiKey = env.RESEND_API_KEY;
 const sendEmailFrom = env.SEND_EMAIL_FROM;
