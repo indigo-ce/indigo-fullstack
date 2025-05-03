@@ -3,26 +3,36 @@ import {Resend} from "resend";
 export async function sendEmail(
   to: string,
   subject: string,
-  html: string
+  html: string,
+  env: Env
 ): Promise<any> {
-  // Use Resend if the API key is set
-  if (process.env.RESEND_API_KEY) {
-    return sendEmailWithResend(to, subject, html);
+  if (env.RESEND_API_KEY) {
+    return sendEmailWithResend(
+      to,
+      subject,
+      html,
+      env.RESEND_API_KEY,
+      env.SEND_EMAIL_FROM
+    );
   } else {
-    console.log("Falling back to SMTP due to missing RESEND_API_KEY...");
-    // Fallback to SMTP (likely dev only)
-    return sendEmailWithSMTP(to, subject, html);
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("RESEND_API_KEY is not set");
+    } else {
+      console.log("📤 Sending email with SMTP...");
+      return sendEmailWithSMTP(to, subject, html, env.SEND_EMAIL_FROM);
+    }
   }
 }
 
 async function sendEmailWithResend(
   to: string,
   subject: string,
-  html: string
+  html: string,
+  resendAPIKey: string,
+  sendEmailFrom?: string
 ): Promise<any> {
-  const from =
-    process.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const from = sendEmailFrom || "Astro Starter <noreply@example.com>";
+  const resend = new Resend(resendAPIKey);
 
   return resend.emails.send({
     from,
@@ -35,23 +45,14 @@ async function sendEmailWithResend(
 async function sendEmailWithSMTP(
   to: string,
   subject: string,
-  html: string
+  html: string,
+  sendEmailFrom?: string
 ): Promise<any> {
-  // Skip SMTP in production environments
-  if (!process.env.PROD) {
-    console.log("Skipping email in production without Resend API key");
-    return {
-      id: "skipped-in-production",
-      message: "Email sending skipped in production"
-    };
-  }
-
   const {getEmailTransporter, getTestMessageUrl} = await import(
     "./nodemailer-util"
   );
   const transporter = await getEmailTransporter();
-  const from =
-    process.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
+  const from = sendEmailFrom || "Astro Starter <noreply@example.com>";
   const message = {to, subject, html, from};
 
   return new Promise((resolve, reject) => {

@@ -17,13 +17,13 @@ export type APIRouteContext = {
   };
 };
 
-export const createHonoApp = (db: D1Database) => {
+export const createHonoApp = (env: Env) => {
   const app = new Hono<APIRouteContext>();
   const v1 = new Hono<APIRouteContext>();
 
   // Apply middlewares to all v1 routes
-  v1.use("*", d1Middleware(db));
-  v1.use("*", authMiddleware(db));
+  v1.use("*", d1Middleware(env.DB));
+  v1.use("*", authMiddleware(env));
   v1.use("*", responseTimeMiddleware);
 
   v1.get("/health", (c) => {
@@ -48,7 +48,7 @@ export const createHonoApp = (db: D1Database) => {
 };
 
 export const ALL: APIRoute = async (context) => {
-  const app = createHonoApp(context.locals.runtime.env.DB);
+  const app = createHonoApp(context.locals.runtime.env);
   return app.fetch(context.request);
 };
 

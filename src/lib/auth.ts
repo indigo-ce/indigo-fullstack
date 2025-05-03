@@ -10,15 +10,19 @@ import ChangeEmailVerification from "@/components/email/ChangeEmailVerification"
 import EmailVerification from "@/components/email/EmailVerification";
 import PasswordReset from "@/components/email/PasswordReset";
 
-export function createAuth(db: D1Database) {
-  if (!process.env.BETTER_AUTH_SECRET) {
+export function createAuth(env: Env) {
+  if (!env.BETTER_AUTH_SECRET) {
     throw new Error("BETTER_AUTH_SECRET is not set");
   }
 
+  if (!env.BETTER_AUTH_BASE_URL) {
+    throw new Error("BETTER_AUTH_BASE_URL is not set");
+  }
+
   return betterAuth({
-    secret: process.env.BETTER_AUTH_SECRET,
-    baseURL: process.env.BETTER_AUTH_BASE_URL || "http://localhost:4321",
-    database: drizzleAdapter(createDrizzle(db), {provider: "sqlite"}),
+    secret: env.BETTER_AUTH_SECRET,
+    baseURL: env.BETTER_AUTH_BASE_URL,
+    database: drizzleAdapter(createDrizzle(env.DB), {provider: "sqlite"}),
     user: {
       changeEmail: {
         enabled: true,
@@ -32,7 +36,8 @@ export function createAuth(db: D1Database) {
                 url,
                 newEmail
               })
-            )
+            ),
+            env
           );
         }
       },
@@ -42,7 +47,8 @@ export function createAuth(db: D1Database) {
           await sendEmail(
             user.email,
             "Account Deleted",
-            await render(AccountDeleted({name: user.name || "friend"}))
+            await render(AccountDeleted({name: user.name || "friend"})),
+            env
           );
         }
       }
@@ -56,7 +62,8 @@ export function createAuth(db: D1Database) {
           "Reset Your Password",
           await render(
             PasswordReset({name: user.name || "friend", resetLink: url})
-          )
+          ),
+          env
         );
       }
     },
@@ -67,7 +74,8 @@ export function createAuth(db: D1Database) {
         await sendEmail(
           user.email,
           "Verify Your Email",
-          await render(EmailVerification({name: user.name || "friend", url}))
+          await render(EmailVerification({name: user.name || "friend", url})),
+          env
         );
       }
     },

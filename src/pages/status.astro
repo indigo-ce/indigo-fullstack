@@ -7,11 +7,6 @@ const betterAuthSecret = env.BETTER_AUTH_SECRET;
 const resendApiKey = env.RESEND_API_KEY;
 const sendEmailFrom = env.SEND_EMAIL_FROM;
 const betterAuthBaseUrl = env.BETTER_AUTH_BASE_URL;
-
-function redact(val: string | undefined) {
-  if (!val) return "(not set)";
-  return val.slice(0, 3) + "...";
-}
 ---
 
 <Layout>
