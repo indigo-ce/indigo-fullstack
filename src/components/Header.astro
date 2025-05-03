@@ -64,11 +64,7 @@ const user = Astro.locals.user;
     <div
       class="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-white/10"
     >
-      <div class="flex items-center justify-between">
-        <a href="#" class="-m-1.5 p-1.5">
-          <span class="sr-only">Astro Starter Kit</span>
-          <Logo />
-        </a>
+      <div class="flex justify-end">
         <button
           type="button"
           id="menu-close"
@@ -93,45 +89,90 @@ const user = Astro.locals.user;
       </div>
       <div class="mt-6 flow-root">
         <div class="-my-6 divide-y divide-gray-500/10 dark:divide-white/10">
-          <div class="space-y-2 py-6">
-            <a
-              href="/dashboard"
-              class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
-              >Dashboard</a
-            >
-          </div>
-          <div class="py-6">
-            <a
-              href="/sign-in"
-              class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
-              >Sign in</a
-            >
-          </div>
+          {
+            user ? (
+              <>
+                <div class="space-y-2 py-2 border-b border-border">
+                  <a
+                    href="/dashboard"
+                    class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    Dashboard
+                  </a>
+                </div>
+                <div class="py-2 border-b border-border">
+                  <button
+                    type="button"
+                    id="mobile-sign-out"
+                    class="-mx-3 flex w-full items-center rounded-lg px-3 py-2.5 text-base/7 font-semibold text-destructive hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    <svg class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M16 17l5-5-5-5"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                      <path
+                        d="M21 12H9"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                    Sign out
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div class="py-2 border-b border-border">
+                <a
+                  href="/sign-in"
+                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                >
+                  Sign in
+                </a>
+              </div>
+            )
+          }
         </div>
       </div>
     </div>
   </div>
 </header>
 
-<!-- <script is:inline>
-  import {authClient} from "@/lib/auth-client";
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const mobileMenu = document.getElementById("mobile-menu");
+    const menuOpen = document.getElementById("menu-open");
+    const menuClose = document.getElementById("menu-close");
+    const mobileSignOut = document.getElementById("mobile-sign-out");
 
-  const mobileMenu = document.getElementById("mobile-menu");
-  const menuOpen = document.getElementById("menu-open");
-  const menuClose = document.getElementById("menu-close");
+    menuOpen?.addEventListener("click", () => {
+      mobileMenu?.classList.remove("hidden");
+    });
 
-  menuOpen?.addEventListener("click", () => {
-    mobileMenu?.classList.remove("hidden");
+    menuClose?.addEventListener("click", () => {
+      mobileMenu?.classList.add("hidden");
+    });
+
+    mobileSignOut?.addEventListener("click", async () => {
+      try {
+        const {authClient} = await import("@/lib/auth-client");
+        await authClient.signOut();
+        window.location.href = "/";
+      } catch (error) {
+        console.error("Mobile sign out failed:", error);
+      }
+    });
   });
-
-  menuClose?.addEventListener("click", () => {
-    mobileMenu?.classList.add("hidden");
-  });
-
-  const signOutButton = document.getElementById("signOutButton");
-
-  signOutButton?.addEventListener("click", async () => {
-    await authClient.signOut();
-    window.location.href = "/";
-  });
-</script> -->
+</script>
