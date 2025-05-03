@@ -8,21 +8,21 @@ import {
 export async function getEmailTransporter(): Promise<Transporter> {
   return new Promise((resolve, reject) => {
     if (
-      import.meta.env.SMTP_HOST &&
-      import.meta.env.SMTP_USER &&
-      import.meta.env.SMTP_PASS
+      process.env.SMTP_HOST &&
+      process.env.SMTP_USER &&
+      process.env.SMTP_PASS
     ) {
-      const host = import.meta.env.SMTP_HOST;
-      const port = parseInt(import.meta.env.SMTP_PORT || "587");
-      const secure = import.meta.env.SMTP_SECURE === "true";
+      const host = process.env.SMTP_HOST;
+      const port = parseInt(process.env.SMTP_PORT || "587");
+      const secure = process.env.SMTP_SECURE === "true";
 
       const transporter = createTransport({
         host,
         port,
         secure,
         auth: {
-          user: import.meta.env.SMTP_USER,
-          pass: import.meta.env.SMTP_PASS
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
         }
       });
 

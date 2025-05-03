@@ -46,7 +46,7 @@ const filesToUpdate = [
   "README.md",
   ".cursor/rules/project.mdc",
   "package.json",
-  ".env.example",
+  ".dev.vars.example",
   "wrangler.jsonc"
 ];
 
@@ -54,7 +54,7 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
   ", "
 )}
 
-Once done, go over the required environment variables listed in the README.md and provide the commands to set them using wrangler CLI. You do not need to run the commands, just provide instructions on what to do.`;
+Once done, list the required secrets and variables. Provide instructions for setting the secrets (BETTER_AUTH_SECRET, RESEND_API_KEY) using 'pnpm wrangler secret put <KEY>' for production deployment. Mention that these can be added to '.dev.vars' for local development. Also, mention that variables like 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' should be set in the 'wrangler.jsonc' file under the 'vars' section. You do not need to run the commands, just provide instructions.`;
 
 const command = "claude";
 const args = [

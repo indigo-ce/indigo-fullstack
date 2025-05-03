@@ -29,20 +29,19 @@ A feature-rich web application starter template built with Astro, Svelte, Tailwi
 
 ```bash
 pnpm install
-cp .env.example .env
+cp .dev.vars.example .dev.vars # For local development secrets
 pnpm run dev
 ```
 
 ## ☑️ New Project Checklist
 
-- [ ] Copy `.env.example` to `.env` and set the required environment variables for local development
-- [ ] Add a KV session namespace then add binding to `wrangler.jsonc`
-- [ ] Update `wrangler.jsonc` with your project details
+- [ ] Copy `.dev.vars.example` to `.dev.vars` and add secrets like `BETTER_AUTH_SECRET` and `RESEND_API_KEY` for local development.
+- [ ] Create a KV namespace for sessions using `pnpm wrangler kv namespace create "SESSION"` and add the binding to `wrangler.jsonc`.
+- [ ] Update `wrangler.jsonc` with your project name, D1 database details, and variables like `BETTER_AUTH_BASE_URL` and `SEND_EMAIL_FROM`.
 - [ ] Update project name in `package.json`
-- [ ] Get D1 database ID, Account ID, and Token from Cloudflare Dashboard. More info [here](https://orm.drizzle.team/docs/guides/d1-http-with-drizzle-kit)
-- [ ] Add D1 database ID to `wrangler.jsonc` file
-- [ ] Set `BETTER_AUTH_SECRET` environment variable using wrangler CLI
-- [ ] Set `RESEND_API_KEY` environment variable using wrangler CLI
+- [ ] Create a D1 database in Cloudflare and add its `binding`, `database_name`, and `database_id` to `wrangler.jsonc`.
+- [ ] Set `BETTER_AUTH_SECRET` secret using `pnpm wrangler secret put BETTER_AUTH_SECRET` for production.
+- [ ] Set `RESEND_API_KEY` secret using `pnpm wrangler secret put RESEND_API_KEY` for production.
 
 ## 🧞 Commands
 
@@ -86,7 +85,9 @@ This template uses Better Auth for authentication. And supports these features o
 
 ### Better Auth
 
-You **must** set the `BETTER_AUTH_SECRET` environment variable in your production environment (e.g., Cloudflare Pages). If this variable is not set, Better Auth will throw an error.
+You **must** set the `BETTER_AUTH_SECRET` secret in your production environment (e.g., Cloudflare Pages). If this variable is not set, Better Auth will throw an error.
+
+For local development, you can add this variable to the `.dev.vars` file (copied from `.dev.vars.example`).
 
 You can generate a secure secret using OpenSSL:
 
@@ -94,22 +95,27 @@ You can generate a secure secret using OpenSSL:
 openssl rand -base64 32
 ```
 
-Copy the generated string. Then, add it as an environment variable named `BETTER_AUTH_SECRET` using wrangler CLI:
+Copy the generated string. Then, add it as a secret named `BETTER_AUTH_SECRET` using wrangler CLI for your production environment:
 
 ```bash
 pnpm wrangler secret put BETTER_AUTH_SECRET
 ```
 
+Also configure `BETTER_AUTH_BASE_URL` in your `wrangler.jsonc` file under the `vars` section for production.
+
 ### Resend
 
 This template uses Resend for email functionality.
-During development, emails are sent via SMTP to Ethereal so that you can test the email functionality without setting up a Resend account.
+During development, emails are sent via SMTP to Ethereal if `RESEND_API_KEY` is not set in `.dev.vars`.
 
-To set up Resend, you need to create an account and set the `RESEND_API_KEY` environment variable using wrangler CLI:
+To set up Resend for production, create an account and set the `RESEND_API_KEY` secret using wrangler CLI:
 
 ```bash
 pnpm wrangler secret put RESEND_API_KEY
 ```
+
+For local development, add `RESEND_API_KEY` to your `.dev.vars` file if you want to use Resend.
+The sender email address (`SEND_EMAIL_FROM`) should be configured in your `wrangler.jsonc` file under the `vars` section for production.
 
 ### Astro Session
 
@@ -141,7 +147,7 @@ Add the returned ID to `wrangler.jsonc`:
 This template uses Drizzle ORM with Cloudflare D1 for a modern, type-safe, serverless SQL database.
 
 - The schema is defined using Drizzle's sqliteTable helpers for tables.
-- The Drizzle config (drizzle.config.ts) auto-detects local vs. production and sets up credentials for Drizzle Kit.
+- The Drizzle config (`drizzle.config.ts`) uses the local D1 database specified in `.wrangler/state/v3/d1` for Drizzle Kit commands like `db:generate`. It does not require separate Cloudflare credentials for local development.
 
 ### Database Schema
 
@@ -158,7 +164,7 @@ The database schema includes:
 - Run `pnpm d1:migrate:local` to apply them locally.
 - Run `pnpm d1:migrate:prod` to apply them to production.
 
-To apply migrations to your production database, you'll need to set up a D1 database in Cloudflare and update your wrangler.jsonc file with the appropriate database ID:
+To apply migrations to your production database, you'll need to set up a D1 database in Cloudflare and update your `wrangler.jsonc` file with the appropriate database `binding`, `database_name`, and `database_id`:
 
 ```jsonc
 "d1_databases": [
@@ -218,24 +224,19 @@ const userWithSessions = await db
 
 ## 📨 Email Functionality
 
-The application includes built-in email functionality using [Resend](https://resend.com) with fallback to SMTP/Ethereal for development.
+The application includes built-in email functionality using [Resend](https://resend.com) (if `RESEND_API_KEY` is set via wrangler secrets or `.dev.vars`) with fallback to SMTP/Ethereal for development.
 
 ### Configuration
 
-Add these environment variables to your `.env` file:
+For production, configure the following:
 
-```env
-# Resend API configuration (recommended for production)
-RESEND_API_KEY=your_resend_api_key
-SEND_EMAIL_FROM="Your App Name <noreply@yourdomain.com>"
+- Set the `RESEND_API_KEY` secret using `pnpm wrangler secret put RESEND_API_KEY`.
+- Set the `SEND_EMAIL_FROM` variable in `wrangler.jsonc` under `vars`.
 
-# Alternative: SMTP configuration
-# SMTP_HOST=smtp.example.com
-# SMTP_PORT=587
-# SMTP_USER=username
-# SMTP_PASS=password
-# SMTP_SECURE=false
-```
+For local development:
+
+- Add `RESEND_API_KEY` to your `.dev.vars` file. If omitted, the app will fall back to using Ethereal via SMTP.
+- The `SEND_EMAIL_FROM` variable from `wrangler.jsonc` will be used if available during `wrangler dev`.
 
 ### Email Templates
 
@@ -343,7 +344,7 @@ This template is configured to deploy to Cloudflare Pages with D1 Database and K
 
 ### Local Development
 
-For local development, the template uses Wrangler to emulate Cloudflare's environment. The `platformProxy` option in the Astro config makes this seamless.
+For local development, the template uses Wrangler to emulate Cloudflare's environment. Use `pnpm dev` which runs `wrangler dev`. Environment variables for local development can be placed in `.dev.vars`. Secrets like API keys should generally be kept out of version control. The `platformProxy` option in the Astro config makes this seamless.
 
 ### Production Deployment
 
@@ -353,8 +354,9 @@ To deploy to Cloudflare Pages:
 2. Link it to your GitHub repository
 3. Configure the build command: `pnpm build`
 4. Configure the build directory: `dist`
-5. Add your environment variables
-6. Deploy!
+5. Set up required KV and D1 bindings in the Pages dashboard.
+6. Configure production environment variables and secrets (like `BETTER_AUTH_SECRET`, `RESEND_API_KEY`) in the Pages dashboard settings.
+7. Deploy!
 
 ## 📚 Learn More
 

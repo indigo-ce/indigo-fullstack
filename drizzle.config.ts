@@ -2,8 +2,6 @@ import "dotenv/config";
 import type {Config} from "drizzle-kit";
 import path from "path";
 import fs from "fs";
-const {CLOUDFLARE_DATABASE_ID, CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_TOKEN} =
-  process.env;
 
 const getLocalD1 = () => {
   try {
@@ -23,31 +21,12 @@ const getLocalD1 = () => {
   }
 };
 
-const isProduction = () => process.env.NODE_ENV === "production";
-
-const getCredentials = () => {
-  const prod = {
-    driver: "d1-http",
-    dbCredentials: {
-      accountId: CLOUDFLARE_ACCOUNT_ID,
-      databaseId: CLOUDFLARE_DATABASE_ID,
-      token: CLOUDFLARE_TOKEN
-    }
-  };
-
-  const dev = {
-    dbCredentials: {
-      url: getLocalD1()
-    }
-  };
-
-  return isProduction() ? prod : dev;
-};
-
 // Only used by Drizzle-Kit
 export default {
   out: "./drizzle/migrations",
   schema: "./src/db/schema.ts",
   dialect: "sqlite",
-  ...getCredentials()
+  dbCredentials: {
+    url: getLocalD1()
+  }
 } satisfies Config;

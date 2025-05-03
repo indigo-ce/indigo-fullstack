@@ -6,7 +6,7 @@ export async function sendEmail(
   html: string
 ): Promise<any> {
   // Use Resend if the API key is set
-  if (import.meta.env.RESEND_API_KEY) {
+  if (process.env.RESEND_API_KEY) {
     return sendEmailWithResend(to, subject, html);
   } else {
     console.log("Falling back to SMTP due to missing RESEND_API_KEY...");
@@ -21,8 +21,8 @@ async function sendEmailWithResend(
   html: string
 ): Promise<any> {
   const from =
-    import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
-  const resend = new Resend(import.meta.env.RESEND_API_KEY);
+    process.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   return resend.emails.send({
     from,
@@ -38,7 +38,7 @@ async function sendEmailWithSMTP(
   html: string
 ): Promise<any> {
   // Skip SMTP in production environments
-  if (!import.meta.env.PROD) {
+  if (!process.env.PROD) {
     console.log("Skipping email in production without Resend API key");
     return {
       id: "skipped-in-production",
@@ -51,7 +51,7 @@ async function sendEmailWithSMTP(
   );
   const transporter = await getEmailTransporter();
   const from =
-    import.meta.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
+    process.env.SEND_EMAIL_FROM || "Astro Starter <noreply@example.com>";
   const message = {to, subject, html, from};
 
   return new Promise((resolve, reject) => {

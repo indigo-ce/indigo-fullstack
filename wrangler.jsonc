@@ -26,5 +26,9 @@
       "binding": "SESSION",
       "id": "f3f60002bf9a42cf9911dfe2b1b55387"
     }
-  ]
+  ],
+  "vars": {
+    "BETTER_AUTH_BASE_URL": "https://astro-starter.4rays.net",
+    "SEND_EMAIL_FROM": "Astro Starter <noreply@4rays.net>"
+  }
 }

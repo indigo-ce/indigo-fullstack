@@ -1,6 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 
+const {env} = Astro.locals.runtime;
+const isProd = env.PROD;
+const betterAuthSecret = env.BETTER_AUTH_SECRET;
+const resendApiKey = env.RESEND_API_KEY;
+const sendEmailFrom = env.SEND_EMAIL_FROM;
+const betterAuthBaseUrl = env.BETTER_AUTH_BASE_URL;
+
 function redact(val: string | undefined) {
   if (!val) return "(not set)";
   return val.slice(0, 3) + "...";
@@ -9,159 +16,73 @@ function redact(val: string | undefined) {
 
 <Layout>
   <div class="max-w-2xl mx-auto py-12">
-    <h1 class="text-2xl font-bold mb-4">Environment Variables</h1>
-    <section class="mb-8">
-      <h2 class="text-lg font-semibold mb-4">D1 (Cloudflare D1/Drizzle)</h2>
-      <dl class="mb-6">
-        <dt class="font-mono font-semibold">CLOUDFLARE_ACCOUNT_ID</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          Your Cloudflare account ID<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.CLOUDFLARE_ACCOUNT_ID ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {
-              process.env.CLOUDFLARE_ACCOUNT_ID ?? "(not set)"
-            }</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">CLOUDFLARE_DATABASE_ID</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          Your Cloudflare D1 database ID<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.CLOUDFLARE_DATABASE_ID ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {
-              process.env.CLOUDFLARE_DATABASE_ID ?? "(not set)"
-            }</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">CLOUDFLARE_TOKEN</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          API token for Cloudflare D1 access<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{redact(import.meta.env.CLOUDFLARE_TOKEN)}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {redact(process.env.CLOUDFLARE_TOKEN)}</span
-          >
-        </dd>
-      </dl>
-      <h2 class="text-lg font-semibold mb-4">Better Auth</h2>
-      <dl class="mb-6">
-        <dt class="font-mono font-semibold">BETTER_AUTH_BASE_URL</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          Base URL for Better Auth (e.g. http://localhost:4321)<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.BETTER_AUTH_BASE_URL ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {
-              process.env.BETTER_AUTH_BASE_URL ?? "(not set)"
-            }</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">BETTER_AUTH_SECRET</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          Secret for Better Auth<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{redact(import.meta.env.BETTER_AUTH_SECRET)}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {redact(process.env.BETTER_AUTH_SECRET)}</span
-          >
-        </dd>
-      </dl>
-      <h2 class="text-lg font-semibold mb-4">Email (Resend)</h2>
-      <dl class="mb-6">
-        <dt class="font-mono font-semibold">RESEND_API_KEY</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          API key for Resend email service<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{redact(import.meta.env.RESEND_API_KEY)}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {redact(process.env.RESEND_API_KEY)}</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">SEND_EMAIL_FROM</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          Default sender (e.g. &quot;Astro Starter
-          &lt;noreply@yourdomain.com&gt;&quot;)<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.SEND_EMAIL_FROM ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {process.env.SEND_EMAIL_FROM ?? "(not set)"}</span
-          >
-        </dd>
-      </dl>
-      <h2 class="text-lg font-semibold mb-4">Email (SMTP Alternative)</h2>
-      <dl>
-        <dt class="font-mono font-semibold">SMTP_HOST</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          SMTP server host<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.SMTP_HOST ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {process.env.SMTP_HOST ?? "(not set)"}</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">SMTP_PORT</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          SMTP server port (e.g. 587)<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.SMTP_PORT ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {process.env.SMTP_PORT ?? "(not set)"}</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">SMTP_USER</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          SMTP username<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.SMTP_USER ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {process.env.SMTP_USER ?? "(not set)"}</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">SMTP_PASS</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          SMTP password<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{redact(import.meta.env.SMTP_PASS)}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {redact(process.env.SMTP_PASS)}</span
-          >
-        </dd>
-        <dt class="font-mono font-semibold">SMTP_SECURE</dt>
-        <dd class="mb-2 ml-4 text-sm text-gray-700">
-          Set to <code>true</code> for TLS, <code>false</code> otherwise<br />
-          <span class="font-mono text-xs text-indigo-700 dark:text-indigo-400"
-            >{import.meta.env.SMTP_SECURE ?? "(not set)"}</span
-          >
-          <br />
-          <span class="font-mono text-xs text-gray-500"
-            >process.env: {import.meta.env.SMTP_SECURE ?? "(not set)"}</span
-          >
-        </dd>
-      </dl>
-    </section>
+    <div
+      class="overflow-hidden bg-card dark:bg-card shadow-sm sm:rounded-lg border border-border"
+    >
+      <div class="px-4 py-6 sm:px-6">
+        <h3 class="text-base/7 font-semibold text-foreground">Status</h3>
+        <p class="mt-1 max-w-2xl text-sm/6 text-muted-foreground">
+          Status of the application.
+        </p>
+      </div>
+      <div class="border-t border-border">
+        <dl class="divide-y divide-border">
+          <div>
+            <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+              <dt class="text-sm font-medium text-foreground">Environment</dt>
+              <dd
+                class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+              >
+                {isProd ? "Production" : "Development"}
+              </dd>
+            </div>
+          </div>
+          <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-foreground">
+              <code class="text-muted-foreground text-xs">RESEND_API_KEY</code>
+            </dt>
+            <dd
+              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+            >
+              {resendApiKey ? "✅" : "❌"}
+            </dd>
+          </div>
+          <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-foreground">
+              <code class="text-muted-foreground text-xs">
+                BETTER_AUTH_SECRET
+              </code>
+            </dt>
+            <dd
+              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+            >
+              {betterAuthSecret ? "✅" : "❌"}
+            </dd>
+          </div>
+          <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-foreground">
+              <code class="text-muted-foreground text-xs"
+                >BETTER_AUTH_BASE_URL</code
+              >
+            </dt>
+            <dd
+              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+            >
+              {betterAuthBaseUrl}
+            </dd>
+          </div>
+          <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+            <dt class="text-sm font-medium text-foreground">
+              <code class="text-muted-foreground text-xs">SEND_EMAIL_FROM</code>
+            </dt>
+            <dd
+              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+            >
+              {sendEmailFrom}
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </div>
   </div>
 </Layout>

@@ -31,3 +31,6 @@ pnpm-debug.log*
 
 # generated types
 worker-configuration.d.ts
+
+# dev environment variables
+.dev.vars
