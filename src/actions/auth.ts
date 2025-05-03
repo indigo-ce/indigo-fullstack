@@ -18,7 +18,7 @@ export const authentication = {
       }
 
       const {status} = await createAuth(
-        context.locals.runtime.env.DB
+        context.locals.runtime.env
       ).api.resetPassword({
         body: {
           newPassword: newPassword,
@@ -41,14 +41,12 @@ export const authentication = {
       email: z.string().email()
     }),
     handler: async ({email}, context) => {
-      await createAuth(context.locals.runtime.env.DB).api.sendVerificationEmail(
-        {
-          body: {
-            email,
-            callbackURL: "/dashboard"
-          }
+      await createAuth(context.locals.runtime.env).api.sendVerificationEmail({
+        body: {
+          email,
+          callbackURL: "/dashboard"
         }
-      );
+      });
     }
   })
 };

@@ -7,7 +7,7 @@ const authMiddleware = defineMiddleware(async (context, next) => {
   }
 
   const isAuthenticated = await createAuth(
-    context.locals.runtime.env.DB
+    context.locals.runtime.env
   ).api.getSession({
     headers: context.request.headers
   });

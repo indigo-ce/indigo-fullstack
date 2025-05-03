@@ -11,40 +11,47 @@ export const email = {
   sendWelcomeEmail: defineAction({
     input: z.object({
       email: z.string().email(),
-      name: z.string().optional(),
+      name: z.string().optional()
     }),
-    handler: async ({email, name}) => {
+    handler: async ({email, name}, context) => {
       await sendEmail(
         email,
         "Welcome to Astro Starter!",
         await render(WelcomeEmail({name: name || "friend"})),
+        context.locals.runtime.env
       );
-    },
+    }
   }),
   sendCustomEmail: defineAction({
     input: z.object({
       email: z.string().email(),
       subject: z.string(),
-      html: z.string(),
+      html: z.string()
     }),
-    handler: async ({email, subject, html}) => {
-      await sendEmail(email, subject, await render(CustomEmail({html})));
-    },
+    handler: async ({email, subject, html}, context) => {
+      await sendEmail(
+        email,
+        subject,
+        await render(CustomEmail({html})),
+        context.locals.runtime.env
+      );
+    }
   }),
   sendEmailVerificationEmail: defineAction({
     input: z.object({
       email: z.string().email(),
       name: z.string().optional(),
-      verificationLink: z.string(),
+      verificationLink: z.string()
     }),
-    handler: async ({email, name, verificationLink}) => {
+    handler: async ({email, name, verificationLink}, context) => {
       await sendEmail(
         email,
         "Verify Your Email",
         await render(
-          EmailVerification({name: name || "friend", url: verificationLink}),
+          EmailVerification({name: name || "friend", url: verificationLink})
         ),
+        context.locals.runtime.env
       );
-    },
-  }),
+    }
+  })
 };
