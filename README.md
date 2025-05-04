@@ -350,15 +350,19 @@ For local development, the template uses Wrangler to emulate Cloudflare's enviro
 
 ### Production Deployment
 
-To deploy to Cloudflare Pages:
+To deploy to Cloudflare Workers with static assets:
 
-1. Create a new Pages project in the Cloudflare dashboard
+1. Create a new Workers project in the Cloudflare dashboard
 2. Link it to your GitHub repository
 3. Configure the build command: `pnpm build`
-4. Configure the build directory: `dist`
-5. Set up required KV and D1 bindings in the Pages dashboard.
-6. Configure production environment variables and secrets (like `BETTER_AUTH_SECRET`, `RESEND_API_KEY`) in the Pages dashboard settings.
-7. Deploy!
+4. Configure production environment variables and secrets (like `BETTER_AUTH_SECRET`, `RESEND_API_KEY`) in the Pages dashboard settings.
+5. Migrate the production database.
+6. Deploy!
+
+> [!NOTE]
+> Cloudflare Pages is not supported for this project.
+> Attempts to deploy end up in a `[ERROR] Error: No such module "node:os".` error.
+> This could be temporary, but as of 2025-05-04, it is not supported.
 
 ## 📚 Learn More
 
