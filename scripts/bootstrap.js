@@ -43,6 +43,7 @@ const filesToUpdate = [
   "src/components/email/CustomEmail.tsx",
   "src/components/email/BaseLayout.tsx",
   "src/components/Header.astro",
+  "src/components/Footer.astro",
   "README.md",
   ".cursor/rules/project.mdc",
   "package.json",
@@ -58,7 +59,7 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
 )}
 - Delete the following files: ${filesToDelete.join(", ")}
 - Remove the todos from the README.md file.
-- Copy '.dev.vars.example' into '.dev.vars' for local development. 
+- Copy '.dev.vars.example' into '.dev.vars' for local development.
 - Return a todo list of the remaining steps to complete the project.
   - Each required secret and env variable should be its own task. 
   - Provide commands for setting the secrets on production using 'pnpm wrangler secret put <KEY>' for production deployment. 
