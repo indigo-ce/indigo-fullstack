@@ -53,16 +53,18 @@ const filesToUpdate = [
 const filesToDelete = ["scripts/bootstrap.js", "drizzle/*"];
 
 const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}).
-
 - Update the following files that contain Astro Starter or similar text (and any others not listed) to use the new project name. Do not update the /scripts folder. Example files to update: ${filesToUpdate.join(
   ", "
 )}
-
 - Delete the following files: ${filesToDelete.join(", ")}
-
 - Remove the todos from the README.md file.
-
-- List the required secrets and variables. Provide instructions for setting the secrets (BETTER_AUTH_SECRET, RESEND_API_KEY) using 'pnpm wrangler secret put <KEY>' for production deployment. Mention that these can be added to '.dev.vars' for local development. Also, mention that variables like 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' should be set in the 'wrangler.jsonc' file under the 'vars' section. You do not need to run the commands, just provide instructions. Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
+- Copy '.dev.vars.example' into '.dev.vars' for local development. 
+- Return a todo list of the remaining steps to complete the project.
+  - Each required secret and env variable should be its own task. 
+  - Provide commands for setting the secrets on production using 'pnpm wrangler secret put <KEY>' for production deployment. 
+  - Add tasks for setting the variables 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' in the 'wrangler.jsonc' file under the 'vars' section.
+  - Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
+  - Go over the remaining tasks listed in README.md and merge them with your list.
 `;
 
 const command = "claude";
