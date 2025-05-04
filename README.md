@@ -41,7 +41,9 @@ pnpm run dev
 - [ ] Update project name in `package.json`
 - [ ] Update database schema.
 - [ ] Create a D1 database in Cloudflare and add its `binding`, `database_name`, and `database_id` to `wrangler.jsonc`.
-- [ ] Delete old and regenerate migrations using `pnpm db:generate`.
+- [ ] Run `pnpm db:init:local` to initialize the local database.
+- [ ] Run `pnpm db:init:prod` to initialize the production database.
+- [ ] Regenerate migrations using `pnpm db:generate`.
 - [ ] Set `BETTER_AUTH_SECRET` secret using `pnpm wrangler secret put BETTER_AUTH_SECRET` for production.
 - [ ] Set `RESEND_API_KEY` secret using `pnpm wrangler secret put RESEND_API_KEY` for production.
 - [ ] Require email verification on sign up.
@@ -163,11 +165,14 @@ The database schema includes:
 
 ### Creating a D1 Database
 
-To create a D1 database on Cloudflare:
+To create a D1 database for your project:
 
 ```bash
-# Create a D1 database
-pnpm wrangler d1 create <database-name>
+# Initialize the local database for development
+pnpm db:init:local
+
+# Create a D1 database in Cloudflare for production
+pnpm db:init:prod
 
 # After creating the database, you'll receive output with the database_id
 # Add this to your wrangler.jsonc as shown in the example below

@@ -12,6 +12,8 @@
     "d1": "wrangler d1",
     "cf-types": "wrangler types",
     "db:generate": "drizzle-kit generate",
+    "db:init:local": "wrangler d1 execute astro-starter --local --command 'SELECT COUNT(*)'",
+    "db:init:prod": "wrangler d1 create astro-starter",
     "d1:migrate:local": "wrangler d1 migrations apply astro-starter --local",
     "d1:migrate-dry:local": "wrangler d1 migrations list astro-starter --local",
     "d1:migrate:prod": "wrangler d1 migrations apply astro-starter --remote",
