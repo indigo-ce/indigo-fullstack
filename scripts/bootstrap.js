@@ -62,6 +62,7 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
 - Return a todo list of the remaining steps to complete the project.
   - Each required secret and env variable should be its own task. 
   - Provide commands for setting the secrets on production using 'pnpm wrangler secret put <KEY>' for production deployment. 
+  - We need to deplot the app before setting the secrets on production.
   - Add tasks for setting the variables 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' in the 'wrangler.jsonc' file under the 'vars' section.
   - Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
   - Go over the remaining tasks listed in README.md and merge them with your list.
