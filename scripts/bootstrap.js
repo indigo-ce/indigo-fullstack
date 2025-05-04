@@ -50,15 +50,19 @@ const filesToUpdate = [
   "wrangler.jsonc"
 ];
 
-const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}). Update the following files that contain Astro Starter or similar text (and any others not listed) to use the new project name. Do not update the /scripts folder. Example files to update: ${filesToUpdate.join(
+const filesToDelete = ["scripts/bootstrap.js", "drizzle/*"];
+
+const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}).
+
+- Update the following files that contain Astro Starter or similar text (and any others not listed) to use the new project name. Do not update the /scripts folder. Example files to update: ${filesToUpdate.join(
   ", "
 )}
 
-Also delete the 'scripts/bootstrap.js' file and remove the todos from the README.md file.
+- Delete the following files: ${filesToDelete.join(", ")}
 
-Once done, list the required secrets and variables. Provide instructions for setting the secrets (BETTER_AUTH_SECRET, RESEND_API_KEY) using 'pnpm wrangler secret put <KEY>' for production deployment. Mention that these can be added to '.dev.vars' for local development. Also, mention that variables like 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' should be set in the 'wrangler.jsonc' file under the 'vars' section. You do not need to run the commands, just provide instructions.
+- Remove the todos from the README.md file.
 
-Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
+- List the required secrets and variables. Provide instructions for setting the secrets (BETTER_AUTH_SECRET, RESEND_API_KEY) using 'pnpm wrangler secret put <KEY>' for production deployment. Mention that these can be added to '.dev.vars' for local development. Also, mention that variables like 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' should be set in the 'wrangler.jsonc' file under the 'vars' section. You do not need to run the commands, just provide instructions. Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
 `;
 
 const command = "claude";
