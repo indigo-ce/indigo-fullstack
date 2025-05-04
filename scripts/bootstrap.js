@@ -54,7 +54,12 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
   ", "
 )}
 
-Once done, list the required secrets and variables. Provide instructions for setting the secrets (BETTER_AUTH_SECRET, RESEND_API_KEY) using 'pnpm wrangler secret put <KEY>' for production deployment. Mention that these can be added to '.dev.vars' for local development. Also, mention that variables like 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' should be set in the 'wrangler.jsonc' file under the 'vars' section. You do not need to run the commands, just provide instructions.`;
+Also delete the 'scripts/bootstrap.js' file and remove the todos from the README.md file.
+
+Once done, list the required secrets and variables. Provide instructions for setting the secrets (BETTER_AUTH_SECRET, RESEND_API_KEY) using 'pnpm wrangler secret put <KEY>' for production deployment. Mention that these can be added to '.dev.vars' for local development. Also, mention that variables like 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' should be set in the 'wrangler.jsonc' file under the 'vars' section. You do not need to run the commands, just provide instructions.
+
+Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
+`;
 
 const command = "claude";
 const args = [

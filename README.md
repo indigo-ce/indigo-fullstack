@@ -160,25 +160,37 @@ The database schema includes:
 - Accounts
 - Verification tokens
 
-### Migrations
+### Creating a D1 Database
 
-- Run `pnpm db:generate` to generate migrations from your schema.
-- Run `pnpm d1:migrate:local` to apply them locally.
-- Run `pnpm d1:migrate:prod` to apply them to production.
+To create a D1 database on Cloudflare:
 
-To apply migrations to your production database, you'll need to set up a D1 database in Cloudflare and update your `wrangler.jsonc` file with the appropriate database `binding`, `database_name`, and `database_id`:
+```bash
+# Create a D1 database
+pnpm wrangler d1 create <database-name>
+
+# After creating the database, you'll receive output with the database_id
+# Add this to your wrangler.jsonc as shown in the example below
+```
+
+Example wrangler.jsonc configuration:
 
 ```jsonc
 "d1_databases": [
   {
-    "binding": "DB", // Must be same as preview_database_id
+    "binding": "DB", // Must match preview_database_id
     "database_name": "your-project-name",
-    "database_id": "your-d1-database-id",
+    "database_id": "your-d1-database-id", // The ID from the create command
     "migrations_dir": "./drizzle/migrations",
     "preview_database_id": "DB" // Required for Pages local development
   }
 ]
 ```
+
+### Migrations
+
+- Run `pnpm db:generate` to generate migrations from your schema.
+- Run `pnpm d1:migrate:local` to apply them locally.
+- Run `pnpm d1:migrate:prod` to apply them to production.
 
 See the checklist above for more details.
 
