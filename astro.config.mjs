@@ -25,6 +25,13 @@ export default defineConfig({
       enabled: true // Use astro built-in commands
     }
   }),
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "ja"],
+    routing: {
+      prefixDefaultLocale: false
+    }
+  },
   vite: {
     plugins: [tailwindcss()],
     resolve: {

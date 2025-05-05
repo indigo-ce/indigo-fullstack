@@ -1,8 +1,11 @@
 ---
 import Logo from "@/assets/logo.svg";
 import UserProfile from "@/components/UserProfile.svelte";
+import {getLangFromUrl, useTranslations} from "@/i18n/utils";
 
 const user = Astro.locals.user;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
 <header class="border-b border-border">
@@ -40,13 +43,18 @@ const user = Astro.locals.user;
     <div class="hidden lg:flex lg:gap-x-12">
       {
         user ? (
-          <UserProfile name={user.name} email={user.email} client:load />
+          <UserProfile
+            name={user.name}
+            imageUrl={user.image}
+            lang={lang}
+            client:load
+          />
         ) : (
           <a
             href="/sign-in"
             class="text-sm/6 font-semibold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300"
           >
-            Sign in <span aria-hidden="true">&rarr;</span>
+            {t("nav.signin")} <span aria-hidden="true">&rarr;</span>
           </a>
         )
       }
@@ -97,7 +105,7 @@ const user = Astro.locals.user;
                     href="/dashboard"
                     class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    Dashboard
+                    {t("nav.dashboard")}
                   </a>
                 </div>
                 <div class="py-2 border-b border-border">
@@ -129,7 +137,7 @@ const user = Astro.locals.user;
                         stroke-linejoin="round"
                       />
                     </svg>
-                    Sign out
+                    {t("nav.signout")}
                   </button>
                 </div>
               </>
@@ -139,7 +147,7 @@ const user = Astro.locals.user;
                   href="/sign-in"
                   class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
-                  Sign in
+                  {t("nav.signin")}
                 </a>
               </div>
             )

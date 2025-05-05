@@ -2,7 +2,7 @@
   import {
     Avatar,
     AvatarFallback,
-    AvatarImage,
+    AvatarImage
   } from "@/components/primitives/avatar";
   import {
     DropdownMenu,
@@ -10,12 +10,16 @@
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
-    DropdownMenuTrigger,
+    DropdownMenuTrigger
   } from "@/components/primitives/dropdown-menu";
   import LogOut from "@lucide/svelte/icons/log-out";
+  import {useTranslations} from "@/i18n/utils";
 
   export let name: string;
   export let imageUrl: string | undefined = undefined;
+  export let lang: string = "en";
+
+  const t = useTranslations(lang);
 
   // Create initials from name for the avatar fallback
   $: initials = name
@@ -49,14 +53,19 @@
     </DropdownMenuTrigger>
     <DropdownMenuContent sideOffset={10}>
       <DropdownMenuLabel class="text-muted-foreground">
-        Hi, <span class="text-foreground">{name}</span>!
+        {t("profile.greeting")},
+        <span class="text-foreground">{name}</span>
+        {lang === "ja" ? "さん" : ""}
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem>
-        <a href="/dashboard" class="flex w-full items-center"> Dashboard </a>
+        <a href="/dashboard" class="flex w-full items-center">
+          {t("profile.dashboard")}
+        </a>
       </DropdownMenuItem>
       <DropdownMenuItem class="text-destructive" onSelect={handleSignOut}>
-        <LogOut class="mr-2 h-4 w-4" /> Logout
+        <LogOut class="mr-2 h-4 w-4" />
+        {t("profile.logout")}
       </DropdownMenuItem>
     </DropdownMenuContent>
   </DropdownMenu>

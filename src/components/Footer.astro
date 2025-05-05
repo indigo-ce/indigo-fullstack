@@ -1,12 +1,14 @@
 ---
 import ThemeSelect from "@/components/ThemeSelect.svelte";
+import LanguageSelect from "@/components/LanguageSelect.svelte";
 ---
 
 <footer class="border-t border-border">
   <div
     class="mx-auto max-w-7xl px-6 py-4 md:flex md:items-center md:justify-between lg:px-8"
   >
-    <div class="flex justify-center gap-x-6 md:order-2">
+    <div class="flex justify-center gap-x-2 md:order-2">
+      <LanguageSelect client:load />
       <ThemeSelect client:load />
     </div>
     <p
