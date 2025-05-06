@@ -36,7 +36,7 @@ export function getUrlWithLocale(path: string, locale: Locale) {
 
 // Sets the language preference cookie
 export function setLanguageCookie(locale: Locale) {
-  document.cookie = `preferred_lang=${locale};path=/;max-age=31536000;SameSite=Lax`;
+  document.cookie = `preferred_lang=${locale};path=/;max-age=31536000;SameSite=Lax;Secure`;
 }
 
 // Gets the language preference from cookies

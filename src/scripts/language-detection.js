@@ -9,8 +9,16 @@ function getCookie(name) {
 }
 
 function setCookie(name, value) {
+  const isSecure = window.location.protocol === "https:";
+  const cookieAge = 31536000; // 1 year in seconds
   document.cookie =
-    name + "=" + value + ";path=/;max-age=31536000;SameSite=Lax";
+    name +
+    "=" +
+    value +
+    ";path=/;max-age=" +
+    cookieAge +
+    ";SameSite=Lax" +
+    (isSecure ? ";Secure" : "");
 }
 
 // Get language from cookie
