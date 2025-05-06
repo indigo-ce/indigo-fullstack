@@ -1,18 +1,24 @@
 ---
+import {useTranslations} from "@/i18n/utils";
+
 export interface Props {
   user: import("better-auth").User;
+  lang?: string;
 }
 
-const {user} = Astro.props;
+const {user, lang = "en"} = Astro.props;
+const t = useTranslations(lang as any);
 ---
 
 <div
   class="bg-card border border-border rounded-[var(--radius)] p-6 mb-6 shadow-sm"
 >
   <h2 class="text-lg text-foreground mt-0 mb-2">
-    Hello, <span class="font-bold text-primary">{user.name}</span>
+    {t.dashboard.welcome}
+    <span class="font-bold text-primary">{user.name}</span>
   </h2>
   <p class="text-sm text-muted-foreground m-0">
-    Welcome back to your dashboard. Your email is <strong>{user.email}</strong>.
+    {t.dashboard.welcomeBack}
+    <strong>{user.email}</strong>{lang === "ja" ? " です。" : "."}
   </p>
 </div>

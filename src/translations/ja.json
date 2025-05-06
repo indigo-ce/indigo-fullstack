@@ -11,11 +11,11 @@
     "signout": "ログアウト"
   },
   "home": {
-    "title": "Astro スターター",
-    "description": "Astro、Svelte、TailwindCSS、Better Auth、Drizzle ORMで構築されたスターターテンプレート。認証、データベース統合、モダンUIですぐに始められます。",
+    "title": "Astro Starter",
+    "description": "Astro、Svelte、TailwindCSS、Better Auth、Drizzle ORMで構築されたテンプレート。認証、データベース統合、モダンUIですぐに始められます。",
     "feature1": {
       "title": "静的 + SSR + Svelte",
-      "description": "静的またはサーバーサイドレンダリングページをクライアントサイドHydrationで構築できます。"
+      "description": "静的またはSSRページをクライアントサイドHydrationで構築できます。"
     },
     "feature2": {
       "title": "TailwindCSS + Shadcn UI",
@@ -39,5 +39,33 @@
     "greeting": "こんにちは",
     "dashboard": "ダッシュボード",
     "logout": "ログアウト"
+  },
+  "dashboard": {
+    "welcome": "こんにちは、",
+    "welcomeBack": "ダッシュボードへようこそ。あなたのメールアドレスは",
+    "emailNotVerified": "メールは確認されていません",
+    "noEmailReceived": "メールが届きませんか？",
+    "emailDemo": "メールデモ →"
+  },
+  "account": {
+    "deleteAccount": "アカウントを削除",
+    "areYouSure": "本当によろしいですか？",
+    "deleting": "削除中...",
+    "yes": "はい",
+    "no": "いいえ",
+    "deleteFailed": "アカウントの削除に失敗しました"
+  },
+  "error": {
+    "500": {
+      "title": "500",
+      "subtitle": "サーバーエラー",
+      "message": "サーバー側で問題が発生しました。しばらく経ってからもう一度お試しいただくか、ホームページにお戻りください。"
+    },
+    "404": {
+      "title": "404",
+      "subtitle": "ページが見つかりません",
+      "message": "申し訳ありませんが、お探しのページが見つかりませんでした。前のページに戻るか、ホームページにお戻りください。"
+    },
+    "goHome": "ホームへ戻る"
   }
 }

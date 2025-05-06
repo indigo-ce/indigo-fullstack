@@ -39,5 +39,33 @@
     "greeting": "Hi",
     "dashboard": "Dashboard",
     "logout": "Logout"
+  },
+  "dashboard": {
+    "welcome": "Hello,",
+    "welcomeBack": "Welcome back to your dashboard. Your email is",
+    "emailNotVerified": "Email is not verified",
+    "noEmailReceived": "No email received?",
+    "emailDemo": "Email Demo →"
+  },
+  "account": {
+    "deleteAccount": "Delete Account",
+    "areYouSure": "Are you sure?",
+    "deleting": "Deleting...",
+    "yes": "Yes",
+    "no": "No",
+    "deleteFailed": "Failed to delete account"
+  },
+  "error": {
+    "500": {
+      "title": "500",
+      "subtitle": "Internal Server Error",
+      "message": "Something went wrong on our end. Please try again later or return to the homepage."
+    },
+    "404": {
+      "title": "404",
+      "subtitle": "Page Not Found",
+      "message": "Sorry, we couldn't find that page. Try going back or return to the homepage."
+    },
+    "goHome": "Go Home"
   }
 }
