@@ -1,0 +1,58 @@
+---
+import Welcome from "@/components/Welcome.astro";
+import Layout from "@/layouts/Layout.astro";
+import "@/styles.css";
+import {Button} from "@/components/primitives/button";
+import DeleteConfirmation from "@/components/DeleteConfirmation.svelte";
+import {
+  getLangFromParams,
+  useTranslationsFromParams,
+  localizeUrl
+} from "@/i18n/utils";
+
+const lang = getLangFromParams(Astro.params);
+const t = useTranslationsFromParams(Astro.params);
+
+if (!Astro.locals.user?.id) {
+  const signInUrl = localizeUrl("/sign-in", lang as any);
+  return Astro.redirect(signInUrl);
+}
+
+const user = Astro.locals.user;
+const accountUrl = localizeUrl("/account", lang as any);
+const emailDemoUrl = localizeUrl("/email-demo", lang as any);
+const verifyEmailUrl = localizeUrl("/verify-email", lang as any);
+---
+
+<Layout title={t.nav.dashboard}>
+  <div class="dashboard p-6 max-w-4xl mx-auto pt-20">
+    <h1 class="text-2xl font-bold text-foreground mb-4">
+      {t.nav.dashboard}
+    </h1>
+
+    {
+      !user.emailVerified && (
+        <div class="bg-orange-100 dark:bg-yellow-900 px-2 py-2 rounded-lg mb-4 flex justify-between items-center">
+          <p class="text-sm ml-2 text-orange-900 dark:text-yellow-100">
+            {lang === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
+            {lang === "ja" ? "は確認されていません" : "is not verified"}
+          </p>
+          <Button href={verifyEmailUrl} variant="outline" size="sm">
+            {t.dashboard.noEmailReceived}
+          </Button>
+        </div>
+      )
+    }
+
+    <Welcome user={user} lang={lang} />
+    <div class="flex flex-wrap gap-4 items-center">
+      <Button href={accountUrl} variant="outline" size="sm">
+        {t.nav.account}
+      </Button>
+      <Button href={emailDemoUrl} variant="outline" size="sm">
+        {t.dashboard.emailDemo}
+      </Button>
+      <DeleteConfirmation client:load locale={lang} />
+    </div>
+  </div>
+</Layout>

@@ -1,28 +1,28 @@
 ---
+import {useTranslations, getLocaleFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
-import {getLangFromUrl, useTranslations} from "@/i18n/utils";
 
-const lang = getLangFromUrl(Astro.url);
+const lang = getLocaleFromParams(Astro.params);
 const t = useTranslations(lang);
 ---
 
-<Layout>
+<Layout title={t.home.title}>
   <div class="py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center">
         <span
           class="text-xs/7 font-mono text-indigo-600 dark:text-indigo-400 border border-indigo-600 dark:border-indigo-400 rounded-full px-2 py-1"
         >
-          {t("common.version")}
+          v1.0.0
         </span>
         <p
           class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl lg:text-balance"
         >
-          {t("home.title")}
+          {t.home.title}
         </p>
         <p class="mt-6 text-lg/8 text-gray-600 dark:text-gray-300">
-          {t("home.description")}
+          {t.home.description}
         </p>
       </div>
     </div>
@@ -37,10 +37,10 @@ const t = useTranslations(lang);
             >
               <Icon src={Server} class="size-6 text-white" solid />
             </div>
-            {t("home.feature1.title")}
+            {t.home.feature1.title}
           </dt>
           <dd class="mt-2 text-base/7 text-muted-foreground">
-            {t("home.feature1.description")}
+            {t.home.feature1.description}
           </dd>
         </div>
         <div class="relative pl-16">
@@ -50,10 +50,10 @@ const t = useTranslations(lang);
             >
               <Icon src={PaintBrush} class="size-6 text-white" solid />
             </div>
-            {t("home.feature2.title")}
+            {t.home.feature2.title}
           </dt>
           <dd class="mt-2 text-base/7 text-muted-foreground">
-            {t("home.feature2.description")}
+            {t.home.feature2.description}
           </dd>
         </div>
         <div class="relative pl-16">
@@ -63,10 +63,10 @@ const t = useTranslations(lang);
             >
               <Icon src={Key} class="size-6 text-white" solid />
             </div>
-            {t("home.feature3.title")}
+            {t.home.feature3.title}
           </dt>
           <dd class="mt-2 text-base/7 text-muted-foreground">
-            {t("home.feature3.description")}
+            {t.home.feature3.description}
           </dd>
         </div>
         <div class="relative pl-16">
@@ -76,10 +76,10 @@ const t = useTranslations(lang);
             >
               <Icon src={CircleStack} class="size-6 text-white" solid />
             </div>
-            {t("home.feature4.title")}
+            {t.home.feature4.title}
           </dt>
           <dd class="mt-2 text-base/7 text-muted-foreground">
-            {t("home.feature4.description")}
+            {t.home.feature4.description}
           </dd>
         </div>
       </dl>

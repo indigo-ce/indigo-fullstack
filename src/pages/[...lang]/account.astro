@@ -1,7 +1,5 @@
 ---
-if (!Astro.locals.user?.id) return Astro.redirect("/sign-in");
-if (!Astro.locals.user.emailVerified) return Astro.redirect("/verify-email");
-
+import {getLangFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
@@ -9,6 +7,14 @@ import PasswordField from "@/components/PasswordField.svelte";
 import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import type {APIError} from "better-auth/api";
+import {useTranslationsFromParams} from "@/i18n/utils";
+
+const t = useTranslationsFromParams(Astro.params);
+const lang = getLangFromParams(Astro.params);
+
+if (!Astro.locals.user?.id) return Astro.redirect(`/${lang}/sign-in`);
+if (!Astro.locals.user.emailVerified)
+  return Astro.redirect(`/${lang}/verify-email`);
 
 const errors = {
   name: "",
@@ -38,10 +44,10 @@ if (Astro.request.method === "POST") {
         body: {name},
         headers: Astro.request.headers
       });
-      return Astro.redirect("/account?success=profile-updated");
+      return Astro.redirect(`/${lang}/account?success=profile-updated`);
     } catch (error) {
       console.error(error);
-      errors.name = "Something went wrong. Please try again.";
+      errors.name = t.account.updateFailed;
     }
   }
 
@@ -53,20 +59,19 @@ if (Astro.request.method === "POST") {
       const {status} = await auth.api.changeEmail({
         body: {
           newEmail: email,
-          callbackURL: "/account"
+          callbackURL: `/${lang}/account`
         },
         headers: Astro.request.headers
       });
 
       if (!status) {
-        errors.email = "Something went wrong. Please try again.";
-        return;
+        errors.email = t.account.updateFailed;
       }
 
-      return Astro.redirect("/account?success=email-verification-sent");
+      return Astro.redirect(`/${lang}/account?success=email-verification-sent`);
     } catch (error) {
       console.error(error);
-      errors.email = "Something went wrong. Please try again.";
+      errors.email = t.account.updateFailed;
     }
   }
 
@@ -86,7 +91,7 @@ if (Astro.request.method === "POST") {
         },
         headers: Astro.request.headers
       });
-      return Astro.redirect("/account?success=password-changed");
+      return Astro.redirect(`/${lang}/account?success=password-changed`);
     } catch (error) {
       const apiError = error as APIError;
       if (apiError.body?.code === "PASSWORD_TOO_SHORT") {
@@ -94,7 +99,7 @@ if (Astro.request.method === "POST") {
       } else if (apiError.body?.code === "INVALID_PASSWORD") {
         errors.currentPassword = "Current password is incorrect";
       } else {
-        errors.currentPassword = "Something went wrong. Please try again.";
+        errors.currentPassword = t.account.updateFailed;
       }
     }
   }
@@ -106,12 +111,12 @@ const success = Astro.url.searchParams.get("success");
 <Layout>
   <div class="flex flex-col items-center justify-center w-full py-12">
     <div class="w-full max-w-md space-y-8">
-      <h1 class="text-2xl font-bold mb-8">Account Settings</h1>
+      <h1 class="text-2xl font-bold mb-8">{t.account.personalInfo}</h1>
 
       {
         success === "profile-updated" && (
           <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
-            Profile updated successfully.
+            {t.account.profileUpdated}
           </div>
         )
       }
@@ -119,8 +124,7 @@ const success = Astro.url.searchParams.get("success");
       {
         success === "email-verification-sent" && (
           <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
-            Check your email for a verification link to complete the email
-            change.
+            {t.auth.checkEmail}
           </div>
         )
       }
@@ -128,13 +132,13 @@ const success = Astro.url.searchParams.get("success");
       {
         success === "password-changed" && (
           <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
-            Password updated successfully.
+            {t.auth.resetSuccess}
           </div>
         )
       }
 
       <div class="bg-card p-6 rounded-lg border">
-        <h2 class="text-xl font-semibold mb-4">Profile</h2>
+        <h2 class="text-xl font-semibold mb-4">{t.account.editProfile}</h2>
         <form method="POST" class="space-y-4">
           <input type="hidden" name="action" value="update-profile" />
           {
@@ -149,19 +153,21 @@ const success = Astro.url.searchParams.get("success");
           >
             <Input
               type="text"
-              placeholder="Name"
+              placeholder={t.account.name}
               class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
               name="name"
               required
               value={fields.name}
             />
           </div>
-          <Button type="submit" class="w-full">Update Profile</Button>
+          <Button type="submit" class="w-full">
+            {t.account.update}
+          </Button>
         </form>
       </div>
 
       <div class="bg-card p-6 rounded-lg border">
-        <h2 class="text-xl font-semibold mb-4">Email</h2>
+        <h2 class="text-xl font-semibold mb-4">{t.account.email}</h2>
         <form method="POST" class="space-y-4">
           <input type="hidden" name="action" value="change-email" />
           {
@@ -177,19 +183,21 @@ const success = Astro.url.searchParams.get("success");
             <Mail class="h-5 w-5 text-muted-foreground mr-1" />
             <Input
               type="email"
-              placeholder="New Email"
+              placeholder={t.account.email}
               class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
               name="email"
               required
               value={fields.email}
             />
           </div>
-          <Button type="submit" class="w-full">Change Email</Button>
+          <Button type="submit" class="w-full">
+            {t.account.update}
+          </Button>
         </form>
       </div>
 
       <div class="bg-card p-6 rounded-lg border">
-        <h2 class="text-xl font-semibold mb-4">Password</h2>
+        <h2 class="text-xl font-semibold mb-4">{t.auth.password}</h2>
         <form method="POST" class="space-y-6">
           <input type="hidden" name="action" value="change-password" />
           {
@@ -202,7 +210,7 @@ const success = Astro.url.searchParams.get("success");
           <PasswordField
             name="currentPassword"
             className="mb-2"
-            placeholder="Current Password"
+            placeholder={t.auth.password}
             required
             client:load
             value={fields.currentPassword}
@@ -210,12 +218,14 @@ const success = Astro.url.searchParams.get("success");
           <PasswordField
             className="mb-2"
             name="newPassword"
-            placeholder="New Password"
+            placeholder={t.auth.newPassword}
             required
             client:load
             value={fields.newPassword}
           />
-          <Button type="submit" class="w-full">Change Password</Button>
+          <Button type="submit" class="w-full">
+            {t.account.update}
+          </Button>
         </form>
       </div>
     </div>

@@ -1,0 +1,38 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {Button} from "@/components/primitives/button";
+import {
+  useTranslationsFromParams,
+  localizeUrl,
+  getLangFromParams
+} from "@/i18n/utils";
+
+const t = useTranslationsFromParams(Astro.params);
+
+export const title = "404: Page Not Found";
+Astro.response.status = 404;
+
+const lang = getLangFromParams(Astro.params);
+const homeUrl = localizeUrl("/", lang as any);
+---
+
+<Layout>
+  <div
+    class="flex flex-col items-center justify-center w-full py-24 min-h-[70dvh]"
+  >
+    <div
+      class="bg-card border border-border rounded-[var(--radius)] p-8 shadow-sm flex flex-col items-center max-w-md w-full"
+    >
+      <h1 class="text-4xl font-bold text-destructive mb-2">
+        {t.error[404].title}
+      </h1>
+      <h2 class="text-xl font-semibold mb-4 text-foreground">
+        {t.error[404].subtitle}
+      </h2>
+      <p class="text-muted-foreground mb-8 text-center">
+        {t.error[404].message}
+      </p>
+      <Button href={homeUrl} size="lg" class="w-full">{t.error.goHome}</Button>
+    </div>
+  </div>
+</Layout>

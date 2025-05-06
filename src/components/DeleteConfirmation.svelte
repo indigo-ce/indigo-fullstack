@@ -1,10 +1,17 @@
 <script lang="ts">
   import {Button} from "@/components/primitives/button";
   import {authClient} from "@/lib/auth-client";
+  import {translations} from "@/i18n/constants";
+  import type {Locale} from "@/i18n/constants";
+  import {localizeUrl} from "@/i18n/utils";
+
+  export let locale: Locale = "en";
 
   let showConfirmation = false;
   let isDeleting = false;
   let error: string | null = null;
+
+  const t = translations[locale] || translations.en;
 
   function handleDelete() {
     error = null;
@@ -16,9 +23,10 @@
       error = null;
       isDeleting = true;
       await authClient.deleteUser();
-      window.location.href = "/sign-in";
+      const signInUrl = localizeUrl("/sign-in", locale);
+      window.location.href = signInUrl;
     } catch (err) {
-      error = err instanceof Error ? err.message : "Failed to delete account";
+      error = err instanceof Error ? err.message : t.account.deleteFailed;
     } finally {
       isDeleting = false;
     }
@@ -37,18 +45,20 @@
 
   {#if !showConfirmation}
     <Button variant="destructive" size="sm" onclick={handleDelete}>
-      Delete Account
+      {t.account.deleteAccount}
     </Button>
   {:else}
     <div class="flex items-center gap-2">
-      <span class="text-sm text-gray-700">Are you sure?</span>
+      <span class="text-sm text-gray-700">
+        {t.account.areYouSure}
+      </span>
       <Button
         variant="destructive"
         size="sm"
         onclick={confirmDelete}
         disabled={isDeleting}
       >
-        {#if isDeleting}Deleting...{:else}Yes{/if}
+        {#if isDeleting}{t.account.deleting}{:else}{t.account.yes}{/if}
       </Button>
       <Button
         variant="outline"
@@ -56,7 +66,7 @@
         onclick={cancelDelete}
         disabled={isDeleting}
       >
-        No
+        {t.account.no}
       </Button>
     </div>
   {/if}

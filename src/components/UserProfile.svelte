@@ -13,60 +13,65 @@
     DropdownMenuTrigger
   } from "@/components/primitives/dropdown-menu";
   import LogOut from "@lucide/svelte/icons/log-out";
-  import {useTranslations} from "@/i18n/utils";
+  import {useTranslations, localizeUrl} from "@/i18n/utils";
+  import type {Locale} from "@/i18n/constants";
 
   export let name: string;
   export let imageUrl: string | undefined = undefined;
-  export let lang: string = "en";
+  export let locale: Locale = "en";
 
-  const t = useTranslations(lang);
+  const t = useTranslations(locale);
+  const dashboardUrl = localizeUrl("/dashboard", locale);
 
   // Create initials from name for the avatar fallback
   $: initials = name
     .split(" ")
-    .map((part) => part[0])
+    .map((n) => n[0])
     .join("")
     .toUpperCase()
     .substring(0, 2);
 
-  const handleSignOut = async () => {
+  async function handleSignOut() {
     try {
-      const {authClient} = await import("@/lib/auth-client");
-      await authClient.signOut();
-      window.location.href = "/";
+      const form = document.querySelector(
+        'form[action="/api/auth/sign-out"]'
+      ) as HTMLFormElement;
+      if (form) {
+        form.submit();
+      }
     } catch (error) {
-      console.error("Failed to sign out:", error);
+      console.error("Sign-out error:", error);
     }
-  };
+  }
 </script>
 
-<div class="flex gap-3">
-  <DropdownMenu>
-    <DropdownMenuTrigger class="rounded-full">
-      <Avatar>
-        <AvatarImage
-          src={imageUrl || `https://github.com/shadcn.png`}
-          alt={name}
-        />
+<DropdownMenu>
+  <DropdownMenuTrigger
+    class="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300"
+  >
+    <Avatar>
+      {#if imageUrl}
+        <AvatarImage src={imageUrl} alt={name} />
+      {:else}
         <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent sideOffset={10}>
-      <DropdownMenuLabel class="text-muted-foreground">
-        {t("profile.greeting")},
-        <span class="text-foreground">{name}</span>
-        {lang === "ja" ? "さん" : ""}
-      </DropdownMenuLabel>
-      <DropdownMenuSeparator />
-      <DropdownMenuItem>
-        <a href="/dashboard" class="flex w-full items-center">
-          {t("profile.dashboard")}
-        </a>
-      </DropdownMenuItem>
-      <DropdownMenuItem class="text-destructive" onSelect={handleSignOut}>
-        <LogOut class="mr-2 h-4 w-4" />
-        {t("profile.logout")}
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-</div>
+      {/if}
+    </Avatar>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent sideOffset={10}>
+    <DropdownMenuLabel class="text-muted-foreground">
+      {t.profile.greeting},
+      <span class="text-foreground">{name}</span>
+      {locale === "ja" ? "さん" : ""}
+    </DropdownMenuLabel>
+    <DropdownMenuSeparator />
+    <DropdownMenuItem>
+      <a href={dashboardUrl} class="flex w-full items-center">
+        {t.profile.dashboard}
+      </a>
+    </DropdownMenuItem>
+    <DropdownMenuItem class="text-destructive" onSelect={handleSignOut}>
+      <LogOut class="mr-2 h-4 w-4" />
+      {t.profile.logout}
+    </DropdownMenuItem>
+  </DropdownMenuContent>
+</DropdownMenu>
