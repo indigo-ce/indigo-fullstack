@@ -3,11 +3,11 @@ import {useTranslations} from "@/i18n/utils";
 
 export interface Props {
   user: import("better-auth").User;
-  lang?: string;
+  lang?: import("@/i18n/constants").Locale;
 }
 
 const {user, lang = "en"} = Astro.props;
-const t = useTranslations(lang as any);
+const t = useTranslations(lang);
 ---
 
 <div

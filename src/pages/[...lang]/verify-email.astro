@@ -28,7 +28,7 @@ if (Astro.request.method === "POST") {
   );
 
   if (error) {
-    errors.server = "Failed to resend verification email. Please try again.";
+    errors.server = t.auth.resendVerificationError;
   } else {
     return Astro.redirect(`/${lang}/verify-email?emailSent=true`);
   }

@@ -93,7 +93,8 @@
     "verifyEmail": "Verify your email",
     "verifyDescription": "We've sent a verification link to your email.",
     "verifyInstruction": "Click the link in the email to verify your account.",
-    "resendVerification": "Resend verification email"
+    "resendVerification": "Resend verification email",
+    "resendVerificationError": "Failed to resend verification email. Please try again."
   },
   "email": {
     "demo": "Email Demo",
@@ -129,6 +130,7 @@
   },
   "status": {
     "serverStatus": "Server Status",
+    "statusDescription": "Status of the application.",
     "version": "Version",
     "environment": "Environment",
     "database": "Database",

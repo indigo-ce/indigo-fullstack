@@ -93,7 +93,8 @@
     "verifyEmail": "メールを確認する",
     "verifyDescription": "確認リンクをメールに送信しました。",
     "verifyInstruction": "アカウントを確認するには、メール内のリンクをクリックしてください。",
-    "resendVerification": "確認メールを再送信"
+    "resendVerification": "確認メールを再送信",
+    "resendVerificationError": "確認メールの再送信に失敗しました。もう一度お試しください。"
   },
   "email": {
     "demo": "メールデモ",
@@ -129,6 +130,7 @@
   },
   "status": {
     "serverStatus": "サーバーステータス",
+    "statusDescription": "アプリケーションのステータスです。",
     "version": "バージョン",
     "environment": "環境",
     "database": "データベース",
