@@ -3,7 +3,7 @@
   import {authClient} from "@/lib/auth-client";
   import {translations} from "@/i18n/constants";
   import type {Locale} from "@/i18n/constants";
-  import {getUrlWithLocale} from "@/i18n/utils";
+  import {localizeUrl} from "@/i18n/utils";
 
   export let locale: Locale = "en";
 
@@ -23,7 +23,7 @@
       error = null;
       isDeleting = true;
       await authClient.deleteUser();
-      const signInUrl = getUrlWithLocale("/sign-in", locale);
+      const signInUrl = localizeUrl("/sign-in", locale);
       window.location.href = signInUrl;
     } catch (err) {
       error = err instanceof Error ? err.message : t.account.deleteFailed;

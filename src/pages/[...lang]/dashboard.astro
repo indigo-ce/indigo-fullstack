@@ -4,24 +4,24 @@ import Layout from "@/layouts/Layout.astro";
 import "@/styles.css";
 import {Button} from "@/components/primitives/button";
 import DeleteConfirmation from "@/components/DeleteConfirmation.svelte";
-import {useTranslations, getUrlWithLocale} from "@/i18n/utils";
-import {defaultLocale, locales} from "@/i18n/constants";
+import {
+  getLangFromParams,
+  useTranslationsFromParams,
+  localizeUrl
+} from "@/i18n/utils";
 
-// Get the locale from the URL or use the default
-let {lang} = Astro.params;
-lang = lang && locales.includes(lang as any) ? lang : defaultLocale;
-
-const t = useTranslations(lang as any);
+const lang = getLangFromParams(Astro.params);
+const t = useTranslationsFromParams(Astro.params);
 
 if (!Astro.locals.user?.id) {
-  const signInUrl = getUrlWithLocale("/sign-in", lang as any);
+  const signInUrl = localizeUrl("/sign-in", lang as any);
   return Astro.redirect(signInUrl);
 }
 
 const user = Astro.locals.user;
-const accountUrl = getUrlWithLocale("/account", lang as any);
-const emailDemoUrl = getUrlWithLocale("/email-demo", lang as any);
-const verifyEmailUrl = getUrlWithLocale("/verify-email", lang as any);
+const accountUrl = localizeUrl("/account", lang as any);
+const emailDemoUrl = localizeUrl("/email-demo", lang as any);
+const verifyEmailUrl = localizeUrl("/verify-email", lang as any);
 ---
 
 <Layout title={t.nav.dashboard}>

@@ -1,7 +1,4 @@
 {
-  "common": {
-    "version": "v1.0.0"
-  },
   "nav": {
     "home": "ホーム",
     "dashboard": "ダッシュボード",
@@ -53,7 +50,69 @@
     "deleting": "削除中...",
     "yes": "はい",
     "no": "いいえ",
-    "deleteFailed": "アカウントの削除に失敗しました"
+    "deleteFailed": "アカウントの削除に失敗しました",
+    "personalInfo": "個人情報",
+    "editProfile": "プロフィール情報を編集する",
+    "name": "名前",
+    "email": "メール",
+    "update": "更新",
+    "updating": "更新中...",
+    "profileUpdated": "プロフィールが正常に更新されました",
+    "updateFailed": "プロフィールの更新に失敗しました"
+  },
+  "auth": {
+    "signin": "ログイン",
+    "signup": "新規登録",
+    "forgotPassword": "パスワードをお忘れですか？",
+    "email": "メール",
+    "password": "パスワード",
+    "name": "名前",
+    "confirmPassword": "パスワードの確認",
+    "alreadyHaveAccount": "すでにアカウントをお持ちですか？",
+    "dontHaveAccount": "アカウントをお持ちでないですか？",
+    "signinHere": "こちらからログイン",
+    "signupHere": "こちらから登録",
+    "invalidCredentials": "メールアドレスまたはパスワードが無効です。もう一度お試しください。",
+    "emailNotVerified": "メールが確認されていません。メールを確認してください。",
+    "somethingWentWrong": "問題が発生しました。もう一度お試しください。",
+    "resetPassword": "パスワードのリセット",
+    "resetPasswordDescription": "メールアドレスを入力すると、パスワードをリセットするためのリンクが送信されます。",
+    "resetLink": "リセットリンク",
+    "backToSignin": "ログインに戻る",
+    "checkEmail": "メールを確認してください",
+    "resetEmailSent": "パスワードリセットリンクをメールに送信しました。",
+    "resetInstruction": "メール内のリンクをクリックしてパスワードをリセットしてください。",
+    "didntReceiveEmail": "メールが届きませんでしたか？",
+    "tryAgain": "もう一度試す",
+    "enterNewPassword": "新しいパスワードを入力してください",
+    "newPassword": "新しいパスワード",
+    "confirmNewPassword": "新しいパスワードの確認",
+    "resetSuccess": "パスワードのリセットが成功しました",
+    "youCanNow": "新しいパスワードで",
+    "signInWithYourNewPassword": "ログインできるようになりました",
+    "verifyEmail": "メールを確認する",
+    "verifyDescription": "確認リンクをメールに送信しました。",
+    "verifyInstruction": "アカウントを確認するには、メール内のリンクをクリックしてください。",
+    "resendVerification": "確認メールを再送信"
+  },
+  "email": {
+    "demo": "メールデモ",
+    "sendCustom": "カスタムメールを送信",
+    "sendWelcome": "ウェルカムメールを送信",
+    "sendReset": "パスワードリセットメールを送信",
+    "sendVerification": "確認メールを送信",
+    "sending": "送信中...",
+    "success": "メールが正常に送信されました",
+    "error": "メールの送信に失敗しました",
+    "demoDescription": "カスタムテストメールを送信",
+    "setupTitle": "セットアップ手順",
+    "setupDescription": "Resendをメール送信に使用するには、以下の環境変数を追加してください：",
+    "templateInfo": "メールテンプレートはReact Emailで構築されており、保守性とデザインの一貫性が向上しています。",
+    "devInfo": "開発環境では、実際のメッセージを送信せずにメールをテストするためにEtherealを使用します。",
+    "subject": "件名",
+    "emailTitle": "メールタイトル（任意）",
+    "message": "メッセージ",
+    "consoleInfo": "配信の詳細についてはコンソールログを確認してください。"
   },
   "error": {
     "500": {
@@ -67,5 +126,20 @@
       "message": "申し訳ありませんが、お探しのページが見つかりませんでした。前のページに戻るか、ホームページにお戻りください。"
     },
     "goHome": "ホームへ戻る"
+  },
+  "status": {
+    "serverStatus": "サーバーステータス",
+    "version": "バージョン",
+    "environment": "環境",
+    "database": "データベース",
+    "connectionStatus": "接続状態",
+    "connected": "接続済み",
+    "notConnected": "未接続",
+    "time": "サーバー時間",
+    "uptime": "稼働時間",
+    "days": "日",
+    "hours": "時間",
+    "minutes": "分",
+    "seconds": "秒"
   }
 }

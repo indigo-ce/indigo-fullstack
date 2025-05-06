@@ -1,14 +1,10 @@
 ---
-import {useTranslations} from "@/i18n/utils";
-import {defaultLocale, locales} from "@/i18n/constants";
+import {useTranslations, getLocaleFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
 
-// Get the locale from the URL or use the default
-let {lang} = Astro.params;
-lang = lang && locales.includes(lang as any) ? lang : defaultLocale;
-
-const t = useTranslations(lang as any);
+const lang = getLocaleFromParams(Astro.params);
+const t = useTranslations(lang);
 ---
 
 <Layout title={t.home.title}>
@@ -18,7 +14,7 @@ const t = useTranslations(lang as any);
         <span
           class="text-xs/7 font-mono text-indigo-600 dark:text-indigo-400 border border-indigo-600 dark:border-indigo-400 rounded-full px-2 py-1"
         >
-          {t.common.version}
+          v1.0.0
         </span>
         <p
           class="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 dark:text-white sm:text-5xl lg:text-balance"

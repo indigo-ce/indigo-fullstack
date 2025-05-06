@@ -1,5 +1,26 @@
 import {defaultLocale, locales, translations, type Locale} from "./constants";
 
+export function getLocaleFromParams(
+  params: Record<string, string | undefined>
+): Locale {
+  const lang = getLangFromParams(params);
+  return lang ? (lang as Locale) : defaultLocale;
+}
+
+export function getLangFromParams(
+  params: Record<string, string | undefined>
+): string | undefined {
+  const lang = params.lang;
+  return lang && locales.includes(lang as Locale) ? lang : undefined;
+}
+
+export function useTranslationsFromParams(
+  params: Record<string, string | undefined>
+) {
+  const locale = getLocaleFromParams(params);
+  return useTranslations(locale);
+}
+
 export function getLocaleFromUrl(url: string) {
   const segments = url.split("/").filter(Boolean);
   if (segments.length === 0) return defaultLocale;
@@ -13,7 +34,7 @@ export function useTranslations(locale?: Locale) {
   return translations[locale || defaultLocale];
 }
 
-export function getUrlWithLocale(path: string, locale: Locale) {
+export function localizeUrl(path: string, locale: Locale) {
   // Remove leading slash if present
   const cleanPath = path.startsWith("/") ? path.substring(1) : path;
 

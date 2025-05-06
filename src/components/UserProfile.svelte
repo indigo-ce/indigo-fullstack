@@ -13,7 +13,7 @@
     DropdownMenuTrigger
   } from "@/components/primitives/dropdown-menu";
   import LogOut from "@lucide/svelte/icons/log-out";
-  import {useTranslations, getUrlWithLocale} from "@/i18n/utils";
+  import {useTranslations, localizeUrl} from "@/i18n/utils";
   import type {Locale} from "@/i18n/constants";
 
   export let name: string;
@@ -21,7 +21,7 @@
   export let locale: Locale = "en";
 
   const t = useTranslations(locale);
-  const dashboardUrl = getUrlWithLocale("/dashboard", locale);
+  const dashboardUrl = localizeUrl("/dashboard", locale);
 
   // Create initials from name for the avatar fallback
   $: initials = name

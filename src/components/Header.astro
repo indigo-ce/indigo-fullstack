@@ -1,11 +1,7 @@
 ---
 import Logo from "@/assets/logo.svg";
 import UserProfile from "@/components/UserProfile.svelte";
-import {
-  getLocaleFromUrl,
-  useTranslations,
-  getUrlWithLocale
-} from "@/i18n/utils";
+import {getLocaleFromUrl, useTranslations, localizeUrl} from "@/i18n/utils";
 
 export interface Props {
   pathname: string;
@@ -17,10 +13,10 @@ const locale = getLocaleFromUrl(pathname);
 const t = useTranslations(locale);
 
 // Create locale-aware URLs
-const homeUrl = getUrlWithLocale("/", locale);
-const signInUrl = getUrlWithLocale("/sign-in", locale);
-const dashboardUrl = getUrlWithLocale("/dashboard", locale);
-const accountUrl = getUrlWithLocale("/account", locale);
+const homeUrl = localizeUrl("/", locale);
+const signInUrl = localizeUrl("/sign-in", locale);
+const dashboardUrl = localizeUrl("/dashboard", locale);
+const accountUrl = localizeUrl("/account", locale);
 ---
 
 <header class="border-b border-border">

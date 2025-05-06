@@ -1,17 +1,19 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
-import {useTranslations, getUrlWithLocale} from "@/i18n/utils";
-import {defaultLocale, locales} from "@/i18n/constants";
+import {
+  useTranslationsFromParams,
+  localizeUrl,
+  getLangFromParams
+} from "@/i18n/utils";
 
-// Get the locale from the URL or use the default
-let {lang} = Astro.params;
-lang = lang && locales.includes(lang as any) ? lang : defaultLocale;
+const t = useTranslationsFromParams(Astro.params);
 
-const t = useTranslations(lang as any);
 export const title = "404: Page Not Found";
 Astro.response.status = 404;
-const homeUrl = getUrlWithLocale("/", lang as any);
+
+const lang = getLangFromParams(Astro.params);
+const homeUrl = localizeUrl("/", lang as any);
 ---
 
 <Layout>

@@ -1,6 +1,4 @@
 ---
-if (Astro.locals.user?.id) return Astro.redirect("/dashboard");
-import {Debug} from "astro:components";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
@@ -8,6 +6,19 @@ import PasswordField from "@/components/PasswordField.svelte";
 import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
+import {
+  getLangFromParams,
+  useTranslationsFromParams,
+  localizeUrl
+} from "@/i18n/utils";
+
+const lang = getLangFromParams(Astro.params);
+const t = useTranslationsFromParams(Astro.params);
+
+if (Astro.locals.user?.id) {
+  const dashboardUrl = localizeUrl("/dashboard", lang as any);
+  return Astro.redirect(dashboardUrl);
+}
 
 const errors = {
   email: "",
@@ -42,10 +53,11 @@ if (Astro.request.method === "POST") {
     if (!response.ok) {
       throw new APIError("UNAUTHORIZED");
     } else {
+      const dashboardUrl = localizeUrl("/dashboard", lang as any);
       return new Response(null, {
         status: 302,
         headers: {
-          Location: "/dashboard",
+          Location: dashboardUrl,
           "Set-Cookie": response.headers.get("set-cookie") || ""
         }
       });
@@ -53,25 +65,28 @@ if (Astro.request.method === "POST") {
   } catch (error) {
     if (error instanceof APIError) {
       if (error.status === "UNAUTHORIZED") {
-        errors.server = "Invalid email or password. Please try again.";
+        errors.server = t.auth.invalidCredentials;
       } else if (error.status === "FORBIDDEN") {
-        errors.server = "Email not verified. Please verify your email.";
+        errors.server = t.auth.emailNotVerified;
       } else {
-        errors.server = "Something went wrong. Please try again.";
+        errors.server = t.auth.somethingWentWrong;
       }
     } else {
       throw error;
     }
   }
 }
+
+const signUpUrl = localizeUrl("/sign-up", lang as any);
+const forgotPasswordUrl = localizeUrl("/forgot-password", lang as any);
 ---
 
-<Layout>
+<Layout title={t.auth.signin}>
   <div
     class="flex flex-col items-center justify-center w-full py-12 min-h-[70dvh]"
   >
     <div class="w-full max-w-xs">
-      <h1 class="text-2xl font-bold mb-8 text-center">Sign In</h1>
+      <h1 class="text-2xl font-bold mb-8 text-center">{t.auth.signin}</h1>
 
       <form method="POST" class="space-y-4">
         <div
@@ -80,7 +95,7 @@ if (Astro.request.method === "POST") {
           <Mail class="h-5 w-5 text-muted-foreground mr-1" />
           <Input
             type="email"
-            placeholder="Email"
+            placeholder={t.auth.email}
             class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
             name="email"
             required
@@ -93,7 +108,12 @@ if (Astro.request.method === "POST") {
           }
         </div>
 
-        <PasswordField required client:load value={fields.password} />
+        <PasswordField
+          required
+          client:load
+          value={fields.password}
+          placeholder={t.auth.password}
+        />
 
         {
           errors.password && (
@@ -103,10 +123,11 @@ if (Astro.request.method === "POST") {
 
         <div class="flex justify-end">
           <a
-            href="/forgot-password"
+            href={forgotPasswordUrl}
             class="pt-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-            >Forgot password?</a
           >
+            {t.auth.forgotPassword}
+          </a>
         </div>
 
         {
@@ -115,11 +136,13 @@ if (Astro.request.method === "POST") {
           )
         }
 
-        <Button type="submit" class="w-full mt-4">Sign In</Button>
+        <Button type="submit" class="w-full mt-4">{t.auth.signin}</Button>
 
         <p class="text-center text-sm mt-4">
-          Don't have an account?{" "}
-          <a href="/sign-up" class="text-primary underline">Sign up here</a>
+          {t.auth.dontHaveAccount}{" "}
+          <a href={signUpUrl} class="text-primary underline">
+            {t.auth.signupHere}
+          </a>
         </p>
       </form>
     </div>
