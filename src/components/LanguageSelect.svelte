@@ -2,10 +2,10 @@
   import * as Select from "@/components/primitives/select";
   import {onMount} from "svelte";
   import Globe from "@lucide/svelte/icons/globe";
-  import {getLocaleFromUrl} from "@/i18n/utils";
-  import {locales} from "@/i18n/constants";
+  import {getLocaleFromUrl, setLanguageCookie} from "@/i18n/utils";
 
   let currentLang = "en";
+
   let languages = [
     {value: "en", label: "English", icon: Globe},
     {value: "ja", label: "日本語", icon: Globe}
@@ -19,6 +19,9 @@
 
   function handleLanguageChange(newLang: string) {
     if (newLang === currentLang) return;
+
+    // Save the language preference in a cookie
+    setLanguageCookie(newLang as any);
 
     const pathname = window.location.pathname;
     const segments = pathname.split("/").filter(Boolean);
@@ -55,7 +58,7 @@
     {#each languages as langOption (langOption.value)}
       <Select.Item value={langOption.value}>
         <div class="flex items-center gap-2">
-          <svelte:component this={langOption.icon} class="h-4 w-4" />
+          <Globe class="h-4 w-4" />
           <span>{langOption.label}</span>
         </div>
       </Select.Item>

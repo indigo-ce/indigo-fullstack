@@ -33,3 +33,76 @@ export function getUrlWithLocale(path: string, locale: Locale) {
   // Add locale prefix
   return `/${locale}/${cleanPath}`;
 }
+
+// Sets the language preference cookie
+export function setLanguageCookie(locale: Locale) {
+  document.cookie = `preferred_lang=${locale};path=/;max-age=31536000;SameSite=Lax`;
+}
+
+// Gets the language preference from cookies
+export function getLanguageCookieValue(): Locale | null {
+  const match = document.cookie.match(/(^|;)\s*preferred_lang=([^;]+)/);
+  const cookieValue = match ? match[2] : null;
+  return cookieValue && locales.includes(cookieValue as Locale)
+    ? (cookieValue as Locale)
+    : null;
+}
+
+// Get browser language that matches our supported locales
+export function getBrowserLanguage(): Locale | null {
+  if (typeof navigator === "undefined") return null;
+
+  // Try to match navigator.languages array first (more specific)
+  if (navigator.languages && navigator.languages.length) {
+    for (const lang of navigator.languages) {
+      const browserLang = lang.split("-")[0]; // Get base language code (e.g., 'en' from 'en-US')
+      if (locales.includes(browserLang as Locale)) {
+        return browserLang as Locale;
+      }
+    }
+  }
+
+  // Fall back to navigator.language
+  if (navigator.language) {
+    const browserLang = navigator.language.split("-")[0];
+    if (locales.includes(browserLang as Locale)) {
+      return browserLang as Locale;
+    }
+  }
+
+  return null;
+}
+
+// Get the preferred language using the fallback chain
+export function getPreferredLanguage(): Locale {
+  // Check cookie first
+  const cookieLang = getLanguageCookieValue();
+  if (cookieLang) return cookieLang;
+
+  // Then check browser language
+  const browserLang = getBrowserLanguage();
+  if (browserLang) return browserLang;
+
+  // Fall back to default
+  return defaultLocale;
+}
+
+// Server-side function to get language from request headers
+export function getLanguageFromHeaders(headers: Headers): Locale | null {
+  const acceptLanguage = headers.get("accept-language");
+  if (!acceptLanguage) return null;
+
+  // Parse Accept-Language header
+  const languages = acceptLanguage
+    .split(",")
+    .map((lang) => lang.split(";")[0].trim().split("-")[0]); // Get base language codes
+
+  // Find first matching language
+  for (const lang of languages) {
+    if (locales.includes(lang as Locale)) {
+      return lang as Locale;
+    }
+  }
+
+  return null;
+}
