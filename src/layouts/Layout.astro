@@ -2,24 +2,29 @@
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import SetTheme from "@/components/SetTheme.astro";
-import {getLangFromUrl} from "@/i18n/utils";
+import {getLocaleFromUrl} from "@/i18n/utils";
 import "@/styles.css";
 
-const lang = getLangFromUrl(Astro.url);
+export interface Props {
+  title?: string;
+}
+
+const {title = "Astro Starter"} = Astro.props;
+const locale = getLocaleFromUrl(Astro.url.pathname);
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={locale}>
   <head>
     <SetTheme />
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <title>Astro Starter</title>
+    <title>{title}</title>
   </head>
   <body>
-    <Header />
+    <Header pathname={Astro.url.pathname} />
     <main class="min-h-[80dvh] bg-white dark:bg-gray-900">
       <slot />
     </main>

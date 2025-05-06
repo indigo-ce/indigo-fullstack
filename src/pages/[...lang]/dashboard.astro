@@ -1,0 +1,57 @@
+---
+import Welcome from "@/components/Welcome.astro";
+import Layout from "@/layouts/Layout.astro";
+import "@/styles.css";
+import {Button} from "@/components/primitives/button";
+import DeleteConfirmation from "@/components/DeleteConfirmation.svelte";
+import {useTranslations, getUrlWithLocale} from "@/i18n/utils";
+import {defaultLocale, locales} from "@/i18n/constants";
+
+// Get the locale from the URL or use the default
+let {lang} = Astro.params;
+lang = lang && locales.includes(lang as any) ? lang : defaultLocale;
+
+const t = useTranslations(lang as any);
+
+if (!Astro.locals.user?.id) {
+  const signInUrl = getUrlWithLocale("/sign-in", lang as any);
+  return Astro.redirect(signInUrl);
+}
+
+const user = Astro.locals.user;
+const accountUrl = getUrlWithLocale("/account", lang as any);
+const emailDemoUrl = getUrlWithLocale("/email-demo", lang as any);
+const verifyEmailUrl = getUrlWithLocale("/verify-email", lang as any);
+---
+
+<Layout title={t.nav.dashboard}>
+  <div class="dashboard p-6 max-w-4xl mx-auto pt-20">
+    <h1 class="text-2xl font-bold text-foreground mb-4">
+      {t.nav.dashboard}
+    </h1>
+
+    {
+      !user.emailVerified && (
+        <div class="bg-orange-100 dark:bg-yellow-900 px-2 py-2 rounded-lg mb-4 flex justify-between items-center">
+          <p class="text-sm ml-2 text-orange-900 dark:text-yellow-100">
+            Email <strong>{user.email}</strong> is not verified
+          </p>
+          <Button href={verifyEmailUrl} variant="outline" size="sm">
+            No email received?
+          </Button>
+        </div>
+      )
+    }
+
+    <Welcome user={user} />
+    <div class="flex flex-wrap gap-4 items-center">
+      <Button href={accountUrl} variant="outline" size="sm">
+        {t.nav.account}
+      </Button>
+      <Button href={emailDemoUrl} variant="outline" size="sm">
+        Email Demo →
+      </Button>
+      <DeleteConfirmation client:load />
+    </div>
+  </div>
+</Layout>

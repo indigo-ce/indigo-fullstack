@@ -1,11 +1,26 @@
 ---
 import Logo from "@/assets/logo.svg";
 import UserProfile from "@/components/UserProfile.svelte";
-import {getLangFromUrl, useTranslations} from "@/i18n/utils";
+import {
+  getLocaleFromUrl,
+  useTranslations,
+  getUrlWithLocale
+} from "@/i18n/utils";
 
+export interface Props {
+  pathname: string;
+}
+
+const {pathname} = Astro.props;
 const user = Astro.locals.user;
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
+const locale = getLocaleFromUrl(pathname);
+const t = useTranslations(locale);
+
+// Create locale-aware URLs
+const homeUrl = getUrlWithLocale("/", locale);
+const signInUrl = getUrlWithLocale("/sign-in", locale);
+const dashboardUrl = getUrlWithLocale("/dashboard", locale);
+const accountUrl = getUrlWithLocale("/account", locale);
 ---
 
 <header class="border-b border-border">
@@ -13,25 +28,35 @@ const t = useTranslations(lang);
     class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
     aria-label="Global"
   >
-    <a href="/" class="size-8">
-      <span class="sr-only">Astro Starter Kit</span>
-      <Logo />
-    </a>
+    <div class="flex lg:flex-1">
+      <a href={homeUrl} class="-m-1.5 p-1.5">
+        <span class="sr-only">Astro Starter</span>
+        <img
+          class="h-8 w-auto dark:hidden"
+          src={Logo.src}
+          alt="Astro Starter Logo"
+        />
+        <img
+          class="h-8 w-auto hidden dark:block"
+          src={Logo.src}
+          alt="Astro Starter Logo"
+        />
+      </a>
+    </div>
     <div class="flex lg:hidden">
       <button
         type="button"
-        id="menu-open"
-        class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-300"
+        class="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700 dark:text-gray-200"
+        id="mobile-menu-toggle"
       >
         <span class="sr-only">Open main menu</span>
         <svg
-          class="size-6"
+          class="h-6 w-6"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
           aria-hidden="true"
-          data-slot="icon"
         >
           <path
             stroke-linecap="round"
@@ -46,141 +71,146 @@ const t = useTranslations(lang);
           <UserProfile
             name={user.name}
             imageUrl={user.image}
-            lang={lang}
+            locale={locale}
             client:load
           />
         ) : (
           <a
-            href="/sign-in"
+            href={signInUrl}
             class="text-sm/6 font-semibold text-gray-900 dark:text-white hover:text-gray-600 dark:hover:text-gray-300"
           >
-            {t("nav.signin")} <span aria-hidden="true">&rarr;</span>
+            {t.nav.signin} <span aria-hidden="true">&rarr;</span>
           </a>
         )
       }
     </div>
   </nav>
+
   <!-- Mobile menu, show/hide based on menu open state. -->
   <div
-    id="mobile-menu"
     class="lg:hidden hidden"
     role="dialog"
     aria-modal="true"
+    id="mobile-menu"
   >
     <!-- Background backdrop, show/hide based on slide-over state. -->
-    <div class="fixed inset-0 z-10 bg-gray-900/50"></div>
+    <div class="fixed inset-0 z-10"></div>
     <div
-      class="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-white/10"
+      class="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:sm:ring-gray-800"
     >
-      <div class="flex justify-end">
+      <div class="flex items-center justify-between">
+        <a href={homeUrl} class="-m-1.5 p-1.5">
+          <span class="sr-only">Your Company</span>
+          <img
+            class="h-8 w-auto dark:hidden"
+            src={Logo.src}
+            alt="Astro Starter Logo"
+          />
+          <img
+            class="h-8 w-auto hidden dark:block"
+            src={Logo.src}
+            alt="Astro Starter Logo"
+          />
+        </a>
         <button
           type="button"
-          id="menu-close"
           class="-m-2.5 rounded-md p-2.5 text-gray-700 dark:text-gray-300"
+          id="mobile-menu-close"
         >
           <span class="sr-only">Close menu</span>
           <svg
-            class="size-6"
+            class="h-6 w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke-width="1.5"
             stroke="currentColor"
             aria-hidden="true"
-            data-slot="icon"
           >
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
-              d="M6 18 18 6M6 6l12 12"></path>
+              d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
       <div class="mt-6 flow-root">
-        <div class="-my-6 divide-y divide-gray-500/10 dark:divide-white/10">
-          {
-            user ? (
-              <>
-                <div class="space-y-2 py-2 border-b border-border">
-                  <a
-                    href="/dashboard"
-                    class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
-                  >
-                    {t("nav.dashboard")}
-                  </a>
-                </div>
-                <div class="py-2 border-b border-border">
+        <div class="-my-6 divide-y divide-gray-500/10 dark:divide-gray-700">
+          <div class="space-y-2 py-6">
+            {
+              user ? (
+                <>
+                  <div class="py-2 border-b border-border">
+                    <a
+                      href={dashboardUrl}
+                      class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      {t.nav.dashboard}
+                    </a>
+                  </div>
+                  <div class="py-2 border-b border-border">
+                    <a
+                      href={accountUrl}
+                      class="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      {t.nav.account}
+                    </a>
+                  </div>
+
                   <button
-                    type="button"
-                    id="mobile-sign-out"
-                    class="-mx-3 flex w-full items-center rounded-lg px-3 py-2.5 text-base/7 font-semibold text-destructive hover:bg-gray-50 dark:hover:bg-gray-800"
+                    class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-red-500 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-gray-800 w-full text-left"
+                    onclick="document.querySelector('form[action=\'/api/auth/sign-out\']').submit()"
                   >
-                    <svg class="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                      class="w-5 h-5 inline-block mr-1"
+                    >
                       <path
-                        d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-                        stroke="currentColor"
-                        stroke-width="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
-                      />
-                      <path
-                        d="M16 17l5-5-5-5"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                      <path
-                        d="M21 12H9"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"
                         stroke-linejoin="round"
                       />
                     </svg>
-                    {t("nav.signout")}
+                    {t.nav.signout}
                   </button>
+                </>
+              ) : (
+                <div>
+                  <a
+                    href={signInUrl}
+                    class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
+                  >
+                    {t.nav.signin}
+                  </a>
                 </div>
-              </>
-            ) : (
-              <div class="py-2 border-b border-border">
-                <a
-                  href="/sign-in"
-                  class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-800"
-                >
-                  {t("nav.signin")}
-                </a>
-              </div>
-            )
-          }
+              )
+            }
+          </div>
         </div>
       </div>
     </div>
   </div>
 </header>
 
+<form method="post" action="/api/auth/sign-out" class="hidden"></form>
+
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const mobileMenu = document.getElementById("mobile-menu");
-    const menuOpen = document.getElementById("menu-open");
-    const menuClose = document.getElementById("menu-close");
-    const mobileSignOut = document.getElementById("mobile-sign-out");
+  // Initialize mobile menu toggle
+  const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+  const mobileMenuClose = document.getElementById("mobile-menu-close");
+  const mobileMenu = document.getElementById("mobile-menu");
 
-    menuOpen?.addEventListener("click", () => {
-      mobileMenu?.classList.remove("hidden");
+  if (mobileMenuToggle && mobileMenuClose && mobileMenu) {
+    mobileMenuToggle.addEventListener("click", () => {
+      mobileMenu.classList.remove("hidden");
     });
 
-    menuClose?.addEventListener("click", () => {
-      mobileMenu?.classList.add("hidden");
+    mobileMenuClose.addEventListener("click", () => {
+      mobileMenu.classList.add("hidden");
     });
-
-    mobileSignOut?.addEventListener("click", async () => {
-      try {
-        const {authClient} = await import("@/lib/auth-client");
-        await authClient.signOut();
-        window.location.href = "/";
-      } catch (error) {
-        console.error("Mobile sign out failed:", error);
-      }
-    });
-  });
+  }
 </script>

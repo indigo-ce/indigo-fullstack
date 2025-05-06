@@ -1,0 +1,43 @@
+{
+  "common": {
+    "version": "v1.0.0"
+  },
+  "nav": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "account": "アカウント",
+    "signin": "ログイン",
+    "signup": "新規登録",
+    "signout": "ログアウト"
+  },
+  "home": {
+    "title": "Astro スターター",
+    "description": "Astro、Svelte、TailwindCSS、Better Auth、Drizzle ORMで構築されたスターターテンプレート。認証、データベース統合、モダンUIですぐに始められます。",
+    "feature1": {
+      "title": "静的 + SSR + Svelte",
+      "description": "静的またはサーバーサイドレンダリングページをクライアントサイドHydrationで構築できます。"
+    },
+    "feature2": {
+      "title": "TailwindCSS + Shadcn UI",
+      "description": "モダンでレスポンシブ、アクセシブルなUIコンポーネントを素早く構築できます。"
+    },
+    "feature3": {
+      "title": "認証",
+      "description": "Better Authによる完全な認証と認可フロー。"
+    },
+    "feature4": {
+      "title": "データベース統合",
+      "description": "型安全なデータベース操作のためのDrizzle ORMを使用したSQLiteデータベース。"
+    }
+  },
+  "language": {
+    "label": "言語",
+    "english": "英語",
+    "japanese": "日本語"
+  },
+  "profile": {
+    "greeting": "こんにちは",
+    "dashboard": "ダッシュボード",
+    "logout": "ログアウト"
+  }
+}

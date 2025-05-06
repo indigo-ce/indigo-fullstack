@@ -24,7 +24,7 @@ A feature-rich web application starter template built with Astro, Svelte, Tailwi
 - **Email Functionality** with Resend API and templating using React Email
 - **Development Tools**: Prettier for code formatting
 - **API Layer**: Built with Hono for efficient request handling
-- **Internationalization**: Built with Astro's i18n routing and Svelte components for language selection and content translation.
+- **Internationalization**: Type-safe i18n with dynamic routes to avoid page duplication.
 
 ## Getting Started
 
