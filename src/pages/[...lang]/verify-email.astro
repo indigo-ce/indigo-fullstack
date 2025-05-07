@@ -1,17 +1,23 @@
 ---
-import {getLangFromParams, useTranslationsFromParams} from "@/i18n/utils";
+import {
+  getLocaleFromParams,
+  useTranslationsFromParams,
+  localizeUrl
+} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {actions} from "astro:actions";
 
-const lang = getLangFromParams(Astro.params);
+const locale = getLocaleFromParams(Astro.params);
 const t = useTranslationsFromParams(Astro.params);
 
-if (!Astro.locals.user?.id) return Astro.redirect(`/${lang}/sign-in`);
+if (!Astro.locals.user?.id)
+  return Astro.redirect(localizeUrl("/sign-in", locale));
 
 const user = Astro.locals.user;
 
-if (user.emailVerified) return Astro.redirect(`/${lang}/dashboard`);
+if (user.emailVerified)
+  return Astro.redirect(localizeUrl("/dashboard", locale));
 
 const emailSent = Astro.url.searchParams.get("emailSent");
 
@@ -30,7 +36,12 @@ if (Astro.request.method === "POST") {
   if (error) {
     errors.server = t.auth.resendVerificationError;
   } else {
-    return Astro.redirect(`/${lang}/verify-email?emailSent=true`);
+    return Astro.redirect(
+      localizeUrl(
+        "/verify-email?emailSent=true",
+        getLocaleFromParams(Astro.params)
+      )
+    );
   }
 }
 ---

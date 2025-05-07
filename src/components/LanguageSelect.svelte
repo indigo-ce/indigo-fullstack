@@ -21,7 +21,7 @@
     if (newLang === currentLang) return;
 
     // Save the language preference in a cookie
-    setLanguageCookie(newLang as any);
+    setLanguageCookie(newLang as import("@/i18n/constants").Locale);
 
     const pathname = window.location.pathname;
     const segments = pathname.split("/").filter(Boolean);
