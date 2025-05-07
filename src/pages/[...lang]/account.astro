@@ -1,5 +1,5 @@
 ---
-import {getLangFromParams} from "@/i18n/utils";
+import {getLocaleFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {Input} from "@/components/primitives/input";
@@ -7,14 +7,15 @@ import PasswordField from "@/components/PasswordField.svelte";
 import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import type {APIError} from "better-auth/api";
-import {useTranslationsFromParams} from "@/i18n/utils";
+import {useTranslationsFromParams, localizeUrl} from "@/i18n/utils";
 
 const t = useTranslationsFromParams(Astro.params);
-const lang = getLangFromParams(Astro.params);
+const locale = getLocaleFromParams(Astro.params);
 
-if (!Astro.locals.user?.id) return Astro.redirect(`/${lang}/sign-in`);
+if (!Astro.locals.user?.id)
+  return Astro.redirect(localizeUrl("/sign-in", locale));
 if (!Astro.locals.user.emailVerified)
-  return Astro.redirect(`/${lang}/verify-email`);
+  return Astro.redirect(localizeUrl("/verify-email", locale));
 
 const errors = {
   name: "",
@@ -44,7 +45,9 @@ if (Astro.request.method === "POST") {
         body: {name},
         headers: Astro.request.headers
       });
-      return Astro.redirect(`/${lang}/account?success=profile-updated`);
+      return Astro.redirect(
+        localizeUrl("/account?success=profile-updated", locale)
+      );
     } catch (error) {
       console.error(error);
       errors.name = t.account.updateFailed;
@@ -59,7 +62,7 @@ if (Astro.request.method === "POST") {
       const {status} = await auth.api.changeEmail({
         body: {
           newEmail: email,
-          callbackURL: `/${lang}/account`
+          callbackURL: localizeUrl("/account", locale)
         },
         headers: Astro.request.headers
       });
@@ -68,7 +71,9 @@ if (Astro.request.method === "POST") {
         errors.email = t.account.updateFailed;
       }
 
-      return Astro.redirect(`/${lang}/account?success=email-verification-sent`);
+      return Astro.redirect(
+        localizeUrl("/account?success=email-verification-sent", locale)
+      );
     } catch (error) {
       console.error(error);
       errors.email = t.account.updateFailed;
@@ -91,7 +96,9 @@ if (Astro.request.method === "POST") {
         },
         headers: Astro.request.headers
       });
-      return Astro.redirect(`/${lang}/account?success=password-changed`);
+      return Astro.redirect(
+        localizeUrl("/account?success=password-changed", locale)
+      );
     } catch (error) {
       const apiError = error as APIError;
       if (apiError.body?.code === "PASSWORD_TOO_SHORT") {

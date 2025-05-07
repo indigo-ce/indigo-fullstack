@@ -31,18 +31,16 @@
     .toUpperCase()
     .substring(0, 2);
 
-  async function handleSignOut() {
+  const handleSignOut = async () => {
     try {
-      const form = document.querySelector(
-        'form[action="/api/auth/sign-out"]'
-      ) as HTMLFormElement;
-      if (form) {
-        form.submit();
-      }
+      const {authClient} = await import("@/lib/auth-client");
+      await authClient.signOut();
+      const homeUrl = localizeUrl("/", locale);
+      window.location.href = homeUrl;
     } catch (error) {
-      console.error("Sign-out error:", error);
+      console.error("Failed to sign out:", error);
     }
-  }
+  };
 </script>
 
 <DropdownMenu>

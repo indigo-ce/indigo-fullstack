@@ -5,23 +5,22 @@ import "@/styles.css";
 import {Button} from "@/components/primitives/button";
 import DeleteConfirmation from "@/components/DeleteConfirmation.svelte";
 import {
-  getLangFromParams,
+  getLocaleFromParams,
   useTranslationsFromParams,
   localizeUrl
 } from "@/i18n/utils";
 
-const lang = getLangFromParams(Astro.params);
+const locale = getLocaleFromParams(Astro.params);
 const t = useTranslationsFromParams(Astro.params);
 
 if (!Astro.locals.user?.id) {
-  const signInUrl = localizeUrl("/sign-in", lang as any);
-  return Astro.redirect(signInUrl);
+  return Astro.redirect(localizeUrl("/sign-in", locale));
 }
 
 const user = Astro.locals.user;
-const accountUrl = localizeUrl("/account", lang as any);
-const emailDemoUrl = localizeUrl("/email-demo", lang as any);
-const verifyEmailUrl = localizeUrl("/verify-email", lang as any);
+const accountUrl = localizeUrl("/account", locale);
+const emailDemoUrl = localizeUrl("/email-demo", locale);
+const verifyEmailUrl = localizeUrl("/verify-email", locale);
 ---
 
 <Layout title={t.nav.dashboard}>
@@ -34,8 +33,8 @@ const verifyEmailUrl = localizeUrl("/verify-email", lang as any);
       !user.emailVerified && (
         <div class="bg-orange-100 dark:bg-yellow-900 px-2 py-2 rounded-lg mb-4 flex justify-between items-center">
           <p class="text-sm ml-2 text-orange-900 dark:text-yellow-100">
-            {lang === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
-            {lang === "ja" ? "は確認されていません" : "is not verified"}
+            {locale === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
+            {locale === "ja" ? "は確認されていません" : "is not verified"}
           </p>
           <Button href={verifyEmailUrl} variant="outline" size="sm">
             {t.dashboard.noEmailReceived}
@@ -44,7 +43,7 @@ const verifyEmailUrl = localizeUrl("/verify-email", lang as any);
       )
     }
 
-    <Welcome user={user} lang={lang} />
+    <Welcome user={user} locale={locale} />
     <div class="flex flex-wrap gap-4 items-center">
       <Button href={accountUrl} variant="outline" size="sm">
         {t.nav.account}
@@ -52,7 +51,7 @@ const verifyEmailUrl = localizeUrl("/verify-email", lang as any);
       <Button href={emailDemoUrl} variant="outline" size="sm">
         {t.dashboard.emailDemo}
       </Button>
-      <DeleteConfirmation client:load locale={lang} />
+      <DeleteConfirmation client:load locale={locale} />
     </div>
   </div>
 </Layout>

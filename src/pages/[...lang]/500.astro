@@ -4,7 +4,7 @@ import {Button} from "@/components/primitives/button";
 import {
   useTranslationsFromParams,
   localizeUrl,
-  getLangFromParams
+  getLocaleFromParams
 } from "@/i18n/utils";
 
 const t = useTranslationsFromParams(Astro.params);
@@ -20,8 +20,8 @@ console.error("Error:", error);
 
 Astro.response.status = 500;
 
-const lang = getLangFromParams(Astro.params);
-const homeUrl = localizeUrl("/", lang as any);
+const locale = getLocaleFromParams(Astro.params);
+const homeUrl = localizeUrl("/", locale);
 ---
 
 <Layout>

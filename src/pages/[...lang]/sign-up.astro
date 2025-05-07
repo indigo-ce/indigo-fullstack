@@ -7,12 +7,17 @@ import Mail from "@/assets/mail.svg";
 import User from "@/assets/user.svg";
 import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
-import {getLangFromParams, useTranslationsFromParams} from "@/i18n/utils";
+import {
+  getLocaleFromParams,
+  localizeUrl,
+  useTranslationsFromParams
+} from "@/i18n/utils";
 
-const lang = getLangFromParams(Astro.params);
+const locale = getLocaleFromParams(Astro.params);
 const t = useTranslationsFromParams(Astro.params);
 
-if (Astro.locals.user?.id) return Astro.redirect(`/${lang}/dashboard`);
+if (Astro.locals.user?.id)
+  return Astro.redirect(localizeUrl("/dashboard", locale));
 
 const errors = {
   name: "",
@@ -61,7 +66,7 @@ if (Astro.request.method === "POST") {
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `/${lang}/dashboard`,
+          Location: localizeUrl("/dashboard", locale),
           "Set-Cookie": response.headers.get("set-cookie") || ""
         }
       });
@@ -86,7 +91,7 @@ if (Astro.request.method === "POST") {
   }
 }
 
-const signInUrl = `/${lang}/sign-in`;
+const signInUrl = localizeUrl("/sign-in", locale);
 ---
 
 <Layout title={t.auth.signup}>

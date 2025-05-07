@@ -3,15 +3,10 @@ import {defaultLocale, locales, translations, type Locale} from "./constants";
 export function getLocaleFromParams(
   params: Record<string, string | undefined>
 ): Locale {
-  const lang = getLangFromParams(params);
-  return lang ? (lang as Locale) : defaultLocale;
-}
-
-export function getLangFromParams(
-  params: Record<string, string | undefined>
-): string | undefined {
   const lang = params.lang;
-  return lang && locales.includes(lang as Locale) ? lang : undefined;
+  return lang && locales.includes(lang as Locale)
+    ? (lang as Locale)
+    : defaultLocale;
 }
 
 export function useTranslationsFromParams(
@@ -34,25 +29,31 @@ export function useTranslations(locale?: Locale) {
   return translations[locale || defaultLocale];
 }
 
-export function localizeUrl(path: string, locale: Locale) {
+export function localizeUrl(path: string, locale?: Locale): string {
+  // Default to the default locale if none is provided
+  const safeLocale =
+    locale && locales.includes(locale as Locale)
+      ? (locale as Locale)
+      : defaultLocale;
+
   // Remove leading slash if present
   const cleanPath = path.startsWith("/") ? path.substring(1) : path;
 
   if (!cleanPath) {
     // If it's just the root path
-    return `/${locale}`;
+    return `/${safeLocale}`;
   }
 
   // Check if path already has a locale prefix
   const segments = cleanPath.split("/");
-  if (locales.includes(segments[0] as any)) {
+  if (locales.includes(segments[0] as Locale)) {
     // Replace existing locale with new one
-    segments[0] = locale;
+    segments[0] = safeLocale;
     return `/${segments.join("/")}`;
   }
 
   // Add locale prefix
-  return `/${locale}/${cleanPath}`;
+  return `/${safeLocale}/${cleanPath}`;
 }
 
 // Sets the language preference cookie

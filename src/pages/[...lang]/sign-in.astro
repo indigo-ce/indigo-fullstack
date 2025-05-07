@@ -7,17 +7,16 @@ import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
 import {
-  getLangFromParams,
+  getLocaleFromParams,
   useTranslationsFromParams,
   localizeUrl
 } from "@/i18n/utils";
 
-const lang = getLangFromParams(Astro.params);
+const locale = getLocaleFromParams(Astro.params);
 const t = useTranslationsFromParams(Astro.params);
 
 if (Astro.locals.user?.id) {
-  const dashboardUrl = localizeUrl("/dashboard", lang as any);
-  return Astro.redirect(dashboardUrl);
+  return Astro.redirect(localizeUrl("/dashboard", locale));
 }
 
 const errors = {
@@ -53,11 +52,10 @@ if (Astro.request.method === "POST") {
     if (!response.ok) {
       throw new APIError("UNAUTHORIZED");
     } else {
-      const dashboardUrl = localizeUrl("/dashboard", lang as any);
       return new Response(null, {
         status: 302,
         headers: {
-          Location: dashboardUrl,
+          Location: localizeUrl("/dashboard", locale),
           "Set-Cookie": response.headers.get("set-cookie") || ""
         }
       });
@@ -77,8 +75,8 @@ if (Astro.request.method === "POST") {
   }
 }
 
-const signUpUrl = localizeUrl("/sign-up", lang as any);
-const forgotPasswordUrl = localizeUrl("/forgot-password", lang as any);
+const signUpUrl = localizeUrl("/sign-up", locale);
+const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
 ---
 
 <Layout title={t.auth.signin}>

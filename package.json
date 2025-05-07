@@ -3,7 +3,7 @@
   "type": "module",
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro check --minimumSeverity warning && astro dev",
     "build": "pnpm cf-types && astro build",
     "preview": "astro build && wrangler dev",
     "astro": "astro",
@@ -21,6 +21,7 @@
     "d1:studio:local": "drizzle-kit studio"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.4",
     "@astrojs/cloudflare": "^12.5.2",
     "@astrojs/node": "^9.2.1",
     "@astrojs/react": "^4.2.7",

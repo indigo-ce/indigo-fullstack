@@ -3,11 +3,11 @@ import {useTranslations} from "@/i18n/utils";
 
 export interface Props {
   user: import("better-auth").User;
-  lang?: import("@/i18n/constants").Locale;
+  locale?: import("@/i18n/constants").Locale;
 }
 
-const {user, lang = "en"} = Astro.props;
-const t = useTranslations(lang);
+const {user, locale = "en"} = Astro.props;
+const t = useTranslations(locale);
 ---
 
 <div
@@ -19,6 +19,6 @@ const t = useTranslations(lang);
   </h2>
   <p class="text-sm text-muted-foreground m-0">
     {t.dashboard.welcomeBack}
-    <strong>{user.email}</strong>{lang === "ja" ? " です。" : "."}
+    <strong>{user.email}</strong>
   </p>
 </div>
