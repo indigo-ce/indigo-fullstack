@@ -8,19 +8,16 @@ import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {actions} from "astro:actions";
 
+const locale = getLocaleFromParams(Astro.params);
 const t = useTranslationsFromParams(Astro.params);
 
 if (!Astro.locals.user?.id)
-  return Astro.redirect(
-    localizeUrl("/sign-in", getLocaleFromParams(Astro.params))
-  );
+  return Astro.redirect(localizeUrl("/sign-in", locale));
 
 const user = Astro.locals.user;
 
 if (user.emailVerified)
-  return Astro.redirect(
-    localizeUrl("/dashboard", getLocaleFromParams(Astro.params))
-  );
+  return Astro.redirect(localizeUrl("/dashboard", locale));
 
 const emailSent = Astro.url.searchParams.get("emailSent");
 
