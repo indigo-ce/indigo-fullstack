@@ -383,6 +383,14 @@ To deploy to Cloudflare Workers with static assets:
 > Attempts to deploy end up in a `[ERROR] Error: No such module "node:os".` error.
 > This could be temporary, but as of 2025-05-04, it is not supported.
 
+## 🎨 Theming
+
+This project uses TailwindCSS for styling.
+The shadcn theme is defined in `src/styles.css`.
+
+You can generate a new theme using your favorite tool ([example](https://themecn.dev/))
+then copy-paste the variables.
+
 ## 📚 Learn More
 
 - [Astro Documentation](https://docs.astro.build)
