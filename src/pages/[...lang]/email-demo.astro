@@ -6,106 +6,106 @@ const t = useTranslationsFromParams(Astro.params);
 ---
 
 <Layout title={`${t.email.demo} | Astro Starter`}>
-  <div class="max-w-4xl mx-auto px-6 py-8 pt-12">
-    <h1 class="text-2xl font-bold mb-8 text-foreground">{t.email.demo}</h1>
+  <div class="mx-auto max-w-4xl px-6 py-8 pt-12">
+    <h1 class="text-foreground mb-8 text-2xl font-bold">{t.email.demo}</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div class="bg-card p-6 rounded-lg shadow-sm border border-border">
+    <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
+      <div class="bg-card border-border rounded-lg border p-6 shadow-sm">
         <form id="send-custom-email" class="space-y-4">
-          <h2 class="text-xl font-semibold mb-4">{t.email.sendCustom}</h2>
+          <h2 class="mb-4 text-xl font-semibold">{t.email.sendCustom}</h2>
           <div>
             <label
               for="send-email__recipient"
-              class="block text-sm font-medium mb-1">{t.auth.email}</label
+              class="mb-1 block text-sm font-medium">{t.auth.email}</label
             >
             <input
               type="email"
               name="recipient"
               id="send-email__recipient"
-              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               required
             />
           </div>
           <div>
             <label
               for="send-email__subject"
-              class="block text-sm font-medium mb-1">{t.email.subject}</label
+              class="mb-1 block text-sm font-medium">{t.email.subject}</label
             >
             <input
               type="text"
               name="subject"
               id="send-email__subject"
-              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               required
             />
           </div>
           <div>
             <label
               for="send-email__title"
-              class="block text-sm font-medium mb-1">{t.email.emailTitle}</label
+              class="mb-1 block text-sm font-medium">{t.email.emailTitle}</label
             >
             <input
               type="text"
               name="title"
               id="send-email__title"
-              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               placeholder="Astro Starter"
             />
           </div>
           <div>
             <label
               for="send-email__message"
-              class="block text-sm font-medium mb-1">{t.email.message}</label
+              class="mb-1 block text-sm font-medium">{t.email.message}</label
             >
             <textarea
               name="message"
               id="send-email__message"
               rows="5"
-              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               required></textarea>
           </div>
           <button
             type="submit"
-            class="inline-flex items-center justify-center rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
           >
             {t.email.sendCustom}
           </button>
         </form>
       </div>
 
-      <div class="bg-card p-6 rounded-lg shadow-sm border border-border">
+      <div class="bg-card border-border rounded-lg border p-6 shadow-sm">
         <form id="send-welcome-email" class="space-y-4">
-          <h2 class="text-xl font-semibold mb-4">{t.email.sendWelcome}</h2>
+          <h2 class="mb-4 text-xl font-semibold">{t.email.sendWelcome}</h2>
           <div>
             <label
               for="welcome-email__recipient"
-              class="block text-sm font-medium mb-1">{t.auth.email}</label
+              class="mb-1 block text-sm font-medium">{t.auth.email}</label
             >
             <input
               type="email"
               name="recipient"
               id="welcome-email__recipient"
-              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               required
             />
           </div>
           <div>
             <label
               for="welcome-email__name"
-              class="block text-sm font-medium mb-1">{t.auth.name}</label
+              class="mb-1 block text-sm font-medium">{t.auth.name}</label
             >
             <input
               type="text"
               name="name"
               id="welcome-email__name"
-              class="w-full rounded-md border border-input bg-background px-3 py-2"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               required
             />
           </div>
           <button></button>
           <button
             type="submit"
-            class="inline-flex items-center justify-center rounded-md font-medium text-sm ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
           >
             {t.email.sendWelcome}
           </button>
@@ -115,29 +115,29 @@ const t = useTranslationsFromParams(Astro.params);
 
     {
       Astro.url.searchParams.get("sent") === "true" && (
-        <div class="mt-8 p-4 bg-muted text-foreground rounded-md border border-border">
+        <div class="bg-muted text-foreground border-border mt-8 rounded-md border p-4">
           <p class="font-medium">✅ {t.email.success}</p>
-          <p class="text-sm mt-1 text-muted-foreground">
+          <p class="text-muted-foreground mt-1 text-sm">
             {t.email.consoleInfo}
           </p>
         </div>
       )
     }
 
-    <div class="mt-8 p-4 bg-muted rounded-md border border-border">
-      <h3 class="font-semibold mb-2">{t.email.setupTitle}</h3>
-      <p class="mb-4 text-muted-foreground">
+    <div class="bg-muted border-border mt-8 rounded-md border p-4">
+      <h3 class="mb-2 font-semibold">{t.email.setupTitle}</h3>
+      <p class="text-muted-foreground mb-4">
         {t.email.setupDescription}
       </p>
       <pre
-        class="p-3 bg-card rounded-md overflow-x-auto border border-border">
+        class="bg-card border-border overflow-x-auto rounded-md border p-3">
 RESEND_API_KEY=your_resend_api_key
 SEND_EMAIL_FROM=Your App &lt;noreply@yourdomain.com&gt;
       </pre>
-      <p class="mt-4 text-muted-foreground">
+      <p class="text-muted-foreground mt-4">
         {t.email.templateInfo}
       </p>
-      <p class="mt-2 text-muted-foreground">
+      <p class="text-muted-foreground mt-2">
         {t.email.devInfo}
       </p>
     </div>

@@ -26,15 +26,15 @@ const homeUrl = localizeUrl("/", locale);
 
 <Layout>
   <div
-    class="flex flex-col items-center justify-center w-full py-24 min-h-[70dvh]"
+    class="flex min-h-[70dvh] w-full flex-col items-center justify-center py-24"
   >
     <div
-      class="bg-card border border-border rounded-[var(--radius)] p-8 shadow-sm flex flex-col items-center max-w-md w-full"
+      class="bg-card border-border flex w-full max-w-md flex-col items-center rounded-[var(--radius)] border p-8 shadow-sm"
     >
-      <h1 class="text-4xl font-bold text-destructive mb-2">
+      <h1 class="text-destructive mb-2 text-4xl font-bold">
         {t.error[500].title}
       </h1>
-      <h2 class="text-xl font-semibold mb-4 text-foreground">
+      <h2 class="text-foreground mb-4 text-xl font-semibold">
         {t.error[500].subtitle}
       </h2>
       <p class="text-muted-foreground mb-8 text-center">

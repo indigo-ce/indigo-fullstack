@@ -116,13 +116,13 @@ const success = Astro.url.searchParams.get("success");
 ---
 
 <Layout>
-  <div class="flex flex-col items-center justify-center w-full py-12">
+  <div class="flex w-full flex-col items-center justify-center py-12">
     <div class="w-full max-w-md space-y-8">
-      <h1 class="text-2xl font-bold mb-8">{t.account.personalInfo}</h1>
+      <h1 class="mb-8 text-2xl font-bold">{t.account.personalInfo}</h1>
 
       {
         success === "profile-updated" && (
-          <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
+          <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
             {t.account.profileUpdated}
           </div>
         )
@@ -130,7 +130,7 @@ const success = Astro.url.searchParams.get("success");
 
       {
         success === "email-verification-sent" && (
-          <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
+          <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
             {t.auth.checkEmail}
           </div>
         )
@@ -138,30 +138,30 @@ const success = Astro.url.searchParams.get("success");
 
       {
         success === "password-changed" && (
-          <div class="bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 p-4 rounded-md mb-4">
+          <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
             {t.auth.resetSuccess}
           </div>
         )
       }
 
-      <div class="bg-card p-6 rounded-lg border">
-        <h2 class="text-xl font-semibold mb-4">{t.account.editProfile}</h2>
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="mb-4 text-xl font-semibold">{t.account.editProfile}</h2>
         <form method="POST" class="space-y-4">
           <input type="hidden" name="action" value="update-profile" />
           {
             errors.name && (
-              <div class="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 p-4 rounded-md mb-4">
+              <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-300">
                 {errors.name}
               </div>
             )
           }
           <div
-            class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring px-2"
+            class="focus-within:ring-ring relative flex items-center rounded-md border px-2 focus-within:ring-1"
           >
             <Input
               type="text"
               placeholder={t.account.name}
-              class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+              class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
               name="name"
               required
               value={fields.name}
@@ -173,25 +173,25 @@ const success = Astro.url.searchParams.get("success");
         </form>
       </div>
 
-      <div class="bg-card p-6 rounded-lg border">
-        <h2 class="text-xl font-semibold mb-4">{t.account.email}</h2>
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="mb-4 text-xl font-semibold">{t.account.email}</h2>
         <form method="POST" class="space-y-4">
           <input type="hidden" name="action" value="change-email" />
           {
             errors.email && (
-              <div class="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 p-4 rounded-md mb-4">
+              <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-300">
                 {errors.email}
               </div>
             )
           }
           <div
-            class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
+            class="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1"
           >
-            <Mail class="h-5 w-5 text-muted-foreground mr-1" />
+            <Mail class="text-muted-foreground mr-1 h-5 w-5" />
             <Input
               type="email"
               placeholder={t.account.email}
-              class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+              class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
               name="email"
               required
               value={fields.email}
@@ -203,13 +203,13 @@ const success = Astro.url.searchParams.get("success");
         </form>
       </div>
 
-      <div class="bg-card p-6 rounded-lg border">
-        <h2 class="text-xl font-semibold mb-4">{t.auth.password}</h2>
+      <div class="bg-card rounded-lg border p-6">
+        <h2 class="mb-4 text-xl font-semibold">{t.auth.password}</h2>
         <form method="POST" class="space-y-6">
           <input type="hidden" name="action" value="change-password" />
           {
             (errors.currentPassword || errors.newPassword) && (
-              <div class="bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 p-4 rounded-md mb-4">
+              <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-300">
                 {errors.currentPassword || errors.newPassword}
               </div>
             )

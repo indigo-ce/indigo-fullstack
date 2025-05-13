@@ -47,9 +47,9 @@ if (Astro.request.method === "POST") {
 ---
 
 <Layout>
-  <div class="container mx-auto px-4 py-8 max-w-2xl">
-    <div class="bg-card rounded-lg shadow-sm p-6">
-      <h1 class="text-2xl font-bold mb-4">{t.auth.verifyEmail}</h1>
+  <div class="container mx-auto max-w-2xl px-4 py-8">
+    <div class="bg-card rounded-lg p-6 shadow-sm">
+      <h1 class="mb-4 text-2xl font-bold">{t.auth.verifyEmail}</h1>
 
       <p class="text-muted-foreground mb-6">
         {t.auth.verifyDescription}
@@ -59,7 +59,7 @@ if (Astro.request.method === "POST") {
       <div>
         {
           errors.server && (
-            <p class="text-red-500 text-xs ml-2" id="error">
+            <p class="ml-2 text-xs text-red-500" id="error">
               {errors.server}
             </p>
           )
@@ -67,7 +67,7 @@ if (Astro.request.method === "POST") {
 
         {
           emailSent ? (
-            <p class="text-green-500 text-xs" id="success">
+            <p class="text-xs text-green-500" id="success">
               ✅ {t.email.success}
             </p>
           ) : (
@@ -80,7 +80,7 @@ if (Astro.request.method === "POST") {
         }
       </div>
 
-      <p class="text-sm text-muted-foreground mt-6">
+      <p class="text-muted-foreground mt-6 text-sm">
         {t.auth.didntReceiveEmail}
         {t.auth.tryAgain}
       </p>

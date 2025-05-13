@@ -24,15 +24,15 @@ const verifyEmailUrl = localizeUrl("/verify-email", locale);
 ---
 
 <Layout title={t.nav.dashboard}>
-  <div class="dashboard p-6 max-w-4xl mx-auto pt-20">
-    <h1 class="text-2xl font-bold text-foreground mb-4">
+  <div class="dashboard mx-auto max-w-4xl p-6 pt-20">
+    <h1 class="text-foreground mb-4 text-2xl font-bold">
       {t.nav.dashboard}
     </h1>
 
     {
       !user.emailVerified && (
-        <div class="bg-orange-100 dark:bg-yellow-900 px-2 py-2 rounded-lg mb-4 flex justify-between items-center">
-          <p class="text-sm ml-2 text-orange-900 dark:text-yellow-100">
+        <div class="mb-4 flex items-center justify-between rounded-lg bg-orange-100 px-2 py-2 dark:bg-yellow-900">
+          <p class="ml-2 text-sm text-orange-900 dark:text-yellow-100">
             {locale === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
             {locale === "ja" ? "は確認されていません" : "is not verified"}
           </p>
@@ -44,7 +44,7 @@ const verifyEmailUrl = localizeUrl("/verify-email", locale);
     }
 
     <Welcome user={user} locale={locale} />
-    <div class="flex flex-wrap gap-4 items-center">
+    <div class="flex flex-wrap items-center gap-4">
       <Button href={accountUrl} variant="outline" size="sm">
         {t.nav.account}
       </Button>

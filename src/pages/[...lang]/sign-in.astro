@@ -81,27 +81,27 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
 
 <Layout title={t.auth.signin}>
   <div
-    class="flex flex-col items-center justify-center w-full py-12 min-h-[70dvh]"
+    class="flex min-h-[70dvh] w-full flex-col items-center justify-center py-12"
   >
     <div class="w-full max-w-xs">
-      <h1 class="text-2xl font-bold mb-8 text-center">{t.auth.signin}</h1>
+      <h1 class="mb-8 text-center text-2xl font-bold">{t.auth.signin}</h1>
 
       <form method="POST" class="space-y-4">
         <div
-          class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
+          class="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1"
         >
-          <Mail class="h-5 w-5 text-muted-foreground mr-1" />
+          <Mail class="text-muted-foreground mr-1 h-5 w-5" />
           <Input
             type="email"
             placeholder={t.auth.email}
-            class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+            class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
             name="email"
             required
             value={fields.email}
           />
           {
             errors.email && (
-              <span class="text-red-500 text-xs ml-2">{errors.email}</span>
+              <span class="ml-2 text-xs text-red-500">{errors.email}</span>
             )
           }
         </div>
@@ -115,14 +115,14 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
 
         {
           errors.password && (
-            <span class="text-red-500 text-xs ml-2">{errors.password}</span>
+            <span class="ml-2 text-xs text-red-500">{errors.password}</span>
           )
         }
 
         <div class="flex justify-end">
           <a
             href={forgotPasswordUrl}
-            class="pt-1 text-xs text-muted-foreground hover:text-primary transition-colors"
+            class="text-muted-foreground hover:text-primary pt-1 text-xs transition-colors"
           >
             {t.auth.forgotPassword}
           </a>
@@ -130,13 +130,13 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
 
         {
           errors.server && (
-            <span class="text-red-500 text-xs ml-2">{errors.server}</span>
+            <span class="ml-2 text-xs text-red-500">{errors.server}</span>
           )
         }
 
-        <Button type="submit" class="w-full mt-4">{t.auth.signin}</Button>
+        <Button type="submit" class="mt-4 w-full">{t.auth.signin}</Button>
 
-        <p class="text-center text-sm mt-4">
+        <p class="mt-4 text-center text-sm">
           {t.auth.dontHaveAccount}{" "}
           <a href={signUpUrl} class="text-primary underline">
             {t.auth.signupHere}

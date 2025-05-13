@@ -96,26 +96,26 @@ const signInUrl = localizeUrl("/sign-in", locale);
 
 <Layout title={t.auth.signup}>
   <div
-    class="flex flex-col items-center justify-center w-full py-12 min-h-[70dvh]"
+    class="flex min-h-[70dvh] w-full flex-col items-center justify-center py-12"
   >
     <div class="w-full max-w-xs">
-      <h1 class="text-2xl font-bold mb-8 text-center">{t.auth.signup}</h1>
+      <h1 class="mb-8 text-center text-2xl font-bold">{t.auth.signup}</h1>
 
       {
         errors.server && (
-          <p class="text-red-500 mb-4 text-sm">{errors.server}</p>
+          <p class="mb-4 text-sm text-red-500">{errors.server}</p>
         )
       }
 
       <form method="POST" class="space-y-4">
         <div
-          class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
+          class="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1"
         >
-          <User class="h-5 w-5 text-muted-foreground mr-1" />
+          <User class="text-muted-foreground mr-1 h-5 w-5" />
           <Input
             type="text"
             placeholder={t.auth.name}
-            class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+            class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
             name="name"
             required
             value={fields.name}
@@ -123,13 +123,13 @@ const signInUrl = localizeUrl("/sign-in", locale);
         </div>
 
         <div
-          class="relative flex items-center rounded-md border focus-within:ring-1 focus-within:ring-ring pl-2"
+          class="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1"
         >
-          <Mail class="h-5 w-5 text-muted-foreground mr-1" />
+          <Mail class="text-muted-foreground mr-1 h-5 w-5" />
           <Input
             type="email"
             placeholder={t.auth.email}
-            class="border-0 focus-visible:ring-0 shadow-none bg-transparent dark:bg-transparent"
+            class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
             name="email"
             required
             value={fields.email}
@@ -147,21 +147,21 @@ const signInUrl = localizeUrl("/sign-in", locale);
           (errors.password || errors.server || errors.email) && (
             <div class="space-y-1">
               {errors.password && (
-                <p class="text-red-500 text-xs">{errors.password}</p>
+                <p class="text-xs text-red-500">{errors.password}</p>
               )}
               {errors.email && (
-                <p class="text-red-500 text-xs">{errors.email}</p>
+                <p class="text-xs text-red-500">{errors.email}</p>
               )}
               {errors.server && (
-                <p class="text-red-500 text-xs">{errors.server}</p>
+                <p class="text-xs text-red-500">{errors.server}</p>
               )}
             </div>
           )
         }
 
-        <Button type="submit" class="w-full mt-4">{t.auth.signup}</Button>
+        <Button type="submit" class="mt-4 w-full">{t.auth.signup}</Button>
 
-        <p class="text-center text-sm mt-4">
+        <p class="mt-4 text-center text-sm">
           {t.auth.alreadyHaveAccount}{" "}
           <a href={signInUrl} class="text-primary underline">
             {t.auth.signinHere}

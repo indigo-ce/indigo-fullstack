@@ -13,72 +13,72 @@ const betterAuthBaseUrl = env.BETTER_AUTH_BASE_URL;
 ---
 
 <Layout>
-  <div class="max-w-2xl mx-auto py-12">
+  <div class="mx-auto max-w-2xl py-12">
     <div
-      class="overflow-hidden bg-card dark:bg-card shadow-sm sm:rounded-lg border border-border"
+      class="bg-card dark:bg-card border-border overflow-hidden border shadow-sm sm:rounded-lg"
     >
       <div class="px-4 py-6 sm:px-6">
-        <h3 class="text-base/7 font-semibold text-foreground">
+        <h3 class="text-foreground text-base/7 font-semibold">
           {t.status.serverStatus}
         </h3>
-        <p class="mt-1 max-w-2xl text-sm/6 text-muted-foreground">
+        <p class="text-muted-foreground mt-1 max-w-2xl text-sm/6">
           {t.status.statusDescription}
         </p>
       </div>
-      <div class="border-t border-border">
-        <dl class="divide-y divide-border">
+      <div class="border-border border-t">
+        <dl class="divide-border divide-y">
           <div>
             <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-              <dt class="text-sm font-medium text-foreground">
+              <dt class="text-foreground text-sm font-medium">
                 {t.status.environment}
               </dt>
               <dd
-                class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+                class="text-muted-foreground mt-1 text-sm/6 sm:col-span-2 sm:mt-0"
               >
                 {isProd ? "Production" : "Development"}
               </dd>
             </div>
           </div>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-foreground">
+            <dt class="text-foreground text-sm font-medium">
               <code class="text-muted-foreground text-xs">RESEND_API_KEY</code>
             </dt>
             <dd
-              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+              class="text-muted-foreground mt-1 text-sm/6 sm:col-span-2 sm:mt-0"
             >
               {resendApiKey ? "✅" : "❌"}
             </dd>
           </div>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-foreground">
+            <dt class="text-foreground text-sm font-medium">
               <code class="text-muted-foreground text-xs">
                 BETTER_AUTH_SECRET
               </code>
             </dt>
             <dd
-              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+              class="text-muted-foreground mt-1 text-sm/6 sm:col-span-2 sm:mt-0"
             >
               {betterAuthSecret ? "✅" : "❌"}
             </dd>
           </div>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-foreground">
+            <dt class="text-foreground text-sm font-medium">
               <code class="text-muted-foreground text-xs"
                 >BETTER_AUTH_BASE_URL</code
               >
             </dt>
             <dd
-              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+              class="text-muted-foreground mt-1 text-sm/6 sm:col-span-2 sm:mt-0"
             >
               {betterAuthBaseUrl}
             </dd>
           </div>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-sm font-medium text-foreground">
+            <dt class="text-foreground text-sm font-medium">
               <code class="text-muted-foreground text-xs">SEND_EMAIL_FROM</code>
             </dt>
             <dd
-              class="mt-1 text-sm/6 text-muted-foreground sm:col-span-2 sm:mt-0"
+              class="text-muted-foreground mt-1 text-sm/6 sm:col-span-2 sm:mt-0"
             >
               {sendEmailFrom}
             </dd>
