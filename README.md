@@ -26,12 +26,64 @@ A feature-rich web application starter template built with Astro, Svelte, Tailwi
 - **API Layer**: Built with Hono for efficient request handling
 - **Internationalization**: Type-safe i18n with consistent naming conventions and locale-aware URLs
 
-## Getting Started
+## Development
+
+Install dependencies:
 
 ```bash
 pnpm install
-cp .dev.vars.example .dev.vars # For local development secrets
-pnpm run dev
+```
+
+Set environment variables:
+
+```bash
+cp .dev.vars.example .dev.vars
+```
+
+Start the development server:
+
+```bash
+pnpm dev
+```
+
+Start the development server:
+
+```bash
+pnpm dev
+```
+
+## Code Quality
+
+This project uses ESLint with the Perfectionist plugin to automatically sort and organize code elements for better readability and consistency.
+
+### Linting
+
+Run ESLint to check for sorting issues:
+
+```bash
+pnpm lint
+```
+
+Fix sorting issues automatically:
+
+```bash
+pnpm lint:fix
+```
+
+The Perfectionist plugin automatically sorts:
+
+- Import statements (with proper grouping)
+- Object properties
+- Interface properties
+- Named imports
+- Exports
+
+Configuration is in `eslint.config.js` using the flat config format with natural sorting enabled.
+
+## Building
+
+```bash
+pnpm build
 ```
 
 ## ☑️ New Project Checklist

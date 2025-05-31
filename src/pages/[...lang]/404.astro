@@ -1,11 +1,11 @@
 ---
-import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/primitives/button";
 import {
-  useTranslationsFromParams,
+  getLocaleFromParams,
   localizeUrl,
-  getLocaleFromParams
+  useTranslationsFromParams
 } from "@/i18n/utils";
+import Layout from "@/layouts/Layout.astro";
 
 const t = useTranslationsFromParams(Astro.params);
 
@@ -32,7 +32,7 @@ const homeUrl = localizeUrl("/", locale);
       <p class="text-muted-foreground mb-8 text-center">
         {t.error[404].message}
       </p>
-      <Button href={homeUrl} size="lg" class="w-full">{t.error.goHome}</Button>
+      <Button class="w-full" href={homeUrl} size="lg">{t.error.goHome}</Button>
     </div>
   </div>
 </Layout>

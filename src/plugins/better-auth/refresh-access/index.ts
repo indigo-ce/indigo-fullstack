@@ -2,7 +2,7 @@ import {
   generateId,
   type BetterAuthPlugin,
   type GenericEndpointContext,
-  type Session,
+  type Session
 } from "better-auth";
 import {getJwtToken, type JwtOptions} from "better-auth/plugins/jwt";
 import {APIError, createAuthEndpoint} from "better-auth/api";
@@ -39,7 +39,7 @@ export interface RefreshAccessTokenOptions extends JwtOptions {
  */
 async function verifyRefreshToken(
   ctx: GenericEndpointContext,
-  refreshToken: string,
+  refreshToken: string
 ): Promise<Session | null> {
   const sessions = await ctx.context.adapter.findMany<Session>({
     model: "session",
@@ -47,9 +47,9 @@ async function verifyRefreshToken(
       {
         field: "token",
         operator: "eq",
-        value: refreshToken,
-      },
-    ],
+        value: refreshToken
+      }
+    ]
   });
 
   const session = sessions[0];
@@ -70,8 +70,8 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
       ...options,
       jwt: {
         ...options?.jwt,
-        expirationTime: options?.accessToken?.expiresIn || "60min",
-      },
+        expirationTime: options?.accessToken?.expiresIn || "60min"
+      }
     };
   };
 
@@ -84,17 +84,17 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
         {
           method: "POST",
           body: z.object({
-            basicToken: z.string(),
+            basicToken: z.string()
           }),
-          requireHeaders: false,
+          requireHeaders: false
         },
         async (ctx) => {
           if (!ctx.context.options?.emailAndPassword?.enabled) {
             ctx.context.logger.error(
-              "Email and password is not enabled. Make sure to enable it in the options on you `auth.ts` file. Check `https://better-auth.com/docs/authentication/email-password` for more!",
+              "Email and password is not enabled. Make sure to enable it in the options on you `auth.ts` file. Check `https://better-auth.com/docs/authentication/email-password` for more!"
             );
             throw new APIError("BAD_REQUEST", {
-              message: "Email and password is not enabled",
+              message: "Email and password is not enabled"
             });
           }
 
@@ -102,13 +102,13 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           const authHeader = ctx.body?.basicToken;
           if (!authHeader) {
             throw new APIError("BAD_REQUEST", {
-              message: "Email and password are required",
+              message: "Email and password are required"
             });
           }
 
           const [email, password] = Buffer.from(
             authHeader.split(" ")[1],
-            "base64",
+            "base64"
           )
             .toString()
             .split(":");
@@ -117,7 +117,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
 
           if (!isValidEmail.success) {
             throw new APIError("BAD_REQUEST", {
-              message: "Invalid email",
+              message: "Invalid email"
             });
           }
 
@@ -125,24 +125,24 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           const user = await ctx.context.internalAdapter.findUserByEmail(
             email,
             {
-              includeAccounts: true,
-            },
+              includeAccounts: true
+            }
           );
 
           if (!user) {
             ctx.context.logger.error("User not found", {email});
             throw new APIError("UNAUTHORIZED", {
-              message: "Invalid email or password",
+              message: "Invalid email or password"
             });
           }
 
           const credentialAccount = user.accounts.find(
-            (a) => a.providerId === "credential",
+            (a) => a.providerId === "credential"
           );
 
           if (!credentialAccount) {
             throw new APIError("UNAUTHORIZED", {
-              message: "Invalid email or password",
+              message: "Invalid email or password"
             });
           }
 
@@ -150,17 +150,17 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           if (!currentPassword) {
             ctx.context.logger.error("Password not found", {email});
             throw new APIError("UNAUTHORIZED", {
-              message: "Invalid email or password",
+              message: "Invalid email or password"
             });
           }
           const validPassword = await ctx.context.password.verify({
             hash: currentPassword,
-            password,
+            password
           });
           if (!validPassword) {
             ctx.context.logger.error("Invalid password");
             throw new APIError("UNAUTHORIZED", {
-              message: "Invalid email or password",
+              message: "Invalid email or password"
             });
           }
 
@@ -169,7 +169,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
             !user.user.emailVerified
           ) {
             throw new APIError("UNAUTHORIZED", {
-              message: "Email not verified",
+              message: "Email not verified"
             });
           }
 
@@ -188,28 +188,24 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               updatedAt: new Date(),
               expiresAt: new Date(
                 Date.now() +
-                  (options?.refreshToken?.expiresIn || 30) *
-                    24 *
-                    60 *
-                    60 *
-                    1000,
-              ), // Days
+                  (options?.refreshToken?.expiresIn || 30) * 24 * 60 * 60 * 1000
+              ) // Days
             },
             ctx,
-            false,
+            false
           );
 
           if (!session) {
             ctx.context.logger.error("Failed to create session");
             throw new APIError("UNAUTHORIZED", {
-              message: "Failed to create session",
+              message: "Failed to create session"
             });
           }
 
           // Set session in context for JWT generation
           ctx.context.session = {
             session,
-            user: user.user,
+            user: user.user
           };
 
           // Generate access token (JWT)
@@ -221,13 +217,13 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               id: user.user.id,
               email: user.user.email,
               name: user.user.name,
-              image: user.user.image,
+              image: user.user.image
             },
             access: accessToken,
             refresh: refreshToken,
-            tokenType: "Bearer",
+            tokenType: "Bearer"
           });
-        },
+        }
       ),
 
       // Refresh token endpoint
@@ -235,7 +231,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
         "/auth-tokens/refresh",
         {
           method: "POST",
-          requireHeaders: false,
+          requireHeaders: false
         },
         async (ctx) => {
           const refreshToken =
@@ -250,7 +246,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           if (!session) {
             return ctx.json(
               {error: "Invalid or expired refresh token"},
-              {status: 401},
+              {status: 401}
             );
           }
 
@@ -261,13 +257,13 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
             newRefreshToken = generateId(32);
             await ctx.context.internalAdapter.updateSession(session.id, {
               token: newRefreshToken,
-              updatedAt: new Date(),
+              updatedAt: new Date()
             });
           }
 
           // Load user info
           const user = await ctx.context.internalAdapter.findUserById(
-            session.userId,
+            session.userId
           );
 
           if (!user) {
@@ -277,7 +273,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           // Set session in context for JWT generation
           ctx.context.session = {
             session,
-            user,
+            user
           };
 
           // Generate access token
@@ -287,9 +283,9 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           return ctx.json({
             accessToken,
             refreshToken: newRefreshToken,
-            tokenType: "Bearer",
+            tokenType: "Bearer"
           });
-        },
+        }
       ),
 
       // Revoke token endpoint
@@ -297,7 +293,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
         "/auth-tokens/revoke",
         {
           method: "POST",
-          requireHeaders: false,
+          requireHeaders: false
         },
         async (ctx) => {
           const refreshToken =
@@ -315,8 +311,8 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
 
           await ctx.context.internalAdapter.deleteSession(session.id);
           return ctx.json({success: true});
-        },
-      ),
-    },
+        }
+      )
+    }
   } satisfies BetterAuthPlugin;
 };

@@ -1,7 +1,8 @@
 ---
-import {useTranslations, getLocaleFromParams} from "@/i18n/utils";
+import {CircleStack, Icon, Key, PaintBrush, Server} from "svelte-hero-icons";
+
+import {getLocaleFromParams, useTranslations} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
-import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
 
 const lang = getLocaleFromParams(Astro.params);
 const t = useTranslations(lang);
@@ -35,7 +36,7 @@ const t = useTranslations(lang);
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-pink-600"
             >
-              <Icon src={Server} class="size-6 text-white" solid />
+              <Icon class="size-6 text-white" solid src={Server} />
             </div>
             {t.home.feature1.title}
           </dt>
@@ -48,7 +49,7 @@ const t = useTranslations(lang);
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-amber-500"
             >
-              <Icon src={PaintBrush} class="size-6 text-white" solid />
+              <Icon class="size-6 text-white" solid src={PaintBrush} />
             </div>
             {t.home.feature2.title}
           </dt>
@@ -61,7 +62,7 @@ const t = useTranslations(lang);
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-blue-600"
             >
-              <Icon src={Key} class="size-6 text-white" solid />
+              <Icon class="size-6 text-white" solid src={Key} />
             </div>
             {t.home.feature3.title}
           </dt>
@@ -74,7 +75,7 @@ const t = useTranslations(lang);
             <div
               class="absolute top-0 left-0 flex size-10 items-center justify-center rounded-full bg-lime-600"
             >
-              <Icon src={CircleStack} class="size-6 text-white" solid />
+              <Icon class="size-6 text-white" solid src={CircleStack} />
             </div>
             {t.home.feature4.title}
           </dt>

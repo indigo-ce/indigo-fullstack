@@ -11,62 +11,62 @@ const t = useTranslationsFromParams(Astro.params);
 
     <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
       <div class="bg-card border-border rounded-lg border p-6 shadow-sm">
-        <form id="send-custom-email" class="space-y-4">
+        <form class="space-y-4" id="send-custom-email">
           <h2 class="mb-4 text-xl font-semibold">{t.email.sendCustom}</h2>
           <div>
             <label
-              for="send-email__recipient"
-              class="mb-1 block text-sm font-medium">{t.auth.email}</label
+              class="mb-1 block text-sm font-medium"
+              for="send-email__recipient">{t.auth.email}</label
             >
             <input
-              type="email"
-              name="recipient"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               id="send-email__recipient"
-              class="border-input bg-background w-full rounded-md border px-3 py-2"
+              name="recipient"
               required
+              type="email"
             />
           </div>
           <div>
             <label
-              for="send-email__subject"
-              class="mb-1 block text-sm font-medium">{t.email.subject}</label
+              class="mb-1 block text-sm font-medium"
+              for="send-email__subject">{t.email.subject}</label
             >
             <input
-              type="text"
-              name="subject"
+              class="border-input bg-background w-full rounded-md border px-3 py-2"
               id="send-email__subject"
-              class="border-input bg-background w-full rounded-md border px-3 py-2"
+              name="subject"
               required
+              type="text"
             />
           </div>
           <div>
             <label
-              for="send-email__title"
-              class="mb-1 block text-sm font-medium">{t.email.emailTitle}</label
+              class="mb-1 block text-sm font-medium"
+              for="send-email__title">{t.email.emailTitle}</label
             >
             <input
-              type="text"
-              name="title"
-              id="send-email__title"
               class="border-input bg-background w-full rounded-md border px-3 py-2"
+              id="send-email__title"
+              name="title"
               placeholder="Astro Starter"
+              type="text"
             />
           </div>
           <div>
             <label
-              for="send-email__message"
-              class="mb-1 block text-sm font-medium">{t.email.message}</label
+              class="mb-1 block text-sm font-medium"
+              for="send-email__message">{t.email.message}</label
             >
             <textarea
-              name="message"
-              id="send-email__message"
-              rows="5"
               class="border-input bg-background w-full rounded-md border px-3 py-2"
-              required></textarea>
+              id="send-email__message"
+              name="message"
+              required
+              rows="5"></textarea>
           </div>
           <button
-            type="submit"
             class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            type="submit"
           >
             {t.email.sendCustom}
           </button>
@@ -74,38 +74,38 @@ const t = useTranslationsFromParams(Astro.params);
       </div>
 
       <div class="bg-card border-border rounded-lg border p-6 shadow-sm">
-        <form id="send-welcome-email" class="space-y-4">
+        <form class="space-y-4" id="send-welcome-email">
           <h2 class="mb-4 text-xl font-semibold">{t.email.sendWelcome}</h2>
           <div>
             <label
-              for="welcome-email__recipient"
-              class="mb-1 block text-sm font-medium">{t.auth.email}</label
+              class="mb-1 block text-sm font-medium"
+              for="welcome-email__recipient">{t.auth.email}</label
             >
             <input
-              type="email"
-              name="recipient"
-              id="welcome-email__recipient"
               class="border-input bg-background w-full rounded-md border px-3 py-2"
+              id="welcome-email__recipient"
+              name="recipient"
               required
+              type="email"
             />
           </div>
           <div>
             <label
-              for="welcome-email__name"
-              class="mb-1 block text-sm font-medium">{t.auth.name}</label
+              class="mb-1 block text-sm font-medium"
+              for="welcome-email__name">{t.auth.name}</label
             >
             <input
-              type="text"
-              name="name"
-              id="welcome-email__name"
               class="border-input bg-background w-full rounded-md border px-3 py-2"
+              id="welcome-email__name"
+              name="name"
               required
+              type="text"
             />
           </div>
           <button></button>
           <button
-            type="submit"
             class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            type="submit"
           >
             {t.email.sendWelcome}
           </button>

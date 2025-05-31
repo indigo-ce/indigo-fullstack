@@ -1,30 +1,31 @@
+import cloudflare from "@astrojs/cloudflare";
+import react from "@astrojs/react";
+import svelte from "@astrojs/svelte";
+import tailwindcss from "@tailwindcss/vite";
 // @ts-check
 import {defineConfig, envField} from "astro/config";
-import tailwindcss from "@tailwindcss/vite";
-import svelte from "@astrojs/svelte";
-import react from "@astrojs/react";
-import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  env: {
-    schema: {
-      BETTER_AUTH_SECRET: envField.string({
-        context: "server",
-        access: "secret"
-      }),
-      RESEND_API_KEY: envField.string({
-        context: "server",
-        access: "secret"
-      })
-    }
-  },
-  output: "server",
   adapter: cloudflare({
     platformProxy: {
       enabled: true // Use astro built-in commands
     }
   }),
+  env: {
+    schema: {
+      BETTER_AUTH_SECRET: envField.string({
+        access: "secret",
+        context: "server"
+      }),
+      RESEND_API_KEY: envField.string({
+        access: "secret",
+        context: "server"
+      })
+    }
+  },
+  integrations: [svelte(), react()],
+  output: "server",
   vite: {
     plugins: [tailwindcss()],
     resolve: {
@@ -58,6 +59,5 @@ export default defineConfig({
         "tls"
       ]
     }
-  },
-  integrations: [svelte(), react()]
+  }
 });
