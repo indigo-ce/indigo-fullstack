@@ -120,7 +120,6 @@ To set up Resend for production, create an account and set the `RESEND_API_KEY` 
 pnpm wrangler secret put RESEND_API_KEY
 ```
 
-For local development, add `RESEND_API_KEY` to your `.dev.vars` file if you want to use Resend.
 The sender email address (`SEND_EMAIL_FROM`) should be configured in your `wrangler.jsonc` file under the `vars` section for production.
 
 ### Astro Session

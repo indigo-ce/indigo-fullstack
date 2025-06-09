@@ -6,21 +6,21 @@ export async function sendEmail(
   html: string,
   env: Env
 ): Promise<any> {
-  if (env.RESEND_API_KEY) {
-    return sendEmailWithResend(
-      to,
-      subject,
-      html,
-      env.RESEND_API_KEY,
-      env.SEND_EMAIL_FROM
-    );
-  } else {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("RESEND_API_KEY is not set");
+  if (process.env.NODE_ENV === "production") {
+    if (env.RESEND_API_KEY) {
+      return sendEmailWithResend(
+        to,
+        subject,
+        html,
+        env.RESEND_API_KEY,
+        env.SEND_EMAIL_FROM
+      );
     } else {
-      console.log("📤 Sending email with SMTP...");
-      return sendEmailWithSMTP(to, subject, html, env.SEND_EMAIL_FROM);
+      throw new Error("RESEND_API_KEY is not set");
     }
+  } else {
+    console.log("📤 Sending email with SMTP...");
+    return sendEmailWithSMTP(to, subject, html, env.SEND_EMAIL_FROM);
   }
 }
 
