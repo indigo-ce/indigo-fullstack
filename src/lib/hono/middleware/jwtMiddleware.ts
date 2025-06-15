@@ -19,7 +19,9 @@ export const jwtMiddleware = async (
     const jwks = await jwksCache.getKeys(c.get("auth"));
     const jwksSet = createLocalJWKSet(jwks);
 
-    if (!process.env.BETTER_AUTH_BASE_URL) {
+    const env = c.get("env");
+    const betterAuthBaseUrl = env.BETTER_AUTH_BASE_URL;
+    if (!betterAuthBaseUrl) {
       console.error("Missing BETTER_AUTH_BASE_URL environment variable");
       return c.json(
         {error: "Server misconfiguration", code: "SERVER_ERROR"},
@@ -28,8 +30,8 @@ export const jwtMiddleware = async (
     }
 
     const {payload} = await jwtVerify(token, jwksSet, {
-      issuer: process.env.BETTER_AUTH_BASE_URL,
-      audience: process.env.BETTER_AUTH_BASE_URL
+      issuer: betterAuthBaseUrl,
+      audience: betterAuthBaseUrl
     });
 
     if (!payload) {
@@ -57,6 +59,7 @@ export const jwtMiddleware = async (
         401
       );
     } else {
+      console.error(error);
       return c.json(
         {
           error: "You are not authorized to access this resource",

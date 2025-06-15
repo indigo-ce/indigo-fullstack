@@ -11,9 +11,7 @@ accountRoutes.use("*", jwtMiddleware);
 
 accountRoutes.get("/profile", (c) => {
   const user = c.get("user");
-  return c.json({
-    user
-  });
+  return c.json(user);
 });
 
 accountRoutes.get("/posts", (c) => {

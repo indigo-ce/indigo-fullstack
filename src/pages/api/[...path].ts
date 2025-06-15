@@ -2,6 +2,7 @@ import {authMiddleware} from "@/lib/hono/middleware/authMiddleware";
 import {createAuth} from "@/lib/auth";
 import {createDrizzle} from "@/db";
 import {d1Middleware} from "@/lib/hono/middleware/d1Middleware";
+import {envMiddleware} from "@/lib/hono/middleware/envMiddleware";
 import {Hono} from "hono";
 import {user} from "@/db/schema";
 import accountRoutes from "@/lib/hono/routes/account-routes";
@@ -14,6 +15,7 @@ export type APIRouteContext = {
     db: ReturnType<typeof createDrizzle>;
     auth: ReturnType<typeof createAuth>;
     user: typeof user.$inferSelect | null;
+    env: Env;
   };
 };
 
@@ -24,6 +26,7 @@ export const createHonoApp = (env: Env) => {
   // Apply middlewares to all v1 routes
   v1.use("*", d1Middleware(env.DB));
   v1.use("*", authMiddleware(env));
+  v1.use("*", envMiddleware(env));
   v1.use("*", responseTimeMiddleware);
 
   v1.get("/health", (c) => {
