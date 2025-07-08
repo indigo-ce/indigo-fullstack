@@ -1,4 +1,4 @@
-# 🪻 Indigo Stack - Community Edition
+# 🪻 Indigo Stack CE — Web Fullstack
 
 Indigo Stack CE is a free, open-source web application starter template built with Astro, Svelte, TailwindCSS, Better Auth, and Drizzle ORM.
 
