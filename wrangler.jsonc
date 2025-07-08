@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "astro-starter",
+  "name": "indigo-stack-demo",
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2025-04-30",
   "compatibility_flags": ["nodejs_compat"],
@@ -15,8 +15,8 @@
     // Used for Pages local development
     {
       "binding": "DB", // Must be same as preview_database_id
-      "database_name": "astro-starter",
-      "database_id": "930d8c84-355f-4aeb-87f4-248d97c74ea9",
+      "database_name": "indigo-ce",
+      "database_id": "ac5d0622-a58f-419c-9710-ca04d3d08c92",
       "migrations_dir": "./drizzle/migrations",
       "preview_database_id": "DB" // Required for Pages local development
     }
@@ -28,7 +28,7 @@
     }
   ],
   "vars": {
-    "BETTER_AUTH_BASE_URL": "https://astro-starter.4rays.net",
-    "SEND_EMAIL_FROM": "Astro Starter <noreply@4rays.net>"
+    "BETTER_AUTH_BASE_URL": "https://ce.indigostack.org",
+    "SEND_EMAIL_FROM": "Indigo CE <noreply@indigostack.org>"
   }
 }

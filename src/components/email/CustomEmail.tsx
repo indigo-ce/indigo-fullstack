@@ -12,7 +12,7 @@ const CustomEmail = ({html, title, preview}: CustomEmailProps) => {
   const safeHtml = typeof html === "string" ? html : String(html || "");
 
   return (
-    <BaseLayout title={title || "Astro Starter"} preview={preview}>
+    <BaseLayout title={title || "Indigo CE"} preview={preview}>
       {safeHtml.trim() ? (
         <div dangerouslySetInnerHTML={{__html: safeHtml}} />
       ) : (

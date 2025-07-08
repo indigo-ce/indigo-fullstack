@@ -1,8 +1,8 @@
-# Astro Starter Kit
+# 🪻 Indigo Stack - Community Edition
 
-A feature-rich web application starter template built with Astro, Svelte, TailwindCSS, Better Auth, Drizzle ORM.
+Indigo Stack CE is a free, open-source web application starter template built with Astro, Svelte, TailwindCSS, Better Auth, and Drizzle ORM.
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **[Astro](https://astro.build)** - Fast, modern web framework
 - **[Svelte](https://svelte.dev)** - UI component library used for component hydration
@@ -11,20 +11,26 @@ A feature-rich web application starter template built with Astro, Svelte, Tailwi
 - **[Shadcn UI](https://next.shadcn-svelte.com)** - UI component library
 - **[Better Auth](https://better-auth.com)** - Authentication system
 - **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
+- **[Drizzle Kit](https://orm.drizzle.team/docs/cli)** - CLI tool for managing Drizzle ORM migrations and database schema
 - **[Resend](https://resend.com)** - Modern email API for sending emails
 - **[Hono](https://hono.dev)** - Lightweight, ultrafast web framework for API endpoints
+- **[Cloudflare D1](https://developers.cloudflare.com/d1)** - Serverless database for modern applications
+- **[React Email](https://react.email)** - Email templating library for React
+- **[Prettier](https://prettier.io)** - Code formatter for consistent code style
+- **[Wrangler](https://developers.cloudflare.com/workers/wrangler)** - CLI tool for managing Cloudflare Workers and D1 databases
 
-## 🛠️ Features
+## Features
 
-- **Server-side Rendering** with Astro's Cloudflare adapter
-- **Type Safety** with TypeScript
-- **User Authentication** flow with Better Auth
-- **Database Integration** with Drizzle ORM and Cloudflare D1
-- **Modern UI** with TailwindCSS v4
-- **Email Functionality** with Resend API and templating using React Email
-- **Development Tools**: Prettier for code formatting
-- **API Layer**: Built with Hono for efficient request handling
-- **Internationalization**: Type-safe i18n with consistent naming conventions and locale-aware URLs
+- **Deploy to Cloudflare Workers** with D1 database support.
+- **Server-side Rendering** with Astro's Cloudflare adapter.
+- **Type Safety** with TypeScript.
+- **User Authentication** flow with Better Auth.
+- **Database Integration** with Drizzle ORM and Cloudflare D1.
+- **Modern UI** with TailwindCSS v4.
+- **Email Functionality** with Resend API and templating using React Email.
+- **Development Tools**: Prettier for code formatting.
+- **API Layer**: Built with Hono for efficient request handling.
+- **Internationalization**: Type-safe i18n with consistent naming conventions and locale-aware URLs.
 
 ## Getting Started
 
@@ -34,7 +40,7 @@ cp .dev.vars.example .dev.vars # For local development secrets
 pnpm run dev
 ```
 
-## ☑️ New Project Checklist
+## New Project Checklist
 
 - [ ] Copy `.dev.vars.example` to `.dev.vars` and add secrets like `BETTER_AUTH_SECRET` and `RESEND_API_KEY` for local development.
 - [ ] Create a KV namespace for sessions using `pnpm wrangler kv namespace create "SESSION"` and add the binding to `wrangler.jsonc`.
@@ -74,7 +80,7 @@ To use the script, run `node scripts/bootstrap.js <project-name>`.
 > The script assumes you have a working installation of Claude Code.
 > if you don't have or rather use another tool, you can run the script with the `--prompt-only` flag to get the prompt and apply it manually in your favorite AI tooling.
 
-## 🔐 Authentication
+## Authentication
 
 This template uses Better Auth for authentication. And supports these features out of the box:
 
@@ -147,7 +153,7 @@ Add the returned ID to `wrangler.jsonc`:
 ]
 ```
 
-## 🗄️ Database
+## Database
 
 This template uses Drizzle ORM with Cloudflare D1 for a modern, type-safe, serverless SQL database.
 
@@ -210,7 +216,7 @@ You can use the Drizzle Studio to view and edit your local database data.
 pnpm d1:studio:local
 ```
 
-## 📊 Database Queries
+### Queries
 
 Here's an example of how to query the database using Drizzle ORM:
 
@@ -242,7 +248,7 @@ const userWithSessions = await db
   .where(eq(user.id, userId));
 ```
 
-## 📨 Email Functionality
+## Emails
 
 The application includes built-in email functionality using [Resend](https://resend.com) (if `RESEND_API_KEY` is set via wrangler secrets or `.dev.vars`) with fallback to SMTP/Ethereal for development.
 
@@ -278,7 +284,7 @@ import {sendEmail} from "@/actions/email";
 // Send a welcome email
 await sendEmail({
   to: "user@example.com",
-  subject: "Welcome to Astro Starter!",
+  subject: "Welcome to Indigo CE!",
   template: {name: "welcome", params: {name: "John"}}
 });
 
@@ -382,7 +388,7 @@ To deploy to Cloudflare Workers with static assets:
 > Attempts to deploy end up in a `[ERROR] Error: No such module "node:os".` error.
 > This could be temporary, but as of 2025-05-04, it is not supported.
 
-## 🎨 Theming
+## Theming
 
 This project uses TailwindCSS for styling.
 The shadcn theme is defined in `src/styles.css`.
@@ -390,7 +396,7 @@ The shadcn theme is defined in `src/styles.css`.
 You can generate a new theme using your favorite tool ([example](https://themecn.dev/))
 then copy-paste the variables.
 
-## 📚 Learn More
+## Learn More
 
 - [Astro Documentation](https://docs.astro.build)
 - [Better Auth Documentation](https://github.com/zenstackhq/better-auth)

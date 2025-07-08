@@ -31,7 +31,7 @@ async function sendEmailWithResend(
   resendAPIKey: string,
   sendEmailFrom?: string
 ): Promise<any> {
-  const from = sendEmailFrom || "Astro Starter <noreply@example.com>";
+  const from = sendEmailFrom || "Indigo CE <noreply@example.com>";
   const resend = new Resend(resendAPIKey);
 
   return resend.emails.send({
@@ -52,7 +52,7 @@ async function sendEmailWithSMTP(
     "./nodemailer-util"
   );
   const transporter = await getEmailTransporter();
-  const from = sendEmailFrom || "Astro Starter <noreply@example.com>";
+  const from = sendEmailFrom || "Indigo CE <noreply@example.com>";
   const message = {to, subject, html, from};
 
   return new Promise((resolve, reject) => {

@@ -8,7 +8,7 @@
     "signout": "Sign Out"
   },
   "home": {
-    "title": "Astro Starter",
+    "title": "Indigo Stack CE",
     "description": "A starter template built with Astro, Svelte, TailwindCSS, Better Auth, and Drizzle ORM. Get started with authentication, database integration, and a modern UI.",
     "feature1": {
       "title": "Static + SSR + Svelte",
