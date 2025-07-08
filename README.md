@@ -37,6 +37,7 @@ Indigo Stack CE is a free, open-source web application starter template built wi
 ```bash
 pnpm install
 cp .dev.vars.example .dev.vars # For local development secrets
+pnpm cf-types # Install Cloudflare types
 pnpm run dev
 ```
 
@@ -55,7 +56,7 @@ pnpm run dev
 - [ ] Set `RESEND_API_KEY` secret using `pnpm wrangler secret put RESEND_API_KEY` for production.
 - [ ] Require email verification on sign up.
 
-## 🧞 Commands
+## Commands
 
 | Command                 | Action                                   |
 | :---------------------- | :--------------------------------------- |
