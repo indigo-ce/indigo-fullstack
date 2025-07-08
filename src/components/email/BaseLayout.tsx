@@ -19,7 +19,7 @@ type BaseLayoutProps = {
 
 const BaseLayout = ({
   children,
-  title = "Astro Starter",
+  title = "Indigo CE",
   preview,
 }: BaseLayoutProps) => (
   <Html>
@@ -35,11 +35,11 @@ const BaseLayout = ({
 
         <Text style={footer}>
           <Link
-            href="https://github.com/4rays/astro-starter"
+            href="https://github.com/4rays/indigo-stack"
             target="_blank"
             style={{...link, color: "#898989"}}
           >
-            Astro Starter
+            Indigo CE
           </Link>
         </Text>
       </Container>
