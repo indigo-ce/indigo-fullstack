@@ -3,7 +3,10 @@
     "allow": [
       "Bash(rg:*)",
       "Bash(ls:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(cp:*)"
     ],
     "deny": []
   }
