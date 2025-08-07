@@ -67,6 +67,7 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
   - Add tasks for setting the variables 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' in the 'wrangler.jsonc' file under the 'vars' section.
   - Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
   - Go over the remaining tasks listed in README.md and merge them with your list.
+  - Remove all mentions of "template" in the README.
 `;
 
 const command = "claude";
