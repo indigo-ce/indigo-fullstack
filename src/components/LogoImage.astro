@@ -1,0 +1,29 @@
+---
+export interface Props {
+  class?: string;
+  alt?: string;
+  size?: "sm" | "md" | "lg";
+}
+
+const {
+  class: className = "",
+  alt = "Indigo CE Logo",
+  size = "sm"
+} = Astro.props;
+
+const sizeClasses = {
+  sm: "h-12 w-12",
+  md: "h-14 w-14",
+  lg: "h-18 w-18"
+};
+---
+
+<div
+  class={`${sizeClasses[size]} ${className} relative overflow-hidden rounded-full bg-seagull-500/10`}
+>
+  <img
+    class="absolute -mx-2 my-1.5 h-full w-full scale-140 object-cover"
+    src="/icon.png"
+    alt={alt}
+  />
+</div>

@@ -1,5 +1,6 @@
 ---
 import UserProfile from "@/components/UserProfile.svelte";
+import LogoImage from "@/components/LogoImage.astro";
 import {getLocaleFromUrl, useTranslations, localizeUrl} from "@/i18n/utils";
 
 export interface Props {
@@ -28,11 +29,7 @@ const accountUrl = localizeUrl("/account", locale);
     <div class="flex lg:flex-1">
       <a href={homeUrl} class="-m-1.5 p-1.5">
         <span class="sr-only">Indigo CE</span>
-        <img
-          class="bg-seagull-500/10 h-8 w-auto rounded-full p-2"
-          src="/icon.png"
-          alt="Indigo CE Logo"
-        />
+        <LogoImage class="p-2" />
       </a>
     </div>
     <div class="flex lg:hidden">
@@ -93,11 +90,7 @@ const accountUrl = localizeUrl("/account", locale);
       <div class="flex items-center justify-between">
         <a href={homeUrl} class="-m-1.5 p-1.5">
           <span class="sr-only">Indigo CE</span>
-          <img
-            class="bg-seagull-500/10 h-8 w-auto rounded-full p-2"
-            src="/icon.png"
-            alt="Indigo CE Logo"
-          />
+          <LogoImage class="p-2" />
         </a>
         <button
           type="button"
