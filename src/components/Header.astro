@@ -1,5 +1,4 @@
 ---
-import Logo from "@/assets/logo.svg";
 import UserProfile from "@/components/UserProfile.svelte";
 import {getLocaleFromUrl, useTranslations, localizeUrl} from "@/i18n/utils";
 
@@ -19,7 +18,9 @@ const dashboardUrl = localizeUrl("/dashboard", locale);
 const accountUrl = localizeUrl("/account", locale);
 ---
 
-<header class="border-border border-b">
+<header
+  class="from-seagull-50/80 dark:from-seagull-900/20 bg-gradient-to-b to-transparent"
+>
   <nav
     class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
     aria-label="Global"
@@ -28,13 +29,8 @@ const accountUrl = localizeUrl("/account", locale);
       <a href={homeUrl} class="-m-1.5 p-1.5">
         <span class="sr-only">Indigo CE</span>
         <img
-          class="h-8 w-auto dark:hidden"
-          src={Logo.src}
-          alt="Indigo CE Logo"
-        />
-        <img
-          class="hidden h-8 w-auto dark:block"
-          src={Logo.src}
+          class="bg-seagull-500/10 h-8 w-auto rounded-full p-2"
+          src="/icon.png"
           alt="Indigo CE Logo"
         />
       </a>
@@ -98,13 +94,8 @@ const accountUrl = localizeUrl("/account", locale);
         <a href={homeUrl} class="-m-1.5 p-1.5">
           <span class="sr-only">Indigo CE</span>
           <img
-            class="h-8 w-auto dark:hidden"
-            src={Logo.src}
-            alt="Indigo CE Logo"
-          />
-          <img
-            class="hidden h-8 w-auto dark:block"
-            src={Logo.src}
+            class="bg-seagull-500/10 h-8 w-auto rounded-full p-2"
+            src="/icon.png"
             alt="Indigo CE Logo"
           />
         </a>
