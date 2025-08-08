@@ -3,7 +3,7 @@ import {useTranslations, getLocaleFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Icon, CircleStack, PaintBrush, Key, Server} from "svelte-hero-icons";
 import {Image} from "astro:assets";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logotype.png";
 
 const lang = getLocaleFromParams(Astro.params);
 const t = useTranslations(lang);
@@ -13,10 +13,10 @@ const t = useTranslations(lang);
   <div class="py-24 sm:py-32">
     <div class="mx-auto max-w-7xl px-6 lg:px-8">
       <div class="mx-auto max-w-2xl lg:text-center">
-        <div class="mb-6 flex justify-center">
-          <Image src={logo} alt="Indigo Logo" class="h-40 w-auto" />
+        <div class="mb-12 flex justify-center">
+          <Image src={logo} alt="Indigo Logo" class="h-36 w-auto" />
         </div>
-        <p class="text-seagull-700 dark:text-seagull-500 text-lg/8">
+        <p class="text-seagull-500 text-lg/8">
           {t.home.description}
         </p>
       </div>
@@ -36,7 +36,7 @@ const t = useTranslations(lang);
             </div>
             {t.home.feature1.title}
           </dt>
-          <dd class="text-seagull-700 dark:text-seagull-200 mt-2 text-base/7">
+          <dd class="text-seagull-500 mt-2 text-base/7">
             {t.home.feature1.description}
           </dd>
         </div>
@@ -51,7 +51,7 @@ const t = useTranslations(lang);
             </div>
             {t.home.feature2.title}
           </dt>
-          <dd class="text-seagull-700 dark:text-seagull-200 mt-2 text-base/7">
+          <dd class="text-seagull-500 mt-2 text-base/7">
             {t.home.feature2.description}
           </dd>
         </div>
@@ -66,7 +66,7 @@ const t = useTranslations(lang);
             </div>
             {t.home.feature3.title}
           </dt>
-          <dd class="text-seagull-700 dark:text-seagull-200 mt-2 text-base/7">
+          <dd class="text-seagull-500 mt-2 text-base/7">
             {t.home.feature3.description}
           </dd>
         </div>
@@ -81,7 +81,7 @@ const t = useTranslations(lang);
             </div>
             {t.home.feature4.title}
           </dt>
-          <dd class="text-seagull-700 dark:text-seagull-200 mt-2 text-base/7">
+          <dd class="text-seagull-500 mt-2 text-base/7">
             {t.home.feature4.description}
           </dd>
         </div>
