@@ -1,6 +1,7 @@
 ---
 import UserProfile from "@/components/UserProfile.svelte";
 import LogoImage from "@/components/LogoImage.astro";
+import {Button} from "@/components/primitives/button";
 import {getLocaleFromUrl, useTranslations, localizeUrl} from "@/i18n/utils";
 
 export interface Props {
@@ -64,12 +65,9 @@ const accountUrl = localizeUrl("/account", locale);
             client:load
           />
         ) : (
-          <a
-            href={signInUrl}
-            class="text-sm/6 font-semibold text-gray-900 hover:text-gray-600 dark:text-white dark:hover:text-gray-300"
-          >
-            {t.nav.signin} <span aria-hidden="true">&rarr;</span>
-          </a>
+          <Button href={signInUrl} size="sm" client:load>
+            {t.nav.signin}
+          </Button>
         )
       }
     </div>
@@ -160,12 +158,9 @@ const accountUrl = localizeUrl("/account", locale);
                 </>
               ) : (
                 <div>
-                  <a
-                    href={signInUrl}
-                    class="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50 dark:text-white dark:hover:bg-gray-800"
-                  >
+                  <Button href={signInUrl} class="w-full" client:load>
                     {t.nav.signin}
-                  </a>
+                  </Button>
                 </div>
               )
             }
