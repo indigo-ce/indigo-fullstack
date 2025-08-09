@@ -6,6 +6,7 @@
 - [ ] Create a KV namespace for sessions using `pnpm wrangler kv namespace create "SESSION"` and add the binding to `wrangler.jsonc`.
 - [ ] Update `wrangler.jsonc` with your project name, D1 database details, and variables like `BETTER_AUTH_BASE_URL` and `SEND_EMAIL_FROM`.
 - [ ] Update project name in `package.json`
+- [ ] Update `CLAUDE.md` with project-specific architecture details and remove generic "Indigo Stack CE" references.
 - [ ] Update database schema.
 - [ ] Create a D1 database in Cloudflare and add its `binding`, `database_name`, and `database_id` to `wrangler.jsonc`.
 - [ ] Run `pnpm db:init:local` to initialize the local database.

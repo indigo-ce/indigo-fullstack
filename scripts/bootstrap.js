@@ -48,7 +48,8 @@ const filesToUpdate = [
   ".cursor/rules/project.mdc",
   "package.json",
   ".dev.vars.example",
-  "wrangler.jsonc"
+  "wrangler.jsonc",
+  "CLAUDE.md"
 ];
 
 const filesToDelete = ["scripts/bootstrap.js", "drizzle/*"];
