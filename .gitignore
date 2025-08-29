@@ -35,5 +35,5 @@ worker-configuration.d.ts
 # dev environment variables
 .dev.vars
 
-# SQL
-*.sql
+# SQL backups
+drizzle/backup.sql
