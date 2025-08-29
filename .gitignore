@@ -37,3 +37,4 @@ worker-configuration.d.ts
 
 # SQL backups
 drizzle/backup.sql
+.claude/settings.local.json
