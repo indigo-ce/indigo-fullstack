@@ -38,7 +38,8 @@ Indigo Stack CE is a free, open-source web application starter template built wi
 pnpm install
 cp .dev.vars.example .dev.vars # For local development secrets
 pnpm cf-types # Install Cloudflare types
-pnpm run dev
+pnpm run dev           # Astro dev server (Node runtime)
+pnpm run preview       # Cloudflare Workers emulation via Wrangler
 ```
 
 ## Commands
@@ -356,7 +357,12 @@ This template is configured to deploy to Cloudflare Pages with D1 Database and K
 
 ### Local Development
 
-For local development, the template uses Wrangler to emulate Cloudflare's environment. Use `pnpm dev` which runs `wrangler dev`. Environment variables for local development can be placed in `.dev.vars`. Secrets like API keys should generally be kept out of version control. The `platformProxy` option in the Astro config makes this seamless.
+For local development, choose between two workflows:
+
+- `pnpm dev` - Astro dev server (Node runtime, faster development)
+- `pnpm preview` - Cloudflare Workers emulation via Wrangler (production parity)
+
+Environment variables for local development can be placed in `.dev.vars`. Secrets like API keys should generally be kept out of version control. The `platformProxy` option in the Astro config makes this seamless.
 
 ### Production Deployment
 
