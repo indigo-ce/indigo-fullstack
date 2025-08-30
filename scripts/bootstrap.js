@@ -1,4 +1,4 @@
-import {spawn} from "child_process";
+import {spawn, spawnSync} from "child_process";
 
 // Take an argument from the command line
 const projectName = process.argv[2];
@@ -16,18 +16,17 @@ const trainCaseProjectName = projectName
   .map((word) => word.toLowerCase())
   .join("-");
 
-// Check if Claude is installed
+// Check if Claude is installed synchronously
 try {
-  const checkClaude = spawn("which", ["claude"], {stdio: "pipe"});
-  checkClaude.on("close", (code) => {
-    if (code !== 0) {
-      console.error("Claude CLI is not installed or not in your PATH.");
-      console.error(
-        "Please install Claude CLI or use another method to rename the project."
-      );
-      process.exit(1);
-    }
-  });
+  const checkClaude = spawnSync("which", ["claude"], {stdio: "pipe"});
+  
+  if (checkClaude.status !== 0) {
+    console.error("Claude CLI is not installed or not in your PATH.");
+    console.error(
+      "Please install Claude CLI or use another method to rename the project."
+    );
+    process.exit(1);
+  }
 } catch (error) {
   console.error("Failed to check for Claude CLI:", error.message);
   process.exit(1);
