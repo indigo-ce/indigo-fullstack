@@ -41,15 +41,33 @@ export const jwtMiddleware = async (
       );
     }
 
-    c.set("user", {
+    // Validate required payload fields
+    if (!payload.sub || typeof payload.sub !== 'string') {
+      return c.json(
+        {error: "Invalid token payload: missing or invalid subject", code: "JWT_INVALID"},
+        401
+      );
+    }
+
+    if (!payload.email || typeof payload.email !== 'string') {
+      return c.json(
+        {error: "Invalid token payload: missing or invalid email", code: "JWT_INVALID"},
+        401
+      );
+    }
+
+    // Create user object with proper type checking
+    const userData: typeof user.$inferSelect = {
       id: payload.sub,
-      name: payload.name,
+      name: typeof payload.name === 'string' ? payload.name : '',
       email: payload.email,
-      emailVerified: payload.emailVerified,
-      image: payload.image,
-      createdAt: payload.createdAt,
-      updatedAt: payload.updatedAt
-    } as typeof user.$inferSelect);
+      emailVerified: typeof payload.emailVerified === 'boolean' ? payload.emailVerified : false,
+      image: typeof payload.image === 'string' ? payload.image : null,
+      createdAt: typeof payload.createdAt === 'string' ? new Date(payload.createdAt) : new Date(),
+      updatedAt: typeof payload.updatedAt === 'string' ? new Date(payload.updatedAt) : new Date()
+    };
+
+    c.set("user", userData);
 
     await next();
   } catch (error) {
