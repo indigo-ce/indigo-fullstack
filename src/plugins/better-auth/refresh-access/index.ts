@@ -130,7 +130,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           );
 
           if (!user) {
-            ctx.context.logger.error("User not found", {email});
+            ctx.context.logger.error("User not found");
             throw new APIError("UNAUTHORIZED", {
               message: "Invalid email or password"
             });
@@ -148,7 +148,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
 
           const currentPassword = credentialAccount?.password;
           if (!currentPassword) {
-            ctx.context.logger.error("Password not found", {email});
+            ctx.context.logger.error("Password not found");
             throw new APIError("UNAUTHORIZED", {
               message: "Invalid email or password"
             });

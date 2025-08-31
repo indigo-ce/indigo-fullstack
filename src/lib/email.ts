@@ -7,17 +7,15 @@ export async function sendEmail(
   env: Env
 ): Promise<any> {
   if (process.env.NODE_ENV === "production") {
-    if (env.RESEND_API_KEY) {
-      return sendEmailWithResend(
-        to,
-        subject,
-        html,
-        env.RESEND_API_KEY,
-        env.SEND_EMAIL_FROM
-      );
-    } else {
-      throw new Error("RESEND_API_KEY is not set");
-    }
+    if (!env.RESEND_API_KEY) throw new Error("RESEND_API_KEY is not set");
+    if (!env.SEND_EMAIL_FROM) throw new Error("SEND_EMAIL_FROM is not set");
+    return sendEmailWithResend(
+      to,
+      subject,
+      html,
+      env.RESEND_API_KEY,
+      env.SEND_EMAIL_FROM
+    );
   } else {
     console.log("📤 Sending email with SMTP...");
     return sendEmailWithSMTP(to, subject, html, env.SEND_EMAIL_FROM);
@@ -29,9 +27,9 @@ async function sendEmailWithResend(
   subject: string,
   html: string,
   resendAPIKey: string,
-  sendEmailFrom?: string
+  sendEmailFrom: string
 ): Promise<any> {
-  const from = sendEmailFrom || "Indigo CE <noreply@example.com>";
+  const from = sendEmailFrom;
   const resend = new Resend(resendAPIKey);
 
   return resend.emails.send({
