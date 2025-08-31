@@ -8,7 +8,7 @@ import {
   Heading,
   Preview,
   Link,
-  Hr,
+  Hr
 } from "@react-email/components";
 
 type BaseLayoutProps = {
@@ -19,8 +19,8 @@ type BaseLayoutProps = {
 
 const BaseLayout = ({
   children,
-  title = "Indigo CE",
-  preview,
+  title = "Indigo Stack CE",
+  preview
 }: BaseLayoutProps) => (
   <Html>
     <Head />
@@ -39,7 +39,7 @@ const BaseLayout = ({
             target="_blank"
             style={{...link, color: "#898989"}}
           >
-            Indigo CE
+            Indigo Stack CE
           </Link>
         </Text>
       </Container>
@@ -50,13 +50,13 @@ const BaseLayout = ({
 export default BaseLayout;
 
 const body = {
-  backgroundColor: "#ffffff",
+  backgroundColor: "#ffffff"
 };
 
 const container = {
   paddingLeft: "12px",
   paddingRight: "12px",
-  margin: "0 auto",
+  margin: "0 auto"
 };
 
 const h1 = {
@@ -66,7 +66,7 @@ const h1 = {
   fontSize: "24px",
   fontWeight: "bold",
   margin: "40px 0",
-  padding: "0",
+  padding: "0"
 };
 
 const link = {
@@ -74,11 +74,11 @@ const link = {
   fontFamily:
     "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
   fontSize: "14px",
-  textDecoration: "underline",
+  textDecoration: "underline"
 };
 
 const border = {
-  borderColor: "#efefef",
+  borderColor: "#efefef"
 };
 
 const footer = {
@@ -88,5 +88,5 @@ const footer = {
   fontSize: "12px",
   lineHeight: "22px",
   marginTop: "12px",
-  marginBottom: "24px",
+  marginBottom: "24px"
 };

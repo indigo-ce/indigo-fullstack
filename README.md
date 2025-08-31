@@ -271,7 +271,7 @@ import {sendEmail} from "@/actions/email";
 // Send a welcome email
 await sendEmail({
   to: "user@example.com",
-  subject: "Welcome to Indigo CE!",
+  subject: "Welcome to Indigo Stack CE!",
   template: {name: "welcome", params: {name: "John"}}
 });
 

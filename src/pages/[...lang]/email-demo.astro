@@ -5,7 +5,7 @@ import Layout from "@/layouts/Layout.astro";
 const t = useTranslationsFromParams(Astro.params);
 ---
 
-<Layout title={`${t.email.demo} | Indigo CE`}>
+<Layout title={`${t.email.demo} | Indigo Stack CE`}>
   <div class="mx-auto max-w-4xl px-6 py-8 pt-12">
     <h1 class="text-foreground mb-8 text-2xl font-bold">{t.email.demo}</h1>
 
@@ -49,7 +49,7 @@ const t = useTranslationsFromParams(Astro.params);
               name="title"
               id="send-email__title"
               class="border-input bg-background w-full rounded-md border px-3 py-2"
-              placeholder="Indigo CE"
+              placeholder="Indigo Stack CE"
             />
           </div>
           <div>
@@ -66,7 +66,7 @@ const t = useTranslationsFromParams(Astro.params);
           </div>
           <button
             type="submit"
-            class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
           >
             {t.email.sendCustom}
           </button>
@@ -105,7 +105,7 @@ const t = useTranslationsFromParams(Astro.params);
           <button></button>
           <button
             type="submit"
-            class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+            class="ring-offset-background focus-visible:ring-ring bg-primary text-primary-foreground hover:bg-primary/90 inline-flex h-10 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
           >
             {t.email.sendWelcome}
           </button>

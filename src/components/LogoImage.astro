@@ -7,7 +7,7 @@ export interface Props {
 
 const {
   class: className = "",
-  alt = "Indigo CE Logo",
+  alt = "Indigo Stack CE Logo",
   size = "sm"
 } = Astro.props;
 
@@ -22,7 +22,7 @@ const sizeClasses = {
   class={`${sizeClasses[size]} ${className} relative overflow-hidden rounded-full bg-seagull-500/10 transition-transform duration-200 ease-out hover:scale-110 active:scale-95`}
 >
   <img
-    class="absolute -mx-2 my-1.5 h-full w-full scale-140 object-cover"
+    class="scale-140 absolute -mx-2 my-1.5 h-full w-full object-cover"
     src="/icon.png"
     alt={alt}
   />
