@@ -50,7 +50,7 @@ async function sendEmailWithSMTP(
     "./nodemailer-util"
   );
   const transporter = await getEmailTransporter();
-  const from = sendEmailFrom || "Indigo CE <noreply@example.com>";
+  const from = sendEmailFrom || "Indigo Stack CE <noreply@example.com>";
   const message = {to, subject, html, from};
 
   return new Promise((resolve, reject) => {
