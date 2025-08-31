@@ -42,26 +42,6 @@ export default defineConfig({
             }
           : {})
       }
-    },
-    ssr: {
-      // Used to avoid SSR issues with nodemailer (dev only))
-      external: [
-        "events",
-        "util",
-        "url",
-        "net",
-        "dns",
-        "crypto",
-        "fs",
-        "os",
-        "child_process",
-        "http",
-        "https",
-        "zlib",
-        "stream",
-        "path",
-        "tls"
-      ]
     }
   },
   integrations: [svelte(), react()]
