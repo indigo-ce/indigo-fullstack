@@ -5,91 +5,143 @@ import {jwtMiddleware} from "@/lib/hono/middleware/jwtMiddleware";
 // Mock the jose library
 vi.mock("jose", () => ({
   jwtVerify: vi.fn(),
-  createLocalJWKSet: vi.fn()
-}));
-
-// Mock JWKS cache
-vi.mock("@/lib/jwks-cache", () => ({
-  default: {
-    getKeys: vi.fn().mockResolvedValue({
-      keys: [{
-        kty: "RSA",
-        kid: "test-key-id", 
-        n: "test-n",
-        e: "AQAB"
-      }]
-    })
+  createLocalJWKSet: vi.fn(),
+  JOSEError: class JOSEError extends Error {
+    code: string;
+    constructor(message: string, code: string = "ERR_JWT_EXPIRED") {
+      super(message);
+      this.code = code;
+    }
   }
 }));
 
-describe("JWT Middleware", () => {
+// Mock the jwks cache
+vi.mock("@/lib/jwks-cache", () => ({
+  default: {
+    getKeys: vi.fn()
+  }
+}));
+
+describe("JWT Middleware Unit Tests", () => {
   let mockContext: Partial<Context>;
   let mockNext: Next;
 
-  beforeEach(async () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.spyOn(console, "error").mockImplementation(() => {});
     mockContext = {
       req: {
         header: vi.fn()
-      },
-      get: vi.fn().mockImplementation((key) => {
-        if (key === "auth") return { someAuthObject: true };
-        if (key === "env") return {
-          BETTER_AUTH_BASE_URL: "http://localhost:3000"
-        };
-        return {};
-      }),
-      set: vi.fn(),
-      json: vi.fn()
-    };
+      } as any,
+      json: vi.fn(),
+      get: vi.fn(),
+      set: vi.fn()
+    } as any;
     mockNext = vi.fn();
-    
-    // Reset all mocks
-    vi.clearAllMocks();
   });
 
-  it("should return 401 when no token provided", async () => {
-    mockContext.req!.header = vi.fn().mockReturnValue(null);
-    
+  it("should reject requests without authorization header", async () => {
+    (mockContext.req!.header as any).mockReturnValue(undefined);
+
     await jwtMiddleware(mockContext as Context, mockNext);
-    
-    expect(mockContext.json).toHaveBeenCalledWith({ error: "Unauthorized" }, 401);
+
+    expect(mockContext.json).toHaveBeenCalledWith({error: "Unauthorized"}, 401);
     expect(mockNext).not.toHaveBeenCalled();
   });
 
-  it("should handle valid JWT token", async () => {
-    const {jwtVerify, createLocalJWKSet} = await import("jose");
-    const jwksCache = (await import("@/lib/jwks-cache")).default;
-    
-    mockContext.req!.header = vi.fn().mockReturnValue("Bearer valid.jwt.token");
-    vi.mocked(createLocalJWKSet).mockReturnValue({});
-    vi.mocked(jwtVerify).mockResolvedValue({
-      payload: {
-        sub: "user-123",
-        email: "test@example.com",
-        name: "Test User"
-      }
-    });
-    
+  it("should reject requests without Bearer token", async () => {
+    (mockContext.req!.header as any).mockReturnValue("InvalidFormat");
+
     await jwtMiddleware(mockContext as Context, mockNext);
-    
-    expect(mockContext.set).toHaveBeenCalledWith("user", expect.any(Object));
-    expect(mockNext).toHaveBeenCalled();
+
+    expect(mockContext.json).toHaveBeenCalledWith({error: "Unauthorized"}, 401);
+    expect(mockNext).not.toHaveBeenCalled();
   });
 
-  it("should handle invalid JWT token", async () => {
-    const {jwtVerify} = await import("jose");
-    
-    mockContext.req!.header = vi.fn().mockReturnValue("Bearer invalid.jwt.token");
-    const joseError = new Error("Invalid token");
-    joseError.code = "ERR_JWT_EXPIRED";
-    vi.mocked(jwtVerify).mockRejectedValue(joseError);
-    
+  it("should handle missing BETTER_AUTH_BASE_URL", async () => {
+    (mockContext.req!.header as any).mockReturnValue("Bearer valid-token");
+    (mockContext.get as any).mockImplementation((key: string) => {
+      if (key === "auth") return {};
+      if (key === "env") return {};
+      return undefined;
+    });
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as any).mockResolvedValue({});
+
     await jwtMiddleware(mockContext as Context, mockNext);
-    
+
     expect(mockContext.json).toHaveBeenCalledWith(
-      expect.objectContaining({ error: expect.any(String) }),
+      {error: "Server misconfiguration", code: "SERVER_ERROR"},
+      500
+    );
+  });
+
+  it("should handle JWT verification errors", async () => {
+    const {jwtVerify, createLocalJWKSet} = await import("jose");
+
+    (mockContext.req!.header as any).mockReturnValue("Bearer invalid-token");
+    (mockContext.get as any).mockImplementation((key: string) => {
+      if (key === "auth") return {};
+      if (key === "env") return {BETTER_AUTH_BASE_URL: "http://localhost:3000"};
+      return undefined;
+    });
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as any).mockResolvedValue({});
+    (createLocalJWKSet as any).mockReturnValue({});
+
+    // Create a mock JOSE error
+    const mockJOSEError = new Error("Token expired");
+    (mockJOSEError as any).code = "ERR_JWT_EXPIRED";
+    (jwtVerify as any).mockRejectedValue(mockJOSEError);
+
+    await jwtMiddleware(mockContext as Context, mockNext);
+
+    expect(mockContext.json).toHaveBeenCalledWith(
+      {
+        error: "You are not authorized to access this resource",
+        code: "UNAUTHORIZED"
+      },
       401
     );
-    expect(mockNext).not.toHaveBeenCalled();
+  });
+
+  it("should set user in context on successful verification", async () => {
+    const {jwtVerify, createLocalJWKSet} = await import("jose");
+
+    const mockPayload = {
+      sub: "user-123",
+      name: "Test User",
+      email: "test@example.com",
+      emailVerified: true,
+      image: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    (mockContext.req!.header as any).mockReturnValue("Bearer valid-token");
+    (mockContext.get as any).mockImplementation((key: string) => {
+      if (key === "auth") return {};
+      if (key === "env") return {BETTER_AUTH_BASE_URL: "http://localhost:3000"};
+      return undefined;
+    });
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as any).mockResolvedValue({});
+    (createLocalJWKSet as any).mockReturnValue({});
+    (jwtVerify as any).mockResolvedValue({payload: mockPayload});
+
+    await jwtMiddleware(mockContext as Context, mockNext);
+
+    expect(mockContext.set).toHaveBeenCalledWith(
+      "user",
+      expect.objectContaining({
+        id: mockPayload.sub,
+        name: mockPayload.name,
+        email: mockPayload.email
+      })
+    );
+    expect(mockNext).toHaveBeenCalled();
   });
 });
