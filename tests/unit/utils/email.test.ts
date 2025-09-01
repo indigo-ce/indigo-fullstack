@@ -5,21 +5,21 @@ import {sendEmail} from "@/lib/email";
 vi.mock("resend", () => ({
   Resend: vi.fn().mockImplementation(() => ({
     emails: {
-      send: vi.fn().mockResolvedValue({ id: "test-email-id" })
+      send: vi.fn().mockResolvedValue({id: "test-email-id"})
     }
   }))
 }));
 
 describe("Email Utilities", () => {
-  let mockEnv: Env;
+  let mockEnv: Partial<Env>;
 
   beforeEach(() => {
     mockEnv = {
       RESEND_API_KEY: "re_test_key",
-      SEND_EMAIL_FROM: "Test <test@example.com>",
+      SEND_EMAIL_FROM: "Indigo Stack CE <noreply@indigostack.org>",
       BETTER_AUTH_BASE_URL: "http://localhost:3000"
-    } as Env;
-    
+    };
+
     // Clear all mocks
     vi.clearAllMocks();
   });
@@ -31,7 +31,12 @@ describe("Email Utilities", () => {
 
       // Just test that the function runs without throwing
       await expect(
-        sendEmail("user@example.com", "Test Subject", "<p>Test content</p>", mockEnv)
+        sendEmail(
+          "user@example.com",
+          "Test Subject",
+          "<p>Test content</p>",
+          mockEnv as Env
+        )
       ).resolves.toBeDefined();
 
       process.env.NODE_ENV = originalNodeEnv;
@@ -43,28 +48,43 @@ describe("Email Utilities", () => {
 
       // Just test that the function runs without throwing
       await expect(
-        sendEmail("user@example.com", "Test Subject", "<p>Test content</p>", mockEnv)
+        sendEmail(
+          "user@example.com",
+          "Test Subject",
+          "<p>Test content</p>",
+          mockEnv as Env
+        )
       ).resolves.toBeDefined();
 
       process.env.NODE_ENV = originalNodeEnv;
     });
 
     it("should throw error when RESEND_API_KEY is missing", async () => {
-      mockEnv.RESEND_API_KEY = undefined;
+      delete (mockEnv as any).RESEND_API_KEY;
 
       await expect(
-        sendEmail("user@example.com", "Test Subject", "<p>Test content</p>", mockEnv)
+        sendEmail(
+          "user@example.com",
+          "Test Subject",
+          "<p>Test content</p>",
+          mockEnv as Env
+        )
       ).rejects.toThrow("RESEND_API_KEY");
     });
 
     it("should throw error when SEND_EMAIL_FROM is missing in production", async () => {
       const originalNodeEnv = process.env.NODE_ENV;
       process.env.NODE_ENV = "production";
-      
-      mockEnv.SEND_EMAIL_FROM = undefined;
+
+      delete (mockEnv as any).SEND_EMAIL_FROM;
 
       await expect(
-        sendEmail("user@example.com", "Test Subject", "<p>Test content</p>", mockEnv)
+        sendEmail(
+          "user@example.com",
+          "Test Subject",
+          "<p>Test content</p>",
+          mockEnv as Env
+        )
       ).rejects.toThrow("SEND_EMAIL_FROM");
 
       process.env.NODE_ENV = originalNodeEnv;
