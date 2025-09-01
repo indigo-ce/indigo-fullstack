@@ -58,10 +58,12 @@ if (Astro.request.method === "POST") {
         status?: string;
         [key: string]: any;
       };
-      throw new APIError(
-        (errorData.status as any) || "INTERNAL_SERVER_ERROR",
-        errorData
-      );
+
+      type BetterAuthStatus = ConstructorParameters<typeof APIError>[0];
+      const status = (errorData.status ??
+        "INTERNAL_SERVER_ERROR") as BetterAuthStatus;
+
+      throw new APIError(status, errorData);
     } else {
       return new Response(null, {
         status: 302,
