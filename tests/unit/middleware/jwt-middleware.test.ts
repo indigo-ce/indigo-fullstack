@@ -1,6 +1,7 @@
 import {describe, it, expect, vi, beforeEach} from "vitest";
-import type {Context, Next} from "hono";
+import type {Context} from "hono";
 import {jwtMiddleware} from "@/lib/hono/middleware/jwtMiddleware";
+import type {MockNext} from "tests/unit/utils/mock-types";
 
 // Mock the jose library
 vi.mock("jose", () => ({
@@ -23,44 +24,75 @@ vi.mock("@/lib/jwks-cache", () => ({
 }));
 
 describe("JWT Middleware Unit Tests", () => {
-  let mockContext: Partial<Context>;
-  let mockNext: Next;
+  let mockContext: Context;
+  let mockNext: MockNext;
+  let mockGet: any;
+  let mockJson: any;
+  let mockSet: any;
+  let mockHeader: any;
 
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(console, "error").mockImplementation(() => {});
+
+    // Create mock functions
+    mockGet = vi.fn();
+    mockJson = vi.fn();
+    mockSet = vi.fn();
+    mockHeader = vi.fn();
+
+    // Create mock context with our functions
     mockContext = {
       req: {
-        header: vi.fn()
-      } as any,
-      json: vi.fn(),
-      get: vi.fn(),
-      set: vi.fn()
-    } as any;
+        header: mockHeader
+      },
+      json: mockJson,
+      get: mockGet,
+      set: mockSet,
+      // Add required Context properties
+      env: {} as any,
+      var: {} as any,
+      executionCtx: {} as any,
+      event: {} as any,
+      finalized: false,
+      error: undefined as any,
+      status: vi.fn(),
+      header: vi.fn(),
+      body: vi.fn(),
+      text: vi.fn(),
+      html: vi.fn(),
+      redirect: vi.fn(),
+      cookie: vi.fn(),
+      notFound: vi.fn(),
+      res: {} as any,
+      newResponse: vi.fn(),
+      render: vi.fn()
+    } as unknown as Context;
+
     mockNext = vi.fn();
   });
 
   it("should reject requests without authorization header", async () => {
-    (mockContext.req!.header as any).mockReturnValue(undefined);
+    mockHeader.mockReturnValue(undefined);
 
-    await jwtMiddleware(mockContext as Context, mockNext);
+    await jwtMiddleware(mockContext, mockNext);
 
-    expect(mockContext.json).toHaveBeenCalledWith({error: "Unauthorized"}, 401);
+    expect(mockJson).toHaveBeenCalledWith({error: "Unauthorized"}, 401);
     expect(mockNext).not.toHaveBeenCalled();
   });
 
   it("should reject requests without Bearer token", async () => {
-    (mockContext.req!.header as any).mockReturnValue("InvalidFormat");
+    mockHeader.mockReturnValue("InvalidFormat");
 
-    await jwtMiddleware(mockContext as Context, mockNext);
+    await jwtMiddleware(mockContext, mockNext);
 
-    expect(mockContext.json).toHaveBeenCalledWith({error: "Unauthorized"}, 401);
+    expect(mockJson).toHaveBeenCalledWith({error: "Unauthorized"}, 401);
     expect(mockNext).not.toHaveBeenCalled();
   });
 
   it("should handle missing BETTER_AUTH_BASE_URL", async () => {
-    (mockContext.req!.header as any).mockReturnValue("Bearer valid-token");
-    (mockContext.get as any).mockImplementation((key: string) => {
+    mockHeader.mockReturnValue("Bearer valid-token");
+    mockGet.mockImplementation((key: string) => {
       if (key === "auth") return {};
       if (key === "env") return {};
       return undefined;
@@ -69,9 +101,9 @@ describe("JWT Middleware Unit Tests", () => {
     const jwksCache = await import("@/lib/jwks-cache");
     (jwksCache.default.getKeys as any).mockResolvedValue({});
 
-    await jwtMiddleware(mockContext as Context, mockNext);
+    await jwtMiddleware(mockContext, mockNext);
 
-    expect(mockContext.json).toHaveBeenCalledWith(
+    expect(mockJson).toHaveBeenCalledWith(
       {error: "Server misconfiguration", code: "SERVER_ERROR"},
       500
     );
@@ -80,8 +112,8 @@ describe("JWT Middleware Unit Tests", () => {
   it("should handle JWT verification errors", async () => {
     const {jwtVerify, createLocalJWKSet} = await import("jose");
 
-    (mockContext.req!.header as any).mockReturnValue("Bearer invalid-token");
-    (mockContext.get as any).mockImplementation((key: string) => {
+    mockHeader.mockReturnValue("Bearer invalid-token");
+    mockGet.mockImplementation((key: string) => {
       if (key === "auth") return {};
       if (key === "env") return {BETTER_AUTH_BASE_URL: "http://localhost:3000"};
       return undefined;
@@ -96,9 +128,9 @@ describe("JWT Middleware Unit Tests", () => {
     (mockJOSEError as any).code = "ERR_JWT_EXPIRED";
     (jwtVerify as any).mockRejectedValue(mockJOSEError);
 
-    await jwtMiddleware(mockContext as Context, mockNext);
+    await jwtMiddleware(mockContext, mockNext);
 
-    expect(mockContext.json).toHaveBeenCalledWith(
+    expect(mockJson).toHaveBeenCalledWith(
       {
         error: "You are not authorized to access this resource",
         code: "UNAUTHORIZED"
@@ -120,8 +152,8 @@ describe("JWT Middleware Unit Tests", () => {
       updatedAt: new Date().toISOString()
     };
 
-    (mockContext.req!.header as any).mockReturnValue("Bearer valid-token");
-    (mockContext.get as any).mockImplementation((key: string) => {
+    mockHeader.mockReturnValue("Bearer valid-token");
+    mockGet.mockImplementation((key: string) => {
       if (key === "auth") return {};
       if (key === "env") return {BETTER_AUTH_BASE_URL: "http://localhost:3000"};
       return undefined;
@@ -132,9 +164,9 @@ describe("JWT Middleware Unit Tests", () => {
     (createLocalJWKSet as any).mockReturnValue({});
     (jwtVerify as any).mockResolvedValue({payload: mockPayload});
 
-    await jwtMiddleware(mockContext as Context, mockNext);
+    await jwtMiddleware(mockContext, mockNext);
 
-    expect(mockContext.set).toHaveBeenCalledWith(
+    expect(mockSet).toHaveBeenCalledWith(
       "user",
       expect.objectContaining({
         id: mockPayload.sub,

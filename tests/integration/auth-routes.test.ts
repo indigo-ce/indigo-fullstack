@@ -6,6 +6,7 @@ import type {user} from "@/db/schema";
 
 // Type definitions for test responses
 type User = typeof user.$inferSelect;
+
 type SignInSuccessResponse = {
   user: User;
   token: string;
@@ -48,7 +49,7 @@ describe("Auth Routes Integration Tests", () => {
     const {authMiddleware} = await import(
       "@/lib/hono/middleware/authMiddleware"
     );
-    app.use("*", authMiddleware(env as any));
+    app.use("*", authMiddleware(env));
     app.route("/auth", authRoutes);
   });
 
