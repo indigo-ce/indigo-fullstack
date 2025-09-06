@@ -226,7 +226,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
       ),
 
       // Refresh token endpoint
-      refreshToken: createAuthEndpoint(
+      refreshTokens: createAuthEndpoint(
         "/auth-tokens/refresh",
         {
           method: "POST",
@@ -288,7 +288,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
       ),
 
       // Revoke token endpoint
-      revokeToken: createAuthEndpoint(
+      revokeTokens: createAuthEndpoint(
         "/auth-tokens/revoke",
         {
           method: "POST",
