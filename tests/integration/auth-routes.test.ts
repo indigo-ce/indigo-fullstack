@@ -51,7 +51,7 @@ describe("Auth Routes Integration Tests", () => {
     const {authMiddleware} = await import(
       "@/lib/hono/middleware/authMiddleware"
     );
-    app.use("*", authMiddleware(env));
+    app.use("*", authMiddleware(env as any));
     app.route("/auth", authRoutes);
   });
 
