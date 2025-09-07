@@ -25,13 +25,16 @@ describe("Auth Middleware Unit Tests", () => {
     mockEnv = {
       SESSION: {},
       SEND_EMAIL_FROM: "test@example.com",
+      BETTER_AUTH_BASE_URL: "http://localhost:3000",
+      DB: {},
+      ASSETS: {},
       RESEND_API_KEY: "test-key",
       BETTER_AUTH_SECRET: "test-secret"
     };
   });
 
   it("should set auth object in context", async () => {
-    const middleware = authMiddleware(mockEnv);
+    const middleware = authMiddleware(mockEnv as any);
 
     await middleware(mockContext, mockNext);
 
@@ -40,7 +43,7 @@ describe("Auth Middleware Unit Tests", () => {
   });
 
   it("should call next middleware", async () => {
-    const middleware = authMiddleware(mockEnv);
+    const middleware = authMiddleware(mockEnv as any);
 
     await middleware(mockContext, mockNext);
 
@@ -59,7 +62,7 @@ describe("Auth Middleware Unit Tests", () => {
       ASSETS: {}
     };
 
-    const middleware = authMiddleware(testEnv);
+    const middleware = authMiddleware(testEnv as any);
 
     await middleware(mockContext, mockNext);
 
