@@ -1,12 +1,16 @@
-import "dotenv/config";
 import {createBackup} from "@cretezy/cloudflare-d1-backup";
 import {mkdir, writeFile} from "fs/promises";
 import path from "path";
 
 try {
   // Validate required environment variables
-  const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_TOKEN} = process.env;
-  for (const [k, v] of Object.entries({CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_TOKEN})) {
+  const {CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_DATABASE_ID, CLOUDFLARE_TOKEN} =
+    process.env;
+  for (const [k, v] of Object.entries({
+    CLOUDFLARE_ACCOUNT_ID,
+    CLOUDFLARE_DATABASE_ID,
+    CLOUDFLARE_TOKEN
+  })) {
     if (!v) {
       throw new Error(`Missing required environment variable: ${k}`);
     }

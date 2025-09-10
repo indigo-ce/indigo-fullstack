@@ -104,8 +104,7 @@ Also configure `BETTER_AUTH_BASE_URL` in your `wrangler.jsonc` file under the `v
 
 ### Resend
 
-This template uses Resend for email functionality.
-During development, emails are sent via SMTP to Ethereal if `RESEND_API_KEY` is not set in `.dev.vars`.
+This template uses [Resend](https://resend.com) for email functionality.
 
 To set up Resend for production, create an account and set the `RESEND_API_KEY` secret using wrangler CLI:
 
@@ -113,7 +112,31 @@ To set up Resend for production, create an account and set the `RESEND_API_KEY` 
 pnpm wrangler secret put RESEND_API_KEY
 ```
 
+For local development, add `RESEND_API_KEY` to your `.dev.vars` file.
 The sender email address (`SEND_EMAIL_FROM`) should be configured in your `wrangler.jsonc` file under the `vars` section for production.
+
+#### Development Testing with resend.dev
+
+For local development, Indigo Stack automatically uses Resend's testing domains to avoid domain verification issues:
+
+- **All verification emails** are sent to `delivered@resend.dev` (instead of real user emails)
+- **Sender address** uses `onboarding@resend.dev` (no domain verification required)
+- **Full functionality** - You can test the complete email verification flow
+
+**Available test scenarios:**
+
+- `delivered@resend.dev` - Test successful email delivery
+- `bounced@resend.dev` - Test email bounces
+- `complained@resend.dev` - Test spam marking
+
+This setup allows you to test email verification without:
+
+- Domain verification requirements
+- Real email addresses
+- SMTP configuration
+- External email services
+
+Simply sign up with any email address locally, and the verification email will be sent to `delivered@resend.dev`. Check your [Resend dashboard](https://resend.com/emails) to see the delivery.
 
 ### Astro Session
 
@@ -237,7 +260,7 @@ const userWithSessions = await db
 
 ## Emails
 
-The application includes built-in email functionality using [Resend](https://resend.com) (if `RESEND_API_KEY` is set via wrangler secrets or `.dev.vars`) with fallback to SMTP/Ethereal for development.
+The application includes built-in email functionality using [Resend](https://resend.com) exclusively for both development and production.
 
 ### Configuration
 
@@ -248,7 +271,7 @@ For production, configure the following:
 
 For local development:
 
-- Add `RESEND_API_KEY` to your `.dev.vars` file. If omitted, the app will fall back to using Ethereal via SMTP.
+- Add `RESEND_API_KEY` to your `.dev.vars` file for local email testing.
 - The `SEND_EMAIL_FROM` variable from `wrangler.jsonc` will be used if available during `wrangler dev`.
 
 ### Email Templates
@@ -285,7 +308,7 @@ await sendEmail({
 
 ### Sending Test Emails
 
-Visit `/email-demo` to try the email functionality. In development, emails are sent to Ethereal (a test SMTP service) and you'll see preview links in the console.
+Visit `/email-demo` to try the email functionality. In development, emails are sent via Resend's testing domains.
 
 ### Preview Emails Templates
 

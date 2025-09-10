@@ -38,7 +38,7 @@ This is an Astro application with Svelte components for interactivity and React 
 - **API Layer**: Hono-based REST API mounted at `/api/v1/*` with modular route organization
 - **Database**: Drizzle ORM with Cloudflare D1 (serverless SQLite)
 - **Authentication**: Better Auth with JWT tokens and refresh token plugin
-- **Email**: React Email templates with Resend API (fallback to SMTP in development)
+- **Email**: React Email templates with Resend API exclusively
 - **Deployment**: Cloudflare Workers with static assets
 
 ### Request Flow Architecture
@@ -87,10 +87,10 @@ Type-safe i18n with locale-aware routing:
 
 ### Email System Architecture
 
-React Email templates with dual delivery:
+React Email templates with Resend API:
 
 - **Production**: Resend API with custom domain
-- **Development**: Ethereal SMTP for testing (when RESEND_API_KEY not set)
+- **Development**: Resend API with resend.dev testing domains
 - Template organization in `src/components/email/` with shared BaseLayout
 - Preview server available via `pnpm preview-email`
 
@@ -159,7 +159,6 @@ React Email templates with dual delivery:
 
 - No Node.js built-ins in production runtime
 - React 19 requires `react-dom/server.edge` in production (configured in Astro config)
-- Nodemailer externals configured for development SSR only
 
 ### Better Auth Configuration
 
@@ -175,7 +174,7 @@ React Email templates with dual delivery:
 
 ### Development vs Production
 
-- Email: Ethereal SMTP (dev) vs Resend API (prod)
+- Email: Resend API with resend.dev testing (dev) vs Resend API (prod)
 - Database: Local D1 file vs remote Cloudflare D1
 - Secrets: `.dev.vars` file vs Wrangler secrets
 - Assets: Dev server vs Cloudflare Workers static assets
