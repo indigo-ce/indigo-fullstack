@@ -11,37 +11,63 @@ import {actions} from "astro:actions";
 const locale = getLocaleFromParams(Astro.params);
 const t = useTranslationsFromParams(Astro.params);
 
-if (!Astro.locals.user?.id)
-  return Astro.redirect(localizeUrl("/sign-in", locale));
-
-const user = Astro.locals.user;
-
-if (user.emailVerified)
+// Check if user is authenticated and email is already verified
+if (Astro.locals.user?.id && Astro.locals.user?.emailVerified) {
   return Astro.redirect(localizeUrl("/dashboard", locale));
+}
 
-const emailSent = Astro.url.searchParams.get("emailSent");
+let email = "";
+let isAuthenticated = false;
+let successMessage = "";
+let shouldProcessPost = false;
+
+// Check for authenticated user first
+if (Astro.locals.user?.id) {
+  isAuthenticated = true;
+  email = Astro.locals.user.email;
+} else {
+  // Fall back to cookies for unauthenticated users
+  email = Astro.cookies.get("verify-email")?.value || "";
+}
+
+// Handle POST request before redirect check
+if (Astro.request.method === "POST") {
+  shouldProcessPost = true;
+  
+  if (!email) {
+    // Try to get email from form data for POST
+    const formData = await Astro.request.formData();
+    email = formData.get("email")?.toString() || "";
+  }
+}
+
+// Only redirect if no email AND not processing a POST
+if (!email && !shouldProcessPost) {
+  return Astro.redirect(localizeUrl("/sign-in", locale));
+}
+
+// Clear cookies only after we're sure we don't need them
+if (!isAuthenticated && email) {
+  Astro.cookies.delete("verify-email");
+  Astro.cookies.delete("verify-name");
+}
 
 const errors = {
   server: ""
 };
 
-if (Astro.request.method === "POST") {
-  const {error} = await Astro.callAction(
+if (shouldProcessPost) {
+  const {error, data} = await Astro.callAction(
     actions.authentication.resendVerificationEmail,
     {
-      email: user.email
+      email: email
     }
   );
 
   if (error) {
     errors.server = t.auth.resendVerificationError;
-  } else {
-    return Astro.redirect(
-      localizeUrl(
-        "/verify-email?emailSent=true",
-        getLocaleFromParams(Astro.params)
-      )
-    );
+  } else if (data?.success) {
+    successMessage = "Email sent successfully!";
   }
 }
 ---
@@ -53,7 +79,7 @@ if (Astro.request.method === "POST") {
 
       <p class="text-muted-foreground mb-6">
         {t.auth.verifyDescription}
-        <strong>{user.email}</strong>. {t.auth.verifyInstruction}
+        <strong>{email}</strong>. {t.auth.verifyInstruction}
       </p>
 
       <div>
@@ -66,12 +92,13 @@ if (Astro.request.method === "POST") {
         }
 
         {
-          emailSent ? (
-            <p class="text-xs text-green-500" id="success">
-              ✅ {t.email.success}
-            </p>
+          successMessage ? (
+            <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
+              ✅ {successMessage}
+            </div>
           ) : (
             <form method="POST">
+              <input type="hidden" name="email" value={email} />
               <Button type="submit" variant="default" size="lg">
                 {t.auth.resendVerification}
               </Button>

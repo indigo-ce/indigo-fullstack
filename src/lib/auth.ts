@@ -22,6 +22,7 @@ export function createAuth(env: Env) {
   return betterAuth({
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_BASE_URL,
+    trustedOrigins: [env.BETTER_AUTH_BASE_URL],
     database: drizzleAdapter(createDrizzle(env.DB), {provider: "sqlite"}),
     user: {
       changeEmail: {
