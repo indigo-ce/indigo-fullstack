@@ -109,7 +109,7 @@
     "setupTitle": "Setup Instructions",
     "setupDescription": "To use Resend for email sending, add the following environment variables:",
     "templateInfo": "Email templates are built with React Email for improved maintainability and design consistency.",
-    "devInfo": "For development, the app will use Ethereal for testing emails without sending real messages.",
+    "devInfo": "For development, the app will use Resend with delivered@resend.dev for testing emails without sending to real addresses.",
     "subject": "Subject",
     "emailTitle": "Email Title (optional)",
     "message": "Message",
