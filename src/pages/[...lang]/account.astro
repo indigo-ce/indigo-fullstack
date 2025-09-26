@@ -1,9 +1,9 @@
 ---
 import {getLocaleFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
-import {Button} from "@/components/primitives/button";
-import {Input} from "@/components/primitives/input";
-import PasswordField from "@/components/PasswordField.svelte";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {PasswordField} from "@/components/PasswordField.tsx";
 import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import type {APIError} from "better-auth/api";
@@ -161,14 +161,14 @@ const success = Astro.url.searchParams.get("success");
             <Input
               type="text"
               placeholder={t.account.name}
-              class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
+              className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
               name="name"
               required
-              value={fields.name}
-              client:only="svelte"
+              defaultValue={fields.name}
+              
             />
           </div>
-          <Button type="submit" class="w-full" client:only="svelte">
+          <Button type="submit" className="w-full" >
             {t.account.update}
           </Button>
         </form>
@@ -192,14 +192,14 @@ const success = Astro.url.searchParams.get("success");
             <Input
               type="email"
               placeholder={t.account.email}
-              class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
+              className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
               name="email"
               required
-              value={fields.email}
-              client:only="svelte"
+              defaultValue={fields.email}
+              
             />
           </div>
-          <Button type="submit" class="w-full" client:only="svelte">
+          <Button type="submit" className="w-full" >
             {t.account.update}
           </Button>
         </form>
@@ -221,18 +221,18 @@ const success = Astro.url.searchParams.get("success");
             className="mb-2"
             placeholder={t.auth.password}
             required
-            client:load
-            value={fields.currentPassword}
+            
+            defaultValue={fields.currentPassword}
           />
           <PasswordField
             className="mb-2"
             name="newPassword"
             placeholder={t.auth.newPassword}
             required
-            client:load
-            value={fields.newPassword}
+            
+            defaultValue={fields.newPassword}
           />
-          <Button type="submit" class="w-full" client:only="svelte">
+          <Button type="submit" className="w-full" >
             {t.account.update}
           </Button>
         </form>

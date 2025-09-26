@@ -2,8 +2,8 @@
 import Welcome from "@/components/Welcome.astro";
 import Layout from "@/layouts/Layout.astro";
 import "@/styles.css";
-import {Button} from "@/components/primitives/button";
-import DeleteConfirmation from "@/components/DeleteConfirmation.svelte";
+import {Button} from "@/components/ui/button";
+import {DeleteConfirmation} from "@/components/DeleteConfirmation.tsx";
 import {
   getLocaleFromParams,
   useTranslationsFromParams,
@@ -36,8 +36,8 @@ const verifyEmailUrl = localizeUrl("/verify-email", locale);
             {locale === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
             {locale === "ja" ? "は確認されていません" : "is not verified"}
           </p>
-          <Button href={verifyEmailUrl} variant="outline" size="sm" client:only="svelte">
-            {t.dashboard.noEmailReceived}
+          <Button asChild variant="outline" size="sm">
+            <a href={verifyEmailUrl}>{t.dashboard.noEmailReceived}</a>
           </Button>
         </div>
       )
@@ -45,13 +45,13 @@ const verifyEmailUrl = localizeUrl("/verify-email", locale);
 
     <Welcome user={user} locale={locale} />
     <div class="flex flex-wrap items-center gap-4">
-      <Button href={accountUrl} variant="outline" size="sm" client:only="svelte">
-        {t.nav.account}
+      <Button asChild variant="outline" size="sm">
+        <a href={accountUrl}>{t.nav.account}</a>
       </Button>
-      <Button href={emailDemoUrl} variant="outline" size="sm" client:only="svelte">
-        {t.dashboard.emailDemo}
+      <Button asChild variant="outline" size="sm">
+        <a href={emailDemoUrl}>{t.dashboard.emailDemo}</a>
       </Button>
-      <DeleteConfirmation client:load locale={locale} />
+      <DeleteConfirmation  locale={locale} />
     </div>
   </div>
 </Layout>

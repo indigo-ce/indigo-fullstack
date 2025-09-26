@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import {Button} from "@/components/primitives/button";
+import {Button} from "@/components/ui/button";
 import {
   useTranslationsFromParams,
   localizeUrl,
@@ -32,7 +32,9 @@ const homeUrl = localizeUrl("/", locale);
       <p class="text-muted-foreground mb-8 text-center">
         {t.error[404].message}
       </p>
-      <Button href={homeUrl} size="lg" class="w-full" client:only="svelte">{t.error.goHome}</Button>
+      <Button asChild size="lg" className="w-full">
+        <a href={homeUrl}>{t.error.goHome}</a>
+      </Button>
     </div>
   </div>
 </Layout>

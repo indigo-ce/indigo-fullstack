@@ -1,7 +1,7 @@
 ---
-import UserProfile from "@/components/UserProfile.svelte";
+import {UserProfile} from "@/components/UserProfile.tsx";
 import LogoImage from "@/components/LogoImage.astro";
-import {Button} from "@/components/primitives/button";
+import {Button} from "@/components/ui/button";
 import {getLocaleFromUrl, useTranslations, localizeUrl} from "@/i18n/utils";
 
 export interface Props {
@@ -60,13 +60,13 @@ const accountUrl = localizeUrl("/account", locale);
         user ? (
           <UserProfile
             name={user.name}
-            imageUrl={user.image}
+            imageUrl={user.image ?? undefined}
             locale={locale}
             client:load
           />
         ) : (
-          <Button href={signInUrl} size="sm" client:only="svelte">
-            {t.nav.signin}
+          <Button asChild>
+            <a href={signInUrl}>{t.nav.signin}</a>
           </Button>
         )
       }
@@ -158,8 +158,8 @@ const accountUrl = localizeUrl("/account", locale);
                 </>
               ) : (
                 <div>
-                  <Button href={signInUrl} class="w-full" client:only="svelte">
-                    {t.nav.signin}
+                  <Button asChild className="w-full">
+                    <a href={signInUrl}>{t.nav.signin}</a>
                   </Button>
                 </div>
               )
