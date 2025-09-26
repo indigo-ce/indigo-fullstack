@@ -36,7 +36,7 @@ const verifyEmailUrl = localizeUrl("/verify-email", locale);
             {locale === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
             {locale === "ja" ? "は確認されていません" : "is not verified"}
           </p>
-          <Button href={verifyEmailUrl} variant="outline" size="sm">
+          <Button href={verifyEmailUrl} variant="outline" size="sm" client:only="svelte">
             {t.dashboard.noEmailReceived}
           </Button>
         </div>
@@ -45,10 +45,10 @@ const verifyEmailUrl = localizeUrl("/verify-email", locale);
 
     <Welcome user={user} locale={locale} />
     <div class="flex flex-wrap items-center gap-4">
-      <Button href={accountUrl} variant="outline" size="sm">
+      <Button href={accountUrl} variant="outline" size="sm" client:only="svelte">
         {t.nav.account}
       </Button>
-      <Button href={emailDemoUrl} variant="outline" size="sm">
+      <Button href={emailDemoUrl} variant="outline" size="sm" client:only="svelte">
         {t.dashboard.emailDemo}
       </Button>
       <DeleteConfirmation client:load locale={locale} />

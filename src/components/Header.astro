@@ -65,7 +65,7 @@ const accountUrl = localizeUrl("/account", locale);
             client:load
           />
         ) : (
-          <Button href={signInUrl} size="sm" client:load>
+          <Button href={signInUrl} size="sm" client:only="svelte">
             {t.nav.signin}
           </Button>
         )
@@ -158,7 +158,7 @@ const accountUrl = localizeUrl("/account", locale);
                 </>
               ) : (
                 <div>
-                  <Button href={signInUrl} class="w-full" client:load>
+                  <Button href={signInUrl} class="w-full" client:only="svelte">
                     {t.nav.signin}
                   </Button>
                 </div>
