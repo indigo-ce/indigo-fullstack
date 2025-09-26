@@ -104,6 +104,7 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
             name="email"
             required
             value={fields.email}
+            client:only="svelte"
           />
           {
             errors.email && (
@@ -140,7 +141,9 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
           )
         }
 
-        <Button type="submit" class="mt-4 w-full">{t.auth.signin}</Button>
+        <Button type="submit" class="mt-4 w-full" client:only="svelte"
+          >{t.auth.signin}</Button
+        >
 
         <p class="mt-4 text-center text-sm">
           {t.auth.dontHaveAccount}{" "}

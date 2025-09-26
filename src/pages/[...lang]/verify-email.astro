@@ -99,7 +99,7 @@ if (shouldProcessPost) {
           ) : (
             <form method="POST">
               <input type="hidden" name="email" value={email} />
-              <Button type="submit" variant="default" size="lg">
+              <Button type="submit" variant="default" size="lg" client:only="svelte">
                 {t.auth.resendVerification}
               </Button>
             </form>

@@ -165,9 +165,10 @@ const success = Astro.url.searchParams.get("success");
               name="name"
               required
               value={fields.name}
+              client:only="svelte"
             />
           </div>
-          <Button type="submit" class="w-full">
+          <Button type="submit" class="w-full" client:only="svelte">
             {t.account.update}
           </Button>
         </form>
@@ -195,9 +196,10 @@ const success = Astro.url.searchParams.get("success");
               name="email"
               required
               value={fields.email}
+              client:only="svelte"
             />
           </div>
-          <Button type="submit" class="w-full">
+          <Button type="submit" class="w-full" client:only="svelte">
             {t.account.update}
           </Button>
         </form>
@@ -230,7 +232,7 @@ const success = Astro.url.searchParams.get("success");
             client:load
             value={fields.newPassword}
           />
-          <Button type="submit" class="w-full">
+          <Button type="submit" class="w-full" client:only="svelte">
             {t.account.update}
           </Button>
         </form>

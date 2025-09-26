@@ -121,6 +121,7 @@ const signInUrl = localizeUrl("/sign-in", locale);
             name="name"
             required
             value={fields.name}
+            client:only="svelte"
           />
         </div>
 
@@ -135,6 +136,7 @@ const signInUrl = localizeUrl("/sign-in", locale);
             name="email"
             required
             value={fields.email}
+            client:only="svelte"
           />
         </div>
 
@@ -161,7 +163,7 @@ const signInUrl = localizeUrl("/sign-in", locale);
           )
         }
 
-        <Button type="submit" class="mt-4 w-full">{t.auth.signup}</Button>
+        <Button type="submit" class="mt-4 w-full" client:only="svelte">{t.auth.signup}</Button>
 
         <p class="mt-4 text-center text-sm">
           {t.auth.alreadyHaveAccount}{" "}
