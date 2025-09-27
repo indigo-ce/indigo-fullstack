@@ -143,9 +143,9 @@ const signInUrl = localizeUrl("/sign-in", locale);
         <PasswordField
           name="password"
           required
-          
           defaultValue={fields.password}
           placeholder={t.auth.password}
+          client:load
         />
         {
           (errors.password || errors.server || errors.email) && (

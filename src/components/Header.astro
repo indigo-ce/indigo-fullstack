@@ -1,7 +1,7 @@
 ---
 import {UserProfile} from "@/components/UserProfile.tsx";
 import LogoImage from "@/components/LogoImage.astro";
-import {Button} from "@/components/ui/button";
+import {buttonVariants} from "@/components/ui/button";
 import {getLocaleFromUrl, useTranslations, localizeUrl} from "@/i18n/utils";
 
 export interface Props {
@@ -18,6 +18,10 @@ const homeUrl = localizeUrl("/", locale);
 const signInUrl = localizeUrl("/sign-in", locale);
 const dashboardUrl = localizeUrl("/dashboard", locale);
 const accountUrl = localizeUrl("/account", locale);
+
+// Generate button classes at compile time
+const desktopButtonClasses = buttonVariants({ size: "sm" });
+const mobileButtonClasses = buttonVariants({ size: "default" });
 ---
 
 <header
@@ -65,9 +69,9 @@ const accountUrl = localizeUrl("/account", locale);
             client:load
           />
         ) : (
-          <Button asChild>
-            <a href={signInUrl}>{t.nav.signin}</a>
-          </Button>
+          <a href={signInUrl} class={desktopButtonClasses}>
+            {t.nav.signin}
+          </a>
         )
       }
     </div>
@@ -158,9 +162,9 @@ const accountUrl = localizeUrl("/account", locale);
                 </>
               ) : (
                 <div>
-                  <Button asChild className="w-full">
-                    <a href={signInUrl}>{t.nav.signin}</a>
-                  </Button>
+                  <a href={signInUrl} class={`w-full ${mobileButtonClasses}`}>
+                    {t.nav.signin}
+                  </a>
                 </div>
               )
             }

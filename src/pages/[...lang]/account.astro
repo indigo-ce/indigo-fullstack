@@ -221,16 +221,16 @@ const success = Astro.url.searchParams.get("success");
             className="mb-2"
             placeholder={t.auth.password}
             required
-            
             defaultValue={fields.currentPassword}
+            client:load
           />
           <PasswordField
             className="mb-2"
             name="newPassword"
             placeholder={t.auth.newPassword}
             required
-            
             defaultValue={fields.newPassword}
+            client:load
           />
           <Button type="submit" className="w-full" >
             {t.account.update}

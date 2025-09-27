@@ -153,6 +153,31 @@ React Email templates with Resend API:
 - **React components**: Only for email templates
 - **UI Primitives**: Shadcn-style components in `src/components/primitives/`
 
+### Button Component Usage Guidelines
+
+**Rule**: Choose the right button approach based on functionality requirements:
+
+- **Static navigation links** → Use `buttonVariants()` with compile-time class generation
+
+  ```astro
+  ---
+  import {buttonVariants} from "@/components/ui/button";
+  const buttonClasses = buttonVariants({variant: "outline", size: "sm"});
+  ---
+
+  <a href="/path" class={buttonClasses}>Link Text</a>
+  ```
+
+- **Interactive functionality** → Keep React Button components with `client:load`
+
+  ```astro
+  <!-- Form submissions, click handlers, state management -->
+  <Button type="submit" onClick={handler} client:load>Submit</Button>
+  ```
+
+**Examples of compile-time candidates**: `<Button asChild>` wrapping simple `<a>` tags
+**Examples of React components**: Form buttons, click handlers, state management, disabled states
+
 ## Important Constraints
 
 ### Cloudflare Workers Limitations

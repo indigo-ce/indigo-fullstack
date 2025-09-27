@@ -2,7 +2,7 @@
 import Welcome from "@/components/Welcome.astro";
 import Layout from "@/layouts/Layout.astro";
 import "@/styles.css";
-import {Button} from "@/components/ui/button";
+import {buttonVariants} from "@/components/ui/button";
 import {DeleteConfirmation} from "@/components/DeleteConfirmation.tsx";
 import {
   getLocaleFromParams,
@@ -21,6 +21,9 @@ const user = Astro.locals.user;
 const accountUrl = localizeUrl("/account", locale);
 const emailDemoUrl = localizeUrl("/email-demo", locale);
 const verifyEmailUrl = localizeUrl("/verify-email", locale);
+
+// Generate button classes at compile time
+const buttonClasses = buttonVariants({ variant: "outline", size: "sm" });
 ---
 
 <Layout title={t.nav.dashboard}>
@@ -36,22 +39,22 @@ const verifyEmailUrl = localizeUrl("/verify-email", locale);
             {locale === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
             {locale === "ja" ? "は確認されていません" : "is not verified"}
           </p>
-          <Button asChild variant="outline" size="sm">
-            <a href={verifyEmailUrl}>{t.dashboard.noEmailReceived}</a>
-          </Button>
+          <a href={verifyEmailUrl} class={buttonClasses}>
+            {t.dashboard.noEmailReceived}
+          </a>
         </div>
       )
     }
 
     <Welcome user={user} locale={locale} />
     <div class="flex flex-wrap items-center gap-4">
-      <Button asChild variant="outline" size="sm">
-        <a href={accountUrl}>{t.nav.account}</a>
-      </Button>
-      <Button asChild variant="outline" size="sm">
-        <a href={emailDemoUrl}>{t.dashboard.emailDemo}</a>
-      </Button>
-      <DeleteConfirmation  locale={locale} />
+      <a href={accountUrl} class={buttonClasses}>
+        {t.nav.account}
+      </a>
+      <a href={emailDemoUrl} class={buttonClasses}>
+        {t.dashboard.emailDemo}
+      </a>
+      <DeleteConfirmation locale={locale} client:load />
     </div>
   </div>
 </Layout>

@@ -7,13 +7,16 @@
     "config": "tailwind.config.js",
     "css": "src/styles.css",
     "baseColor": "gray",
-    "cssVariables": true
+    "cssVariables": true,
+    "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
     "ui": "@/components/ui",
-    "hooks": "@/hooks",
-    "lib": "@/lib"
-  }
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  },
+  "registries": {}
 }

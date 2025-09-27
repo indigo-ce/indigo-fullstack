@@ -116,6 +116,7 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
           required
           defaultValue={fields.password}
           placeholder={t.auth.password}
+          client:load
         />
 
         {

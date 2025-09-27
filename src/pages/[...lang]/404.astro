@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import {Button} from "@/components/ui/button";
+import {buttonVariants} from "@/components/ui/button";
 import {
   useTranslationsFromParams,
   localizeUrl,
@@ -14,6 +14,9 @@ Astro.response.status = 404;
 
 const locale = getLocaleFromParams(Astro.params);
 const homeUrl = localizeUrl("/", locale);
+
+// Generate button classes at compile time
+const buttonClasses = buttonVariants({ size: "lg" });
 ---
 
 <Layout>
@@ -32,9 +35,9 @@ const homeUrl = localizeUrl("/", locale);
       <p class="text-muted-foreground mb-8 text-center">
         {t.error[404].message}
       </p>
-      <Button asChild size="lg" className="w-full">
-        <a href={homeUrl}>{t.error.goHome}</a>
-      </Button>
+      <a href={homeUrl} class={`w-full ${buttonClasses}`}>
+        {t.error.goHome}
+      </a>
     </div>
   </div>
 </Layout>
