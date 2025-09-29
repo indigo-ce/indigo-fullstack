@@ -1,7 +1,6 @@
 // @ts-check
 import {defineConfig, envField} from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
-import svelte from "@astrojs/svelte";
 import react from "@astrojs/react";
 import cloudflare from "@astrojs/cloudflare";
 
@@ -31,7 +30,7 @@ export default defineConfig({
     }
   }),
   vite: {
-    // @ts-expect-error - Due to Svelte v5 using Vite v7. Will be resolved in Astro 6
+    // @ts-expect-error - tailwindcss vite plugin type compatibility issue
     plugins: [tailwindcss()],
     resolve: {
       // Use react-dom/server.edge instead of react-dom/server.browser for React 19
@@ -45,5 +44,5 @@ export default defineConfig({
       }
     }
   },
-  integrations: [svelte(), react()]
+  integrations: [react()]
 });

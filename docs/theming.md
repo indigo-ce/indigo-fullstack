@@ -203,7 +203,7 @@ Additional radius variants are available:
 ### User Interface
 
 The project includes a theme selector component
-(`src/components/ThemeSelect.svelte`) that allows users to choose between:
+(`src/components/ThemeSelect.tsx`) that allows users to choose between:
 
 - **Light**: Force light theme
 - **Dark**: Force dark theme
