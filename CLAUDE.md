@@ -32,9 +32,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Multi-Framework Hybrid Architecture
 
-This is an Astro application with Svelte components for interactivity and React components for email templates. The architecture follows a hybrid approach:
+This is an Astro application with React components for interactivity and email templates. The architecture follows a hybrid approach:
 
-- **Frontend**: Astro pages with server-side rendering + Svelte islands for client-side interactivity
+- **Frontend**: Astro pages with server-side rendering + React islands for client-side interactivity
 - **API Layer**: Hono-based REST API mounted at `/api/v1/*` with modular route organization
 - **Database**: Drizzle ORM with Cloudflare D1 (serverless SQLite)
 - **Authentication**: Better Auth with JWT tokens and refresh token plugin
@@ -47,7 +47,7 @@ This is an Astro application with Svelte components for interactivity and React 
 
 1. Astro middleware handles authentication state and i18n routing
 2. Pages render server-side with user context available via `locals.user`
-3. Svelte components hydrate for interactive features
+3. React components hydrate for interactive features
 4. Language detection/routing handled by middleware with cookie preference
 
 #### API Requests (Hono)
@@ -149,9 +149,8 @@ React Email templates with Resend API:
 ### Component Development
 
 - **Astro components**: For page layouts and static content
-- **Svelte components**: For interactive UI elements (forms, dropdowns, etc.)
-- **React components**: Only for email templates
-- **UI Primitives**: Shadcn-style components in `src/components/primitives/`
+- **React components**: For interactive UI elements (forms, dropdowns, etc.) and email templates
+- **UI Primitives**: Shadcn-style components in `src/components/ui/`
 
 ### Button Component Usage Guidelines
 

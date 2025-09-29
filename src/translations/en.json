@@ -9,9 +9,9 @@
   },
   "home": {
     "title": "Indigo Stack CE",
-    "description": "A starter template built with Astro, Svelte, TailwindCSS, Better Auth, and Drizzle ORM. Get started with authentication, database integration, and a modern UI.",
+    "description": "A starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM. Get started with authentication, database integration, and a modern UI.",
     "feature1": {
-      "title": "Static + SSR + Svelte",
+      "title": "Static + SSR + React",
       "description": "Build static or server-side rendered pages with client-side hydration."
     },
     "feature2": {
