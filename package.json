@@ -8,7 +8,6 @@
     "build": "pnpm cf-types && astro build",
     "preview": "astro build && wrangler dev",
     "astro": "astro",
-    "add-component": "pnpm dlx shadcn@latest add",
     "preview-email": "email dev --dir src/components/email",
     "d1": "wrangler d1",
     "cf-types": "wrangler types",
