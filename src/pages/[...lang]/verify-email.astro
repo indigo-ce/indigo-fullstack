@@ -33,7 +33,7 @@ if (Astro.locals.user?.id) {
 // Handle POST request before redirect check
 if (Astro.request.method === "POST") {
   shouldProcessPost = true;
-  
+
   if (!email) {
     // Try to get email from form data for POST
     const formData = await Astro.request.formData();
@@ -99,7 +99,7 @@ if (shouldProcessPost) {
           ) : (
             <form method="POST">
               <input type="hidden" name="email" value={email} />
-              <Button type="submit" variant="default" size="lg" >
+              <Button type="submit" variant="default" size="lg">
                 {t.auth.resendVerification}
               </Button>
             </form>

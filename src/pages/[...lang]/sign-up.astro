@@ -121,7 +121,6 @@ const signInUrl = localizeUrl("/sign-in", locale);
             name="name"
             required
             defaultValue={fields.name}
-            
           />
         </div>
 
@@ -136,7 +135,6 @@ const signInUrl = localizeUrl("/sign-in", locale);
             name="email"
             required
             defaultValue={fields.email}
-            
           />
         </div>
 
@@ -163,7 +161,7 @@ const signInUrl = localizeUrl("/sign-in", locale);
           )
         }
 
-        <Button type="submit" className="mt-4 w-full" >{t.auth.signup}</Button>
+        <Button type="submit" className="mt-4 w-full">{t.auth.signup}</Button>
 
         <p class="mt-4 text-center text-sm">
           {t.auth.alreadyHaveAccount}{" "}
