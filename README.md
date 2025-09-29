@@ -1,14 +1,14 @@
 # 🪻 Indigo Stack CE — Web Full Stack
 
-Indigo Stack CE is a free, open-source web application starter template built with Astro, Svelte, TailwindCSS, Better Auth, and Drizzle ORM.
+Indigo Stack CE is a free, open-source web application starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM.
 
 ## Tech Stack
 
 - **[Astro](https://astro.build)** - Fast, modern web framework
-- **[Svelte](https://svelte.dev)** - UI component library used for component hydration
+- **[React](https://react.dev)** - UI component library used for component hydration
 - **[TailwindCSS](https://tailwindcss.com)** - Utility-first CSS framework v4
   - With Typography plugin for elegant content styling
-- **[Shadcn UI](https://next.shadcn-svelte.com)** - UI component library
+- **[Shadcn UI](https://ui.shadcn.com)** - UI component library
 - **[Better Auth](https://better-auth.com)** - Authentication system
 - **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
 - **[Drizzle Kit](https://orm.drizzle.team/docs/cli)** - CLI tool for managing Drizzle ORM migrations and database schema
@@ -417,7 +417,7 @@ then copy-paste the variables.
 - [Better Auth Documentation](https://github.com/zenstackhq/better-auth)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
-- [Svelte Documentation](https://svelte.dev/docs)
+- [React Documentation](https://react.dev/learn)
 - [Resend Documentation](https://resend.com/docs)
 - [React Email](https://react.email/docs/introduction)
 
