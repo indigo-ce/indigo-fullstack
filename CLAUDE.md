@@ -202,3 +202,25 @@ React Email templates with Resend API:
 - Database: Local D1 file vs remote Cloudflare D1
 - Secrets: `.dev.vars` file vs Wrangler secrets
 - Assets: Dev server vs Cloudflare Workers static assets
+
+## Theming
+
+This project uses TailwindCSS for styling.
+The shadcn theme is defined in `src/styles.css`.
+
+You can generate a new theme using your favorite tool ([example](https://themecn.dev/))
+then copy-paste the variables.
+
+### CSS File Setup for New Projects
+
+The template includes two CSS files in `src/`:
+
+- `styles.css` - Contains Indigo brand colors (seagull, hyacinth, asparagus, earth palettes)
+- `_styles.css` - Contains neutral colors that most projects would want to start with
+
+When starting a new project, you should:
+
+1. Delete `src/styles.css` (contains Indigo template branding)
+2. Rename `src/_styles.css` to `src/styles.css` (neutral starter colors)
+
+**Automated via Bootstrap Script**: This is handled automatically by the `scripts/bootstrap.js` script when setting up a new project.
