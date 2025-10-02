@@ -216,14 +216,14 @@ const success = Astro.url.searchParams.get("success");
           }
           <PasswordField
             name="currentPassword"
-            className="mb-2"
+            className="mb-4"
             placeholder={t.auth.password}
             required
             defaultValue={fields.currentPassword}
             client:load
           />
           <PasswordField
-            className="mb-2"
+            className="mb-4"
             name="newPassword"
             placeholder={t.auth.newPassword}
             required

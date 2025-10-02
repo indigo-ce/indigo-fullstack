@@ -1,6 +1,7 @@
 import * as React from "react";
 import {Eye, EyeOff, Lock} from "lucide-react";
 import {Input} from "@/components/ui/input";
+import {cn} from "@/lib/utils";
 
 interface PasswordFieldProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -11,7 +12,12 @@ export function PasswordField({className, ...props}: PasswordFieldProps) {
   const [showPassword, setShowPassword] = React.useState(false);
 
   return (
-    <div className="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1">
+    <div
+      className={cn(
+        "focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1",
+        className
+      )}
+    >
       <Lock className="text-muted-foreground mr-1 h-5 w-5" />
       <Input
         {...props}
