@@ -7,9 +7,9 @@
   --radius: 0.625rem;
   --background: var(--color-seagull-10);
   --foreground: var(--color-seagull-900);
-  --card: var(--color-seagull-50);
+  --card: var(--color-seagull-20);
   --card-foreground: var(--color-seagull-900);
-  --popover: var(--color-seagull-50);
+  --popover: var(--color-seagull-20);
   --popover-foreground: var(--color-seagull-900);
   --primary: var(--color-hyacinth-500);
   --primary-foreground: var(--color-seagull-50);
@@ -21,7 +21,7 @@
   --accent-foreground: var(--color-seagull-50);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0.15 0);
-  --border: var(--color-seagull-300);
+  --border: var(--color-seagull-200);
   --input: var(--color-seagull-200);
   --ring: var(--color-hyacinth-500);
   --chart-1: oklch(0.646 0.222 41.116);
@@ -76,7 +76,8 @@
 
 @theme inline {
   /* Color Palette */
-  --color-seagull-10: oklch(0.9563 0.0052 225.69);
+  --color-seagull-10: oklch(0.9965 0.0182 225.69);
+  --color-seagull-20: oklch(0.9844 0.0213 225.69);
   --color-seagull-50: oklch(0.9563 0.0277 225.69);
   --color-seagull-100: oklch(0.9326 0.0416 228.38);
   --color-seagull-200: oklch(0.8854 0.0693 232.15);
