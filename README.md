@@ -82,6 +82,17 @@ This template uses Better Auth for authentication. And supports these features o
 > [!IMPORTANT]
 > By default, email verification is not required to sign in. You may want to change this behavior in `src/lib/auth.ts`.
 
+### Test Credentials (Development)
+
+For local development and testing, you can use these
+
+- **Email**: `test@example.com`
+- **Password**: `TestPassword123!`
+
+> [!NOTE]
+> No test user is created by default. You'll need to sign up through the `/sign-up` page to create your first account. Feel free to use different credentials if preferred.
+> If you're using the placeholder `RESEND_API_KEY=test-key` in `.dev.vars`, email verification emails will not be sent during sign-up. The auth configuration automatically detects this and disables email sending to prevent errors. Users created this way will need their email manually verified in the database for testing purposes (e.g., `UPDATE user SET emailVerified = 1 WHERE email = 'your@email.com'`).
+
 ### Better Auth
 
 You **must** set the `BETTER_AUTH_SECRET` secret in your production environment (e.g., Cloudflare Pages). If this variable is not set, Better Auth will throw an error.
@@ -410,6 +421,15 @@ The shadcn theme is defined in `src/styles.css`.
 
 You can generate a new theme using your favorite tool ([example](https://themecn.dev/))
 then copy-paste the variables.
+
+### CSS Files
+
+The template includes two CSS files:
+
+- `src/styles.css` - Indigo brand colors (for the template showcase)
+- `src/_styles.css` - Neutral colors for starting new projects
+
+When using the bootstrap script (`node scripts/bootstrap.js <project-name>`), the branded `styles.css` is automatically deleted and `_styles.css` is renamed to `styles.css` to give you a clean neutral color palette to start with.
 
 ## Learn More
 
