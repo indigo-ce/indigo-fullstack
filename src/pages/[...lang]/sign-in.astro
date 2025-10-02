@@ -44,9 +44,11 @@ if (Astro.request.method === "POST") {
     const response = await auth.api.signInEmail({
       body: {
         email,
-        password
+        password,
+        callbackURL: localizeUrl("/dashboard", locale)
       },
-      asResponse: true
+      asResponse: true,
+      headers: Astro.request.headers
     });
 
     if (!response.ok) {
@@ -113,6 +115,7 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
         </div>
 
         <PasswordField
+          name="password"
           required
           defaultValue={fields.password}
           placeholder={t.auth.password}
