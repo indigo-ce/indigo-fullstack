@@ -61,7 +61,7 @@ export default defineConfig({
     command: "pnpm preview:test",
     url: "http://127.0.0.1:8787",
     reuseExistingServer: !process.env.CI,
-    timeout: 180 * 1000, // 3 minutes for build + wrangler startup
+    timeout: 60 * 1000, // 1 minute for build + wrangler startup (typically takes ~10-15s)
     env: {
       NODE_ENV: "test"
     }
