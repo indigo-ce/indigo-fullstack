@@ -37,6 +37,8 @@ worker-configuration.d.ts
 
 # SQL backups
 drizzle/backup.sql
+
+# Claude
 .claude/settings.local.json
 
 # Test coverage
