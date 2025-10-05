@@ -431,6 +431,108 @@ The template includes two CSS files:
 
 When using the bootstrap script (`node scripts/bootstrap.js <project-name>`), the branded `styles.css` is automatically deleted and `_styles.css` is renamed to `styles.css` to give you a clean neutral color palette to start with.
 
+## Testing
+
+This project includes comprehensive test coverage with both unit tests (Vitest) and end-to-end tests (Playwright).
+
+### Running Tests
+
+| Command                 | Action                               |
+| :---------------------- | :----------------------------------- |
+| `pnpm test`             | Run unit tests in watch mode         |
+| `pnpm test:run`         | Run unit tests once                  |
+| `pnpm test:coverage`    | Generate coverage report             |
+| `pnpm test:e2e`         | Run all e2e tests                    |
+| `pnpm test:e2e:ui`      | Run e2e tests in interactive UI mode |
+| `pnpm test:e2e:headed`  | Run e2e tests with visible browser   |
+| `pnpm test:e2e:debug`   | Debug e2e tests step-by-step         |
+| `pnpm test:e2e:codegen` | Generate e2e tests visually          |
+| `pnpm test:e2e:report`  | View last test report                |
+
+### Email Behavior in Different Environments
+
+Understanding how emails work across different scenarios:
+
+#### 🧪 **Automated Testing (CI/E2E tests)**
+
+- **API Key Pattern**: `ci-test-key` or any key containing `ci-test`
+- **Behavior**: Emails are **mocked** (not sent)
+- **Why**: Fast, reliable tests without API calls or rate limits
+- **Setup**: Automatically configured in CI workflow
+- **Example**: `RESEND_API_KEY=ci-test-key` in `.github/workflows/test.yml`
+
+```bash
+# E2E tests automatically use mocked emails
+pnpm test:e2e
+```
+
+#### 🏠 **Local Development (with real Resend API key)**
+
+- **API Key Pattern**: Any valid Resend key (starts with `re_`)
+- **Behavior**: Emails sent to `delivered@resend.dev` test domain
+- **Why**: Test actual email delivery without domain verification
+- **Setup**: Add real Resend API key to `.dev.vars`
+- **Dashboard**: View emails at [resend.com/emails](https://resend.com/emails)
+
+```bash
+# .dev.vars
+RESEND_API_KEY=re_xxxxxxxxxx  # Your real Resend API key
+```
+
+When you sign up locally, the verification email goes to `delivered@resend.dev` (visible in your Resend dashboard).
+
+#### 🧪 **Local Development (testing without emails)**
+
+- **API Key Pattern**: Set to `ci-test-key` or leave empty
+- **Behavior**: Emails are **mocked** (not sent)
+- **Why**: Quick testing without needing a Resend account
+- **Setup**: Use `ci-test-key` in `.dev.vars`
+- **Note**: Manual email verification needed in database
+
+```bash
+# .dev.vars - for testing without actual emails
+RESEND_API_KEY=ci-test-key
+
+# Then manually verify users in database if needed
+pnpm d1:studio:local
+# Run: UPDATE user SET emailVerified = 1 WHERE email = 'test@example.com'
+```
+
+#### 🚀 **Production**
+
+- **API Key Pattern**: Your production Resend API key
+- **Behavior**: Emails sent to actual user email addresses
+- **Setup**: Set via Wrangler secrets
+- **Domain**: Configure verified domain in Resend dashboard
+
+```bash
+# Set production secret
+pnpm wrangler secret put RESEND_API_KEY
+```
+
+### Summary: Email Sending Decision Tree
+
+```shell
+Is RESEND_API_KEY = "ci-test-key"?
+├─ YES → Mock emails (log to console)
+└─ NO → Is NODE_ENV = "production"?
+    ├─ YES → Send to real user emails
+    └─ NO → Send to delivered@resend.dev (local dev)
+```
+
+### Test Coverage
+
+The test suite includes:
+
+- **Unit Tests**: Middleware, utilities, and business logic
+- **Integration Tests**: Database operations and API endpoints
+- **E2E Tests**: Complete user flows
+  - Authentication (sign-up, sign-in, protected routes)
+  - Internationalization (language switching)
+  - Form validation and error handling
+
+All tests run automatically in CI on every pull request.
+
 ## Learn More
 
 - [Astro Documentation](https://docs.astro.build)

@@ -38,3 +38,10 @@ worker-configuration.d.ts
 # SQL backups
 drizzle/backup.sql
 .claude/settings.local.json
+
+# Test coverage
+coverage/
+
+# Playwright
+playwright-report/
+test-results/

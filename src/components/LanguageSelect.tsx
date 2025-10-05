@@ -51,7 +51,7 @@ export function LanguageSelect() {
 
   return (
     <Select value={currentLang} onValueChange={handleLanguageChange}>
-      <SelectTrigger className="w-auto min-w-24">
+      <SelectTrigger className="w-auto min-w-24" data-testid="language-selector">
         <div className="flex items-center gap-2">
           <Globe className="h-4 w-4" />
           <span className="pr-1">{currentLanguageOption.label}</span>
@@ -59,7 +59,7 @@ export function LanguageSelect() {
       </SelectTrigger>
       <SelectContent>
         {languages.map((langOption) => (
-          <SelectItem key={langOption.value} value={langOption.value}>
+          <SelectItem key={langOption.value} value={langOption.value} data-testid={`language-option-${langOption.value}`}>
             <div className="flex items-center gap-2">
               <Globe className="h-4 w-4" />
               <span>{langOption.label}</span>
