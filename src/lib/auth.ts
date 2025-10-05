@@ -69,7 +69,7 @@ export function createAuth(env: Env) {
       }
     },
     emailVerification: {
-      sendOnSignUp: env.RESEND_API_KEY !== "test-key", // Only send if we have a valid API key
+      sendOnSignUp: !env.RESEND_API_KEY.includes("test-key"), // Only send if we have a valid API key
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({user, url}) => {
         await sendEmail(

@@ -11,8 +11,8 @@ export async function sendEmail(
   html: string,
   env: Env
 ): Promise<any> {
-  // Check if we're in test mode by looking for CI-specific test key
-  const isTestMode = env.RESEND_API_KEY === "ci-test-key";
+  // Check if we're in test mode (local "test-key" or CI "ci-test-key")
+  const isTestMode = env.RESEND_API_KEY.includes("test-key");
 
   // In test environment, skip actual email sending
   if (isTestMode) {
