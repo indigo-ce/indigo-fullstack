@@ -75,7 +75,7 @@ jobs:
           cat > .dev.vars << EOF
           BETTER_AUTH_SECRET=test-secret-for-ci-only-12345678
           BETTER_AUTH_BASE_URL=http://127.0.0.1:8787
-          RESEND_API_KEY=re_test_key_for_ci
+          RESEND_API_KEY=ci-test-key
           SEND_EMAIL_FROM=Test <test@example.com>
           EOF
 

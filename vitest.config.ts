@@ -32,7 +32,7 @@ export default defineWorkersProject(async () => {
               NODE_ENV: "test",
               BETTER_AUTH_BASE_URL: "http://localhost:3000",
               SEND_EMAIL_FROM: "Test <test@example.com>",
-              RESEND_API_KEY: "re_test_key",
+              RESEND_API_KEY: "ci-test-key",
               BETTER_AUTH_SECRET: "test-secret-123456789"
             },
             // Test D1 database (isolated per test)
