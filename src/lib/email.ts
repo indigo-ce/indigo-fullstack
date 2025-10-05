@@ -12,7 +12,7 @@ export async function sendEmail(
   env: Env
 ): Promise<any> {
   // Check if we're in test mode (local "test-key" or CI "ci-test-key")
-  const isTestMode = env.RESEND_API_KEY.includes("test-key");
+  const isTestMode = env.RESEND_API_KEY?.includes("test-key") ?? false;
 
   // In test environment, skip actual email sending
   if (isTestMode) {
