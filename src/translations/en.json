@@ -8,10 +8,10 @@
     "signout": "Sign Out"
   },
   "home": {
-    "title": "Astro Starter",
-    "description": "A starter template built with Astro, Svelte, TailwindCSS, Better Auth, and Drizzle ORM. Get started with authentication, database integration, and a modern UI.",
+    "title": "Indigo Stack CE",
+    "description": "A starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM. Get started with authentication, database integration, and a modern UI.",
     "feature1": {
-      "title": "Static + SSR + Svelte",
+      "title": "Static + SSR + React",
       "description": "Build static or server-side rendered pages with client-side hydration."
     },
     "feature2": {
@@ -109,7 +109,7 @@
     "setupTitle": "Setup Instructions",
     "setupDescription": "To use Resend for email sending, add the following environment variables:",
     "templateInfo": "Email templates are built with React Email for improved maintainability and design consistency.",
-    "devInfo": "For development, the app will use Ethereal for testing emails without sending real messages.",
+    "devInfo": "For development, the app will use Resend with delivered@resend.dev for testing emails without sending to real addresses.",
     "subject": "Subject",
     "emailTitle": "Email Title (optional)",
     "message": "Message",

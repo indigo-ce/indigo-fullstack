@@ -1,8 +1,8 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import {Button} from "@/components/primitives/button";
-import {Input} from "@/components/primitives/input";
-import PasswordField from "@/components/PasswordField.svelte";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {PasswordField} from "@/components/PasswordField.tsx";
 import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
@@ -44,9 +44,11 @@ if (Astro.request.method === "POST") {
     const response = await auth.api.signInEmail({
       body: {
         email,
-        password
+        password,
+        callbackURL: localizeUrl("/dashboard", locale)
       },
-      asResponse: true
+      asResponse: true,
+      headers: Astro.request.headers
     });
 
     if (!response.ok) {
@@ -100,10 +102,11 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
           <Input
             type="email"
             placeholder={t.auth.email}
-            class="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
+            className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
             name="email"
+            data-testid="email-input"
             required
-            value={fields.email}
+            defaultValue={fields.email}
           />
           {
             errors.email && (
@@ -113,10 +116,12 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
         </div>
 
         <PasswordField
+          name="password"
+          data-testid="password-input"
           required
-          client:load
-          value={fields.password}
+          defaultValue={fields.password}
           placeholder={t.auth.password}
+          client:load
         />
 
         {
@@ -140,7 +145,7 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
           )
         }
 
-        <Button type="submit" class="mt-4 w-full">{t.auth.signin}</Button>
+        <Button type="submit" data-testid="submit-button" className="mt-4 w-full">{t.auth.signin}</Button>
 
         <p class="mt-4 text-center text-sm">
           {t.auth.dontHaveAccount}{" "}

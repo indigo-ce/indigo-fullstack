@@ -16,7 +16,7 @@ export const email = {
     handler: async ({email, name}, context) => {
       await sendEmail(
         email,
-        "Welcome to Astro Starter!",
+        "Welcome to Indigo Stack CE!",
         await render(WelcomeEmail({name: name || "friend"})),
         context.locals.runtime.env
       );

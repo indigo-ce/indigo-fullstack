@@ -47,6 +47,8 @@ export const authentication = {
           callbackURL: "/dashboard"
         }
       });
+      
+      return {success: true};
     }
   })
 };

@@ -22,6 +22,7 @@ export function createAuth(env: Env) {
   return betterAuth({
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_BASE_URL,
+    trustedOrigins: [env.BETTER_AUTH_BASE_URL],
     database: drizzleAdapter(createDrizzle(env.DB), {provider: "sqlite"}),
     user: {
       changeEmail: {
@@ -68,7 +69,7 @@ export function createAuth(env: Env) {
       }
     },
     emailVerification: {
-      sendOnSignUp: true,
+      sendOnSignUp: !(env.RESEND_API_KEY?.includes("test-key") ?? false), // Only send if we have a valid API key
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({user, url}) => {
         await sendEmail(

@@ -8,10 +8,10 @@
     "signout": "ログアウト"
   },
   "home": {
-    "title": "Astro Starter",
-    "description": "Astro、Svelte、TailwindCSS、Better Auth、Drizzle ORMで構築されたテンプレート。認証、データベース統合、モダンUIですぐに始められます。",
+    "title": "Indigo Stack CE",
+    "description": "Astro、React、TailwindCSS、Better Auth、Drizzle ORMで構築されたテンプレート。認証、データベース統合、モダンUIですぐに始められます。",
     "feature1": {
-      "title": "静的 + SSR + Svelte",
+      "title": "静的 + SSR + React",
       "description": "静的またはSSRページをクライアントサイドHydrationで構築できます。"
     },
     "feature2": {
@@ -109,7 +109,7 @@
     "setupTitle": "セットアップ手順",
     "setupDescription": "Resendをメール送信に使用するには、以下の環境変数を追加してください：",
     "templateInfo": "メールテンプレートはReact Emailで構築されており、保守性とデザインの一貫性が向上しています。",
-    "devInfo": "開発環境では、実際のメッセージを送信せずにメールをテストするためにEtherealを使用します。",
+    "devInfo": "開発環境では、実際のアドレスに送信せずにメールをテストするためにResendのdelivered@resend.devを使用します。",
     "subject": "件名",
     "emailTitle": "メールタイトル（任意）",
     "message": "メッセージ",

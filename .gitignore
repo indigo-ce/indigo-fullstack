@@ -34,3 +34,16 @@ worker-configuration.d.ts
 
 # dev environment variables
 .dev.vars
+
+# SQL backups
+drizzle/backup.sql
+
+# Claude
+.claude/settings.local.json
+
+# Test coverage
+coverage/
+
+# Playwright
+playwright-report/
+test-results/

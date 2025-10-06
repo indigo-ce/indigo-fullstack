@@ -1,26 +1,50 @@
 import {Resend} from "resend";
 
+interface ResendError {
+  message?: string;
+  error?: string;
+}
+
 export async function sendEmail(
   to: string,
   subject: string,
   html: string,
   env: Env
 ): Promise<any> {
+  // Check if we're in test mode (local "test-key" or CI "ci-test-key")
+  const isTestMode = env.RESEND_API_KEY?.includes("test-key") ?? false;
+
+  // In test environment, skip actual email sending
+  if (isTestMode) {
+    console.log(`📧 [TEST MODE] Would send email to: ${to}, subject: ${subject}`);
+    return {id: "test-email-id", mock: true};
+  }
+
   if (process.env.NODE_ENV === "production") {
-    if (env.RESEND_API_KEY) {
-      return sendEmailWithResend(
-        to,
-        subject,
-        html,
-        env.RESEND_API_KEY,
-        env.SEND_EMAIL_FROM
-      );
-    } else {
-      throw new Error("RESEND_API_KEY is not set");
-    }
+    if (!env.RESEND_API_KEY) throw new Error("RESEND_API_KEY is not set");
+    if (!env.SEND_EMAIL_FROM) throw new Error("SEND_EMAIL_FROM is not set");
+    return sendEmailWithResend(
+      to,
+      subject,
+      html,
+      env.RESEND_API_KEY,
+      env.SEND_EMAIL_FROM
+    );
   } else {
-    console.log("📤 Sending email with SMTP...");
-    return sendEmailWithSMTP(to, subject, html, env.SEND_EMAIL_FROM);
+    if (!env.RESEND_API_KEY) {
+      throw new Error("RESEND_API_KEY is required");
+    }
+
+    // Use Resend test domain for local development
+    const emailTo = "delivered@resend.dev";
+
+    return sendEmailWithResend(
+      emailTo,
+      subject,
+      html,
+      env.RESEND_API_KEY,
+      env.SEND_EMAIL_FROM
+    );
   }
 }
 
@@ -29,44 +53,32 @@ async function sendEmailWithResend(
   subject: string,
   html: string,
   resendAPIKey: string,
-  sendEmailFrom?: string
+  sendEmailFrom: string
 ): Promise<any> {
-  const from = sendEmailFrom || "Astro Starter <noreply@example.com>";
+  const from = sendEmailFrom;
   const resend = new Resend(resendAPIKey);
 
-  return resend.emails.send({
-    from,
-    to,
-    subject,
-    html
-  });
-}
-
-async function sendEmailWithSMTP(
-  to: string,
-  subject: string,
-  html: string,
-  sendEmailFrom?: string
-): Promise<any> {
-  const {getEmailTransporter, getTestMessageUrl} = await import(
-    "./nodemailer-util"
-  );
-  const transporter = await getEmailTransporter();
-  const from = sendEmailFrom || "Astro Starter <noreply@example.com>";
-  const message = {to, subject, html, from};
-
-  return new Promise((resolve, reject) => {
-    transporter.sendMail(message, (err, info) => {
-      if (err) {
-        console.error(err);
-        reject(err);
-        return;
-      }
-
-      console.log("Message sent:", info.messageId);
-      const testUrl = getTestMessageUrl(info);
-      if (testUrl) console.log("Preview URL:", testUrl);
-      resolve(info);
+  try {
+    const result = await resend.emails.send({
+      from,
+      to,
+      subject,
+      html
     });
-  });
+
+    // Check if Resend returned an error in the response
+    if (result.error) {
+      const error = result.error as ResendError;
+      console.error("❌ [RESEND] API error:", error.message || error.error);
+      throw new Error(`Resend API error: ${error.message || error.error}`);
+    }
+
+    return result;
+  } catch (error) {
+    console.error(
+      "❌ [RESEND] Failed to send email:",
+      (error as Error).message
+    );
+    throw error;
+  }
 }

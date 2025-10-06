@@ -1,55 +1,48 @@
-# Astro Starter Kit
+# 🪻 Indigo Stack CE — Web Full Stack
 
-A feature-rich web application starter template built with Astro, Svelte, TailwindCSS, Better Auth, Drizzle ORM.
+Indigo Stack CE is a free, open-source web application starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM.
 
-## 🚀 Tech Stack
+## Tech Stack
 
 - **[Astro](https://astro.build)** - Fast, modern web framework
-- **[Svelte](https://svelte.dev)** - UI component library used for component hydration
+- **[React](https://react.dev)** - UI component library used for component hydration
 - **[TailwindCSS](https://tailwindcss.com)** - Utility-first CSS framework v4
   - With Typography plugin for elegant content styling
-- **[Shadcn UI](https://next.shadcn-svelte.com)** - UI component library
+- **[Shadcn UI](https://ui.shadcn.com)** - UI component library
 - **[Better Auth](https://better-auth.com)** - Authentication system
 - **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
+- **[Drizzle Kit](https://orm.drizzle.team/docs/cli)** - CLI tool for managing Drizzle ORM migrations and database schema
 - **[Resend](https://resend.com)** - Modern email API for sending emails
 - **[Hono](https://hono.dev)** - Lightweight, ultrafast web framework for API endpoints
+- **[Cloudflare D1](https://developers.cloudflare.com/d1)** - Serverless database for modern applications
+- **[React Email](https://react.email)** - Email templating library for React
+- **[Prettier](https://prettier.io)** - Code formatter for consistent code style
+- **[Wrangler](https://developers.cloudflare.com/workers/wrangler)** - CLI tool for managing Cloudflare Workers and D1 databases
 
-## 🛠️ Features
+## Features
 
-- **Server-side Rendering** with Astro's Cloudflare adapter
-- **Type Safety** with TypeScript
-- **User Authentication** flow with Better Auth
-- **Database Integration** with Drizzle ORM and Cloudflare D1
-- **Modern UI** with TailwindCSS v4
-- **Email Functionality** with Resend API and templating using React Email
-- **Development Tools**: Prettier for code formatting
-- **API Layer**: Built with Hono for efficient request handling
-- **Internationalization**: Type-safe i18n with consistent naming conventions and locale-aware URLs
+- **Deploy to Cloudflare Workers** with D1 database support.
+- **Server-side Rendering** with Astro's Cloudflare adapter.
+- **Type Safety** with TypeScript.
+- **User Authentication** flow with Better Auth.
+- **Database Integration** with Drizzle ORM and Cloudflare D1.
+- **Modern UI** with TailwindCSS v4.
+- **Email Functionality** with Resend API and templating using React Email.
+- **Development Tools**: Prettier for code formatting.
+- **API Layer**: Built with Hono for efficient request handling.
+- **Internationalization**: Type-safe i18n with consistent naming conventions and locale-aware URLs.
 
 ## Getting Started
 
 ```bash
 pnpm install
 cp .dev.vars.example .dev.vars # For local development secrets
-pnpm run dev
+pnpm cf-types # Install Cloudflare types
+pnpm run dev           # Astro dev server (Node runtime)
+pnpm run preview       # Cloudflare Workers emulation via Wrangler
 ```
 
-## ☑️ New Project Checklist
-
-- [ ] Copy `.dev.vars.example` to `.dev.vars` and add secrets like `BETTER_AUTH_SECRET` and `RESEND_API_KEY` for local development.
-- [ ] Create a KV namespace for sessions using `pnpm wrangler kv namespace create "SESSION"` and add the binding to `wrangler.jsonc`.
-- [ ] Update `wrangler.jsonc` with your project name, D1 database details, and variables like `BETTER_AUTH_BASE_URL` and `SEND_EMAIL_FROM`.
-- [ ] Update project name in `package.json`
-- [ ] Update database schema.
-- [ ] Create a D1 database in Cloudflare and add its `binding`, `database_name`, and `database_id` to `wrangler.jsonc`.
-- [ ] Run `pnpm db:init:local` to initialize the local database.
-- [ ] Run `pnpm db:init:prod` to initialize the production database.
-- [ ] Regenerate migrations using `pnpm db:generate`.
-- [ ] Set `BETTER_AUTH_SECRET` secret using `pnpm wrangler secret put BETTER_AUTH_SECRET` for production.
-- [ ] Set `RESEND_API_KEY` secret using `pnpm wrangler secret put RESEND_API_KEY` for production.
-- [ ] Require email verification on sign up.
-
-## 🧞 Commands
+## Commands
 
 | Command                 | Action                                   |
 | :---------------------- | :--------------------------------------- |
@@ -74,7 +67,7 @@ To use the script, run `node scripts/bootstrap.js <project-name>`.
 > The script assumes you have a working installation of Claude Code.
 > if you don't have or rather use another tool, you can run the script with the `--prompt-only` flag to get the prompt and apply it manually in your favorite AI tooling.
 
-## 🔐 Authentication
+## Authentication
 
 This template uses Better Auth for authentication. And supports these features out of the box:
 
@@ -88,6 +81,17 @@ This template uses Better Auth for authentication. And supports these features o
 
 > [!IMPORTANT]
 > By default, email verification is not required to sign in. You may want to change this behavior in `src/lib/auth.ts`.
+
+### Test Credentials (Development)
+
+For local development and testing, you can use these
+
+- **Email**: `test@example.com`
+- **Password**: `TestPassword123!`
+
+> [!NOTE]
+> No test user is created by default. You'll need to sign up through the `/sign-up` page to create your first account. Feel free to use different credentials if preferred.
+> If you're using the placeholder `RESEND_API_KEY=test-key` in `.dev.vars`, email verification emails will not be sent during sign-up. The auth configuration automatically detects this and disables email sending to prevent errors. Users created this way will need their email manually verified in the database for testing purposes (e.g., `UPDATE user SET emailVerified = 1 WHERE email = 'your@email.com'`).
 
 ### Better Auth
 
@@ -111,8 +115,7 @@ Also configure `BETTER_AUTH_BASE_URL` in your `wrangler.jsonc` file under the `v
 
 ### Resend
 
-This template uses Resend for email functionality.
-During development, emails are sent via SMTP to Ethereal if `RESEND_API_KEY` is not set in `.dev.vars`.
+This template uses [Resend](https://resend.com) for email functionality.
 
 To set up Resend for production, create an account and set the `RESEND_API_KEY` secret using wrangler CLI:
 
@@ -120,7 +123,31 @@ To set up Resend for production, create an account and set the `RESEND_API_KEY` 
 pnpm wrangler secret put RESEND_API_KEY
 ```
 
+For local development, add `RESEND_API_KEY` to your `.dev.vars` file.
 The sender email address (`SEND_EMAIL_FROM`) should be configured in your `wrangler.jsonc` file under the `vars` section for production.
+
+#### Development Testing with resend.dev
+
+For local development, Indigo Stack automatically uses Resend's testing domains to avoid domain verification issues:
+
+- **All verification emails** are sent to `delivered@resend.dev` (instead of real user emails)
+- **Sender address** uses `onboarding@resend.dev` (no domain verification required)
+- **Full functionality** - You can test the complete email verification flow
+
+**Available test scenarios:**
+
+- `delivered@resend.dev` - Test successful email delivery
+- `bounced@resend.dev` - Test email bounces
+- `complained@resend.dev` - Test spam marking
+
+This setup allows you to test email verification without:
+
+- Domain verification requirements
+- Real email addresses
+- SMTP configuration
+- External email services
+
+Simply sign up with any email address locally, and the verification email will be sent to `delivered@resend.dev`. Check your [Resend dashboard](https://resend.com/emails) to see the delivery.
 
 ### Astro Session
 
@@ -147,7 +174,7 @@ Add the returned ID to `wrangler.jsonc`:
 ]
 ```
 
-## 🗄️ Database
+## Database
 
 This template uses Drizzle ORM with Cloudflare D1 for a modern, type-safe, serverless SQL database.
 
@@ -210,7 +237,7 @@ You can use the Drizzle Studio to view and edit your local database data.
 pnpm d1:studio:local
 ```
 
-## 📊 Database Queries
+### Queries
 
 Here's an example of how to query the database using Drizzle ORM:
 
@@ -242,9 +269,9 @@ const userWithSessions = await db
   .where(eq(user.id, userId));
 ```
 
-## 📨 Email Functionality
+## Emails
 
-The application includes built-in email functionality using [Resend](https://resend.com) (if `RESEND_API_KEY` is set via wrangler secrets or `.dev.vars`) with fallback to SMTP/Ethereal for development.
+The application includes built-in email functionality using [Resend](https://resend.com) exclusively for both development and production.
 
 ### Configuration
 
@@ -255,7 +282,7 @@ For production, configure the following:
 
 For local development:
 
-- Add `RESEND_API_KEY` to your `.dev.vars` file. If omitted, the app will fall back to using Ethereal via SMTP.
+- Add `RESEND_API_KEY` to your `.dev.vars` file for local email testing.
 - The `SEND_EMAIL_FROM` variable from `wrangler.jsonc` will be used if available during `wrangler dev`.
 
 ### Email Templates
@@ -278,7 +305,7 @@ import {sendEmail} from "@/actions/email";
 // Send a welcome email
 await sendEmail({
   to: "user@example.com",
-  subject: "Welcome to Astro Starter!",
+  subject: "Welcome to Indigo Stack CE!",
   template: {name: "welcome", params: {name: "John"}}
 });
 
@@ -292,7 +319,7 @@ await sendEmail({
 
 ### Sending Test Emails
 
-Visit `/email-demo` to try the email functionality. In development, emails are sent to Ethereal (a test SMTP service) and you'll see preview links in the console.
+Visit `/email-demo` to try the email functionality. In development, emails are sent via Resend's testing domains.
 
 ### Preview Emails Templates
 
@@ -364,7 +391,12 @@ This template is configured to deploy to Cloudflare Pages with D1 Database and K
 
 ### Local Development
 
-For local development, the template uses Wrangler to emulate Cloudflare's environment. Use `pnpm dev` which runs `wrangler dev`. Environment variables for local development can be placed in `.dev.vars`. Secrets like API keys should generally be kept out of version control. The `platformProxy` option in the Astro config makes this seamless.
+For local development, choose between two workflows:
+
+- `pnpm dev` - Astro dev server (Node runtime, faster development)
+- `pnpm preview` - Cloudflare Workers emulation via Wrangler (production parity)
+
+Environment variables for local development can be placed in `.dev.vars`. Secrets like API keys should generally be kept out of version control. The `platformProxy` option in the Astro config makes this seamless.
 
 ### Production Deployment
 
@@ -382,7 +414,7 @@ To deploy to Cloudflare Workers with static assets:
 > Attempts to deploy end up in a `[ERROR] Error: No such module "node:os".` error.
 > This could be temporary, but as of 2025-05-04, it is not supported.
 
-## 🎨 Theming
+## Theming
 
 This project uses TailwindCSS for styling.
 The shadcn theme is defined in `src/styles.css`.
@@ -390,13 +422,124 @@ The shadcn theme is defined in `src/styles.css`.
 You can generate a new theme using your favorite tool ([example](https://themecn.dev/))
 then copy-paste the variables.
 
-## 📚 Learn More
+### CSS Files
+
+The template includes two CSS files:
+
+- `src/styles.css` - Indigo brand colors (for the template showcase)
+- `src/_styles.css` - Neutral colors for starting new projects
+
+When using the bootstrap script (`node scripts/bootstrap.js <project-name>`), the branded `styles.css` is automatically deleted and `_styles.css` is renamed to `styles.css` to give you a clean neutral color palette to start with.
+
+## Testing
+
+This project includes comprehensive test coverage with both unit tests (Vitest) and end-to-end tests (Playwright).
+
+### Running Tests
+
+| Command                 | Action                               |
+| :---------------------- | :----------------------------------- |
+| `pnpm test`             | Run unit tests in watch mode         |
+| `pnpm test:run`         | Run unit tests once                  |
+| `pnpm test:coverage`    | Generate coverage report             |
+| `pnpm test:e2e`         | Run all e2e tests                    |
+| `pnpm test:e2e:ui`      | Run e2e tests in interactive UI mode |
+| `pnpm test:e2e:headed`  | Run e2e tests with visible browser   |
+| `pnpm test:e2e:debug`   | Debug e2e tests step-by-step         |
+| `pnpm test:e2e:codegen` | Generate e2e tests visually          |
+| `pnpm test:e2e:report`  | View last test report                |
+
+### Email Behavior in Different Environments
+
+Understanding how emails work across different scenarios:
+
+#### 🧪 **Automated Testing (CI/E2E tests)**
+
+- **API Key Pattern**: `ci-test-key` or any key containing `ci-test`
+- **Behavior**: Emails are **mocked** (not sent)
+- **Why**: Fast, reliable tests without API calls or rate limits
+- **Setup**: Automatically configured in CI workflow
+- **Example**: `RESEND_API_KEY=ci-test-key` in `.github/workflows/test.yml`
+
+```bash
+# E2E tests automatically use mocked emails
+pnpm test:e2e
+```
+
+#### 🏠 **Local Development (with real Resend API key)**
+
+- **API Key Pattern**: Any valid Resend key (starts with `re_`)
+- **Behavior**: Emails sent to `delivered@resend.dev` test domain
+- **Why**: Test actual email delivery without domain verification
+- **Setup**: Add real Resend API key to `.dev.vars`
+- **Dashboard**: View emails at [resend.com/emails](https://resend.com/emails)
+
+```bash
+# .dev.vars
+RESEND_API_KEY=re_xxxxxxxxxx  # Your real Resend API key
+```
+
+When you sign up locally, the verification email goes to `delivered@resend.dev` (visible in your Resend dashboard).
+
+#### 🧪 **Local Development (testing without emails)**
+
+- **API Key Pattern**: Set to `ci-test-key` or leave empty
+- **Behavior**: Emails are **mocked** (not sent)
+- **Why**: Quick testing without needing a Resend account
+- **Setup**: Use `ci-test-key` in `.dev.vars`
+- **Note**: Manual email verification needed in database
+
+```bash
+# .dev.vars - for testing without actual emails
+RESEND_API_KEY=ci-test-key
+
+# Then manually verify users in database if needed
+pnpm d1:studio:local
+# Run: UPDATE user SET emailVerified = 1 WHERE email = 'test@example.com'
+```
+
+#### 🚀 **Production**
+
+- **API Key Pattern**: Your production Resend API key
+- **Behavior**: Emails sent to actual user email addresses
+- **Setup**: Set via Wrangler secrets
+- **Domain**: Configure verified domain in Resend dashboard
+
+```bash
+# Set production secret
+pnpm wrangler secret put RESEND_API_KEY
+```
+
+### Summary: Email Sending Decision Tree
+
+```shell
+Is RESEND_API_KEY = "ci-test-key"?
+├─ YES → Mock emails (log to console)
+└─ NO → Is NODE_ENV = "production"?
+    ├─ YES → Send to real user emails
+    └─ NO → Send to delivered@resend.dev (local dev)
+```
+
+### Test Coverage
+
+The test suite includes:
+
+- **Unit Tests**: Middleware, utilities, and business logic
+- **Integration Tests**: Database operations and API endpoints
+- **E2E Tests**: Complete user flows
+  - Authentication (sign-up, sign-in, protected routes)
+  - Internationalization (language switching)
+  - Form validation and error handling
+
+All tests run automatically in CI on every pull request.
+
+## Learn More
 
 - [Astro Documentation](https://docs.astro.build)
 - [Better Auth Documentation](https://github.com/zenstackhq/better-auth)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
-- [Svelte Documentation](https://svelte.dev/docs)
+- [React Documentation](https://react.dev/learn)
 - [Resend Documentation](https://resend.com/docs)
 - [React Email](https://react.email/docs/introduction)
 
