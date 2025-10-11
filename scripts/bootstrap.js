@@ -19,7 +19,7 @@ const trainCaseProjectName = projectName
 // Check if Claude is installed synchronously
 try {
   const checkClaude = spawnSync("which", ["claude"], {stdio: "pipe"});
-  
+
   if (checkClaude.status !== 0) {
     console.error("Claude CLI is not installed or not in your PATH.");
     console.error(
@@ -59,16 +59,11 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
 )}
 - Delete the following files: ${filesToDelete.join(", ")}
 - Rename 'src/_styles.css' to 'src/styles.css' (replacing the deleted brand colors with neutral colors)
-- Remove the todos from the README.md file.
-- Copy '.dev.vars.example' into '.dev.vars' for local development.
-- Return a todo list of the remaining steps to complete the project.
-  - Each required secret and env variable should be its own task. 
-  - Provide commands for setting the secrets on production using 'pnpm wrangler secret put <KEY>' for production deployment. 
-  - We need to deplot the app before setting the secrets on production.
-  - Add tasks for setting the variables 'BETTER_AUTH_BASE_URL' and 'SEND_EMAIL_FROM' in the 'wrangler.jsonc' file under the 'vars' section.
-  - Provide a command to create a D1 database in Cloudflare. Refer to the README.md file for the correct command.
-  - Go over the remaining tasks listed in README.md and merge them with your list.
-  - Remove all mentions of "template" in the README.
+- Remove the pre-existing TODO.md and rename _TODO.md to TODO.md.
+- Copy '.devvars.example' into '.dev.vars' for local development.
+- Remove the email testing page and the link to it from the dashboard.
+- Remove all mentions of "template" in the README and project as a whole.
+- Update CLAUDE.md with project-specific architecture details and remove generic "Indigo Stack CE" references.
 `;
 
 const command = "claude";
