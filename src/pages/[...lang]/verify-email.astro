@@ -6,6 +6,8 @@ import {
 } from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/ui/button";
+import ErrorMessage from "@/components/ErrorMessage.astro";
+import SuccessMessage from "@/components/SuccessMessage.astro";
 import {actions} from "astro:actions";
 
 const locale = getLocaleFromParams(Astro.params);
@@ -82,21 +84,12 @@ if (shouldProcessPost) {
         <strong>{email}</strong>. {t.auth.verifyInstruction}
       </p>
 
-      <div>
-        {
-          errors.server && (
-            <p class="ml-2 text-xs text-red-500" id="error">
-              {errors.server}
-            </p>
-          )
-        }
+      <div class="space-y-4">
+        <ErrorMessage message={errors.server} />
+        <SuccessMessage message={successMessage} />
 
         {
-          successMessage ? (
-            <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
-              ✅ {successMessage}
-            </div>
-          ) : (
+          !successMessage && (
             <form method="POST">
               <input type="hidden" name="email" value={email} />
               <Button type="submit" variant="default" size="lg">

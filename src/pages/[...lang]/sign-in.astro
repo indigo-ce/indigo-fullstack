@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {PasswordField} from "@/components/PasswordField.tsx";
+import ErrorMessage from "@/components/ErrorMessage.astro";
 import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import {APIError} from "better-auth/api";
@@ -95,6 +96,8 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
       <h1 class="mb-8 text-center text-2xl font-bold">{t.auth.signin}</h1>
 
       <form method="POST" class="space-y-4">
+        <ErrorMessage message={errors.server || errors.email || errors.password} />
+
         <div
           class="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1"
         >
@@ -108,11 +111,6 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
             required
             defaultValue={fields.email}
           />
-          {
-            errors.email && (
-              <span class="ml-2 text-xs text-red-500">{errors.email}</span>
-            )
-          }
         </div>
 
         <PasswordField
@@ -124,12 +122,6 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
           client:load
         />
 
-        {
-          errors.password && (
-            <span class="ml-2 text-xs text-red-500">{errors.password}</span>
-          )
-        }
-
         <div class="flex justify-end">
           <a
             href={forgotPasswordUrl}
@@ -138,12 +130,6 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
             {t.auth.forgotPassword}
           </a>
         </div>
-
-        {
-          errors.server && (
-            <span class="ml-2 text-xs text-red-500">{errors.server}</span>
-          )
-        }
 
         <Button type="submit" data-testid="submit-button" className="mt-4 w-full">{t.auth.signin}</Button>
 

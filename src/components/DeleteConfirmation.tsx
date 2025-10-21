@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { ErrorMessage } from "@/components/ErrorMessage"
 import { authClient } from "@/lib/auth-client"
 import { translations } from "@/i18n/constants"
 import type { Locale } from "@/i18n/constants"
@@ -51,10 +52,6 @@ export function DeleteConfirmation({ locale = "en" }: DeleteConfirmationProps) {
 
   return (
     <div className="relative">
-      {error && (
-        <p className="text-sm text-destructive mt-2">{error}</p>
-      )}
-
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="destructive" size="sm" onClick={handleDelete}>
@@ -68,6 +65,7 @@ export function DeleteConfirmation({ locale = "en" }: DeleteConfirmationProps) {
               {t.account.areYouSure}
             </DialogDescription>
           </DialogHeader>
+          <ErrorMessage message={error || undefined} />
           <DialogFooter>
             <Button
               variant="outline"

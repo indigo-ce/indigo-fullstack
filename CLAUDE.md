@@ -152,6 +152,81 @@ React Email templates with Resend API:
 - **React components**: For interactive UI elements (forms, dropdowns, etc.) and email templates
 - **UI Primitives**: Shadcn-style components in `src/components/ui/`
 
+### Error Handling & Display Guidelines
+
+The application uses a unified error display system for consistent user feedback.
+
+**Available Components:**
+
+- **Astro:**
+  - `ErrorMessage.astro` - Displays all errors at the top of forms
+  - `SuccessMessage.astro` - Success confirmations with icons
+- **React:**
+  - `ErrorMessage.tsx` - React version for client components
+
+**Error Display Pattern:**
+
+**ALL errors display at the top of forms using ErrorMessage. No inline field errors.**
+
+```astro
+<!-- Astro Components -->
+import ErrorMessage from "@/components/ErrorMessage.astro";
+import SuccessMessage from "@/components/SuccessMessage.astro";
+
+<form>
+  <!-- Show ANY error at top - server, validation, or field errors -->
+  <ErrorMessage message={errors.server || errors.email || errors.password} />
+
+  <!-- Form fields without inline errors -->
+  <Input type="email" name="email" required />
+  <Input type="password" name="password" required />
+
+  <Button type="submit">Submit</Button>
+</form>
+
+<!-- Success message -->
+<SuccessMessage message={successMessage} />
+```
+
+```tsx
+// React Components
+import {ErrorMessage} from "@/components/ErrorMessage";
+import {toast} from "sonner";
+
+<form>
+  {/* All errors at top */}
+  <ErrorMessage message={errors.server || errors.name || errors.description} />
+
+  {/* Fields */}
+  <Input name="name" required />
+
+  {/* Toast for success (transient feedback) */}
+  <Button onClick={() => toast.success("Saved!")}>Save</Button>
+</form>
+```
+
+**Design Principles:**
+
+- **One error location**: Top of form only, never inline
+- **Combine errors**: Use `||` to show first available error
+- **Lucide icons**: AlertCircle for errors, CheckCircle for success
+- **Design tokens**: `text-destructive`, `bg-destructive/10`, etc.
+- **Auto-hide**: Components hide when no message
+- **Dark mode**: Built-in via design tokens
+
+**Toast Notifications** - For transient, non-blocking feedback:
+- Success confirmations (`toast.success()`)
+- Background operations (`toast.info()`)
+- Non-critical errors (`toast.error()`)
+- Icons auto-configured with Lucide
+
+**Migration Notes:**
+
+- Remove all inline field error displays
+- Consolidate errors at top with `errors.field1 || errors.field2`
+- Remove `FormError` component usage (deprecated)
+- Keep ARIA attributes for accessibility (optional)
+
 ### Adding New Components
 
 When tasking with redesigning or creating components, always check whether we

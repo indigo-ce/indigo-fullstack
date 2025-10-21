@@ -1,0 +1,42 @@
+---
+/**
+ * Unified success message component for displaying positive feedback.
+ * Use this for confirmation messages, successful operations, or positive alerts.
+ */
+
+interface Props {
+  message?: string;
+  class?: string;
+}
+
+const { message, class: className } = Astro.props;
+
+// Don't render if no message
+if (!message) return null;
+---
+
+<div
+  class:list={[
+    "flex gap-3 rounded-md border border-green-500/20 bg-green-500/10 p-4",
+    className
+  ]}
+  role="status"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="text-green-600 dark:text-green-400 mt-0.5 shrink-0"
+    aria-hidden="true"
+  >
+    <path d="M22 11.08V12a10 10 10 1 1-5.93-9.14"></path>
+    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+  </svg>
+  <p class="text-green-700 dark:text-green-300 text-sm">{message}</p>
+</div>

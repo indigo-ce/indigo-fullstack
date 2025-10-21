@@ -1,0 +1,44 @@
+---
+/**
+ * Unified error message component for displaying all errors.
+ * Place at the top of forms to show server errors, validation errors, or any error messages.
+ * All errors should display here - no inline field errors.
+ */
+
+interface Props {
+  message?: string;
+  class?: string;
+}
+
+const { message, class: className } = Astro.props;
+
+// Don't render if no message
+if (!message) return null;
+---
+
+<div
+  class:list={[
+    "flex gap-3 rounded-md border border-destructive/20 bg-destructive/10 p-4",
+    className
+  ]}
+  role="alert"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    class="text-destructive mt-0.5 shrink-0"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="10"></circle>
+    <line x1="12" x2="12" y1="8" y2="12"></line>
+    <line x1="12" x2="12.01" y1="16" y2="16"></line>
+  </svg>
+  <p class="text-destructive text-sm">{message}</p>
+</div>

@@ -4,6 +4,8 @@ import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {PasswordField} from "@/components/PasswordField.tsx";
+import ErrorMessage from "@/components/ErrorMessage.astro";
+import SuccessMessage from "@/components/SuccessMessage.astro";
 import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import type {APIError} from "better-auth/api";
@@ -120,41 +122,21 @@ const success = Astro.url.searchParams.get("success");
     <div class="w-full max-w-md space-y-8">
       <h1 class="mb-8 text-2xl font-bold">{t.account.personalInfo}</h1>
 
-      {
-        success === "profile-updated" && (
-          <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
-            {t.account.profileUpdated}
-          </div>
-        )
-      }
-
-      {
-        success === "email-verification-sent" && (
-          <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
-            {t.auth.checkEmail}
-          </div>
-        )
-      }
-
-      {
-        success === "password-changed" && (
-          <div class="mb-4 rounded-md bg-green-50 p-4 text-green-700 dark:bg-green-950 dark:text-green-300">
-            {t.auth.resetSuccess}
-          </div>
-        )
-      }
+      <SuccessMessage
+        message={success === "profile-updated"
+          ? t.account.profileUpdated
+          : success === "email-verification-sent"
+            ? t.auth.checkEmail
+            : success === "password-changed"
+              ? t.auth.resetSuccess
+              : undefined}
+      />
 
       <div class="bg-card rounded-lg border p-6">
         <h2 class="mb-4 text-xl font-semibold">{t.account.editProfile}</h2>
         <form method="POST" class="space-y-4">
           <input type="hidden" name="action" value="update-profile" />
-          {
-            errors.name && (
-              <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-300">
-                {errors.name}
-              </div>
-            )
-          }
+          <ErrorMessage message={errors.name} />
           <div
             class="focus-within:ring-ring relative flex items-center rounded-md border px-2 focus-within:ring-1"
           >
@@ -177,13 +159,7 @@ const success = Astro.url.searchParams.get("success");
         <h2 class="mb-4 text-xl font-semibold">{t.account.email}</h2>
         <form method="POST" class="space-y-4">
           <input type="hidden" name="action" value="change-email" />
-          {
-            errors.email && (
-              <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-300">
-                {errors.email}
-              </div>
-            )
-          }
+          <ErrorMessage message={errors.email} />
           <div
             class="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1"
           >
@@ -207,16 +183,12 @@ const success = Astro.url.searchParams.get("success");
         <h2 class="mb-4 text-xl font-semibold">{t.auth.password}</h2>
         <form method="POST" class="space-y-6">
           <input type="hidden" name="action" value="change-password" />
-          {
-            (errors.currentPassword || errors.newPassword) && (
-              <div class="mb-4 rounded-md bg-red-50 p-4 text-red-700 dark:bg-red-950 dark:text-red-300">
-                {errors.currentPassword || errors.newPassword}
-              </div>
-            )
-          }
+          <ErrorMessage
+            message={errors.currentPassword || errors.newPassword}
+          />
           <PasswordField
             name="currentPassword"
-            className="mb-4"
+            className="mb-2"
             placeholder={t.auth.password}
             required
             defaultValue={fields.currentPassword}
