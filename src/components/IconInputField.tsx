@@ -14,6 +14,7 @@ interface IconInputFieldProps
 export function IconInputField({
   className,
   iconName,
+  "data-testid": dataTestId,
   ...props
 }: IconInputFieldProps) {
   const Icon = iconName
@@ -31,6 +32,7 @@ export function IconInputField({
       {Icon && <Icon className="text-muted-foreground mr-1 h-5 w-5" />}
       <Input
         {...props}
+        data-testid={dataTestId}
         className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
       />
     </div>
