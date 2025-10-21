@@ -1,9 +1,15 @@
 import * as React from "react";
 import {Input} from "@/components/ui/input";
 import {cn} from "@/lib/utils";
-import * as LucideIcons from "lucide-react";
+import {User, Mail} from "lucide-react";
 
-type IconName = keyof typeof LucideIcons;
+// Icon map - add more icons here as needed
+const ICON_MAP = {
+  User,
+  Mail,
+} as const;
+
+type IconName = keyof typeof ICON_MAP;
 
 interface IconInputFieldProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -16,9 +22,7 @@ export function IconInputField({
   iconName,
   ...props
 }: IconInputFieldProps) {
-  const Icon = iconName
-    ? (LucideIcons[iconName] as React.ComponentType<{className?: string}>)
-    : null;
+  const Icon = iconName ? ICON_MAP[iconName] : null;
 
   return (
     <div
