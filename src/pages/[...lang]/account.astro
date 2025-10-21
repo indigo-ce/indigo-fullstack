@@ -2,11 +2,10 @@
 import {getLocaleFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
 import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
+import {IconInputField} from "@/components/IconInputField.tsx";
 import {PasswordField} from "@/components/PasswordField.tsx";
 import ErrorMessage from "@/components/ErrorMessage.astro";
 import SuccessMessage from "@/components/SuccessMessage.astro";
-import Mail from "@/assets/mail.svg";
 import {createAuth} from "@/lib/auth";
 import type {APIError} from "better-auth/api";
 import {useTranslationsFromParams, localizeUrl} from "@/i18n/utils";
@@ -40,45 +39,55 @@ if (Astro.request.method === "POST") {
 
   if (action === "update-profile") {
     const name = formData.get("name") as string;
-    fields.name = name;
-
-    try {
-      await auth.api.updateUser({
-        body: {name},
-        headers: Astro.request.headers
-      });
-      return Astro.redirect(
-        localizeUrl("/account?success=profile-updated", locale)
-      );
-    } catch (error) {
-      console.error(error);
-      errors.name = t.account.updateFailed;
-    }
-  }
-
-  if (action === "change-email") {
     const email = formData.get("email") as string;
+    fields.name = name;
     fields.email = email;
 
-    try {
-      const {status} = await auth.api.changeEmail({
-        body: {
-          newEmail: email,
-          callbackURL: localizeUrl("/account", locale)
-        },
-        headers: Astro.request.headers
-      });
+    let emailChanged = false;
 
-      if (!status) {
+    // Update name if changed
+    if (name !== Astro.locals.user.name) {
+      try {
+        await auth.api.updateUser({
+          body: {name},
+          headers: Astro.request.headers
+        });
+      } catch (error) {
+        console.error(error);
+        errors.name = t.account.updateFailed;
+      }
+    }
+
+    // Update email if changed
+    if (email !== Astro.locals.user.email && !errors.name) {
+      try {
+        const {status} = await auth.api.changeEmail({
+          body: {
+            newEmail: email,
+            callbackURL: localizeUrl("/account", locale)
+          },
+          headers: Astro.request.headers
+        });
+
+        if (!status) {
+          errors.email = t.account.updateFailed;
+        } else {
+          emailChanged = true;
+        }
+      } catch (error) {
+        console.error(error);
         errors.email = t.account.updateFailed;
       }
+    }
 
+    // Only redirect if no errors
+    if (!errors.name && !errors.email) {
+      const successParam = emailChanged
+        ? "email-verification-sent"
+        : "profile-updated";
       return Astro.redirect(
-        localizeUrl("/account?success=email-verification-sent", locale)
+        localizeUrl(`/account?success=${successParam}`, locale)
       );
-    } catch (error) {
-      console.error(error);
-      errors.email = t.account.updateFailed;
     }
   }
 
@@ -120,7 +129,7 @@ const success = Astro.url.searchParams.get("success");
 <Layout>
   <div class="flex w-full flex-col items-center justify-center py-12">
     <div class="w-full max-w-md space-y-8">
-      <h1 class="mb-8 text-2xl font-bold">{t.account.personalInfo}</h1>
+      <h1 class="mb-8 text-2xl font-bold">{t.account.title}</h1>
 
       <SuccessMessage
         message={success === "profile-updated"
@@ -134,45 +143,29 @@ const success = Astro.url.searchParams.get("success");
 
       <div class="bg-card rounded-lg border p-6">
         <h2 class="mb-4 text-xl font-semibold">{t.account.editProfile}</h2>
-        <form method="POST" class="space-y-4">
+        <form method="POST">
           <input type="hidden" name="action" value="update-profile" />
-          <ErrorMessage message={errors.name} />
-          <div
-            class="focus-within:ring-ring relative flex items-center rounded-md border px-2 focus-within:ring-1"
-          >
-            <Input
-              type="text"
-              placeholder={t.account.name}
-              className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
-              name="name"
-              required
-              defaultValue={fields.name}
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            {t.account.update}
-          </Button>
-        </form>
-      </div>
-
-      <div class="bg-card rounded-lg border p-6">
-        <h2 class="mb-4 text-xl font-semibold">{t.account.email}</h2>
-        <form method="POST" class="space-y-4">
-          <input type="hidden" name="action" value="change-email" />
-          <ErrorMessage message={errors.email} />
-          <div
-            class="focus-within:ring-ring relative flex items-center rounded-md border pl-2 focus-within:ring-1"
-          >
-            <Mail class="text-muted-foreground mr-1 h-5 w-5" />
-            <Input
-              type="email"
-              placeholder={t.account.email}
-              className="border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
-              name="email"
-              required
-              defaultValue={fields.email}
-            />
-          </div>
+          <ErrorMessage message={errors.name || errors.email} />
+          <IconInputField
+            type="text"
+            placeholder={t.account.name}
+            name="name"
+            required
+            defaultValue={fields.name}
+            iconName="User"
+            className="mb-2"
+            client:load
+          />
+          <IconInputField
+            type="email"
+            placeholder={t.account.email}
+            name="email"
+            required
+            defaultValue={fields.email}
+            iconName="Mail"
+            className="mb-4"
+            client:load
+          />
           <Button type="submit" className="w-full">
             {t.account.update}
           </Button>

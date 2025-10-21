@@ -51,7 +51,7 @@
     "yes": "はい",
     "no": "いいえ",
     "deleteFailed": "アカウントの削除に失敗しました",
-    "personalInfo": "個人情報",
+    "title": "アカウント",
     "editProfile": "プロフィール情報を編集する",
     "name": "名前",
     "email": "メール",
