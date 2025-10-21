@@ -5,6 +5,17 @@
       "args": [
         "@browsermcp/mcp@latest"
       ]
+    },
+    "git-ingest": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/adhikasp/mcp-git-ingest",
+        "mcp-git-ingest"
+      ]
+    },
+    "deepwiki": {
+      "url": "https://mcp.deepwiki.com/sse"
     }
   }
 }

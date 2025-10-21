@@ -152,6 +152,25 @@ React Email templates with Resend API:
 - **React components**: For interactive UI elements (forms, dropdowns, etc.) and email templates
 - **UI Primitives**: Shadcn-style components in `src/components/ui/`
 
+### Adding New Components
+
+When tasking with redesigning or creating components, always check whether we
+have the component locally first, then if not, use the `git-ingest` and
+`deepwiki` tools to pull Shadcn components and Lucide icons from the following
+repositories:
+
+- [Shadcn](https://github.com/shadcn-ui/ui)
+- [Lucide](https://github.com/lucide-icons/lucide)
+- [Shadcn Blocks](https://github.com/shadcnblocks/shadcn-ui-blocks)
+- [Shadcn Examples](https://github.com/shadcn-examples/shadcn-examples)
+- [React Shadcn Components](https://github.com/shadcnio/react-shadcn-components)
+
+Use BrowserMCP to preview both the old and new designs. If you get connection
+errors, ask the developer to ensure the browser extension is installed and is
+running against localhost:4321. Use that as base URL for your attempts. You
+might need to navigate to the page you're redesigning first to see how it looks
+like.
+
 ### Button Component Usage Guidelines
 
 **Rule**: Choose the right button approach based on functionality requirements:
