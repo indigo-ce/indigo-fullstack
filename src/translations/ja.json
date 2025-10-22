@@ -8,7 +8,7 @@
     "signout": "ログアウト"
   },
   "home": {
-    "title": "Indigo Stack CE",
+    "title": "Indigo Stack",
     "description": "Astro、React、TailwindCSS、Better Auth、Drizzle ORMで構築されたテンプレート。認証、データベース統合、モダンUIですぐに始められます。",
     "feature1": {
       "title": "静的 + SSR + React",

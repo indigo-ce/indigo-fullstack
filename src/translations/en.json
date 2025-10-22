@@ -8,7 +8,7 @@
     "signout": "Sign Out"
   },
   "home": {
-    "title": "Indigo Stack CE",
+    "title": "Indigo Stack",
     "description": "A starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM. Get started with authentication, database integration, and a modern UI.",
     "feature1": {
       "title": "Static + SSR + React",
