@@ -1,14 +1,11 @@
 // @ts-check
-import {defineConfig, envField, passthroughImageService} from "astro/config";
+import {defineConfig, envField} from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  image: {
-    service: passthroughImageService()
-  },
   env: {
     schema: {
       BETTER_AUTH_SECRET: envField.string({
@@ -30,7 +27,8 @@ export default defineConfig({
   adapter: cloudflare({
     platformProxy: {
       enabled: true // Use astro built-in commands
-    }
+    },
+    imageService: "cloudflare" // Use Cloudflare's native image optimization
   }),
   vite: {
     // @ts-expect-error - tailwindcss vite plugin type compatibility issue

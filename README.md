@@ -1,6 +1,6 @@
-# 🪻 Indigo Stack CE — Web Full Stack
+# 🪻 Indigo Stack — Web Full-stack
 
-Indigo Stack CE is a free, open-source web application starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM.
+Indigo Stack is a free, open-source web application starter template built with Astro, React, TailwindCSS, Better Auth, and Drizzle ORM.
 
 ## Tech Stack
 
