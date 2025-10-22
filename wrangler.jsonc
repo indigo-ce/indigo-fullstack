@@ -29,6 +29,6 @@
   ],
   "vars": {
     "BETTER_AUTH_BASE_URL": "https://ce.indigostack.org",
-    "SEND_EMAIL_FROM": "Indigo Stack CE <noreply@indigostack.org>"
+    "SEND_EMAIL_FROM": "Indigo Stack <noreply@indigostack.org>"
   }
 }

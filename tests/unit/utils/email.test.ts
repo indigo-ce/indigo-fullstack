@@ -16,7 +16,7 @@ describe("Email Utilities", () => {
   beforeEach(() => {
     mockEnv = {
       RESEND_API_KEY: "re_test_key",
-      SEND_EMAIL_FROM: "Indigo Stack CE <noreply@indigostack.org>",
+      SEND_EMAIL_FROM: "Indigo Stack <noreply@indigostack.org>",
       BETTER_AUTH_BASE_URL: "http://localhost:3000"
     };
 
