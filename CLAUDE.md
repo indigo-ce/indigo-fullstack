@@ -58,6 +58,8 @@ This is an Astro application with React components for interactivity and email t
 4. JWT-based authentication for API endpoints
 5. Routes organized by domain: `/auth`, `/account`
 
+**IMPORTANT**: Hono API endpoints are designed for external/mobile clients only and require JWT authentication. **Do NOT use these endpoints within Astro views or components.** For server-side data access in views, use direct database queries via Drizzle ORM or server-side actions instead.
+
 ### Database Schema Architecture
 
 The database follows Better Auth's expected schema with extensions:
