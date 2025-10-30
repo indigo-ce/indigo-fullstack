@@ -51,7 +51,13 @@ const filesToUpdate = [
   "CLAUDE.md"
 ];
 
-const filesToDelete = ["scripts/bootstrap.js", "drizzle/*", "src/styles.css"];
+const filesToDelete = [
+  "scripts/bootstrap.js",
+  "drizzle/migrations/*.sql",
+  "drizzle/migrations/meta",
+  "drizzle/meta",
+  "src/styles.css"
+];
 
 const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}).
 - Update the following files that contain Astro Starter or similar text (and any others not listed) to use the new project name. Do not update the /scripts folder. Example files to update: ${filesToUpdate.join(
