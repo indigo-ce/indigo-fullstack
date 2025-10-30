@@ -1,4 +1,4 @@
-RESEND_API_KEY=
+RESEND_API_KEY=test-key
 BETTER_AUTH_SECRET=better-auth-secret-123456789
 BETTER_AUTH_BASE_URL=http://localhost:4321
 SEND_EMAIL_FROM=Indigo Stack <onboarding@resend.dev>
