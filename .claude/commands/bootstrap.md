@@ -1,6 +1,6 @@
 ---
 argument-hint: "Project Name"
-description: Scaffold new project from template
+description: Bootstrap new project from template
 ---
 
 Read the bootstrap script and apply the instructions listed in it to rename the
