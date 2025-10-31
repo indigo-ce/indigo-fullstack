@@ -14,9 +14,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Database Operations
 
 - `pnpm db:generate` - Generate Drizzle migrations from schema changes
-- `pnpm d1:migrate:local` - Apply migrations to local D1 database
-- `pnpm d1:migrate:prod` - Apply migrations to production D1 database
-- `pnpm d1:studio:local` - Open Drizzle Studio for local database inspection
+- `pnpm db:migrate:local` - Apply migrations to local D1 database
+- `pnpm db:migrate:prod` - Apply migrations to production D1 database
+- `pnpm db:studio:local` - Open Drizzle Studio for local database inspection
 - `pnpm db:init:local` - Initialize local D1 database
 - `pnpm db:init:prod` - Create production D1 database
 
@@ -131,8 +131,8 @@ React Email templates with Resend API:
 
 1. Update `src/db/schema.ts`
 2. Run `pnpm db:generate` to create migration
-3. Apply with `pnpm d1:migrate:local`
-4. For production: `pnpm d1:migrate:prod`
+3. Apply with `pnpm db:migrate:local`
+4. For production: `pnpm db:migrate:prod`
 
 ### Adding New Languages
 
@@ -171,9 +171,9 @@ The application uses a unified error display system for consistent user feedback
 **ALL errors display at the top of forms using ErrorMessage. No inline field errors.**
 
 ```astro
-<!-- Astro Components -->
-import ErrorMessage from "@/components/ErrorMessage.astro";
-import SuccessMessage from "@/components/SuccessMessage.astro";
+<!-- Astro Components -->import ErrorMessage from
+"@/components/ErrorMessage.astro"; import SuccessMessage from
+"@/components/SuccessMessage.astro";
 
 <form>
   <!-- Show ANY error at top - server, validation, or field errors -->
@@ -204,7 +204,7 @@ import {toast} from "sonner";
 
   {/* Toast for success (transient feedback) */}
   <Button onClick={() => toast.success("Saved!")}>Save</Button>
-</form>
+</form>;
 ```
 
 **Design Principles:**
@@ -217,6 +217,7 @@ import {toast} from "sonner";
 - **Dark mode**: Built-in via design tokens
 
 **Toast Notifications** - For transient, non-blocking feedback:
+
 - Success confirmations (`toast.success()`)
 - Background operations (`toast.info()`)
 - Non-critical errors (`toast.error()`)

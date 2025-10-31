@@ -83,7 +83,7 @@ jobs:
         run: pnpm db:init:local
 
       - name: Run database migrations
-        run: pnpm d1:migrate:local
+        run: pnpm db:migrate:local
 
       - name: Run e2e tests
         run: pnpm test:e2e

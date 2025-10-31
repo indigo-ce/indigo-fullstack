@@ -51,9 +51,9 @@ pnpm run preview       # Cloudflare Workers emulation via Wrangler
 | `pnpm build`            | Build your production site with DB setup |
 | `pnpm astro`            | Run Astro CLI commands                   |
 | `pnpm db:generate`      | Generate Drizzle migrations              |
-| `pnpm d1:migrate:local` | Apply migrations locally                 |
-| `pnpm d1:migrate:prod`  | Apply migrations to production           |
-| `pnpm d1:studio:local`  | Run Drizzle Studio for local development |
+| `pnpm db:migrate:local` | Apply migrations locally                 |
+| `pnpm db:migrate:prod`  | Apply migrations to production           |
+| `pnpm db:studio:local`  | Run Drizzle Studio for local development |
 | `pnpm preview-email`    | Start email template preview server      |
 
 ### AI-assisted Bootstrap
@@ -222,8 +222,8 @@ Example wrangler.jsonc configuration:
 ### Migrations
 
 - Run `pnpm db:generate` to generate migrations from your schema.
-- Run `pnpm d1:migrate:local` to apply them locally.
-- Run `pnpm d1:migrate:prod` to apply them to production.
+- Run `pnpm db:migrate:local` to apply them locally.
+- Run `pnpm db:migrate:prod` to apply them to production.
 
 See the checklist above for more details.
 
@@ -234,7 +234,7 @@ See the checklist above for more details.
 You can use the Drizzle Studio to view and edit your local database data.
 
 ```bash
-pnpm d1:studio:local
+pnpm db:studio:local
 ```
 
 ### Queries
@@ -494,7 +494,7 @@ When you sign up locally, the verification email goes to `delivered@resend.dev` 
 RESEND_API_KEY=ci-test-key
 
 # Then manually verify users in database if needed
-pnpm d1:studio:local
+pnpm db:studio:local
 # Run: UPDATE user SET emailVerified = 1 WHERE email = 'test@example.com'
 ```
 

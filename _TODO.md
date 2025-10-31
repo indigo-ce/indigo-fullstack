@@ -7,8 +7,8 @@
 - [ ] Run `pnpm db:init:local` to initialize the local database.
 - [ ] Run `pnpm db:init:prod` to initialize the production database.
 - [ ] Regenerate migrations using `pnpm db:generate`.
-- [ ] Apply migrations to local database using `pnpm d1:migrate:local`.
-- [ ] Apply migrations to production database using `pnpm d1:migrate:prod`.
+- [ ] Apply migrations to local database using `pnpm db:migrate:local`.
+- [ ] Apply migrations to production database using `pnpm db:migrate:prod`.
 - [ ] Ensure all bundled tests pass using `pnpm test`.
 - [ ] Deploy the app using `pnpm deploy` before setting production secrets.
 - [ ] Set `BETTER_AUTH_SECRET` secret using `pnpm wrangler secret put BETTER_AUTH_SECRET` for production.
