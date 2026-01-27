@@ -34,9 +34,9 @@
     "test:e2e:codegen": "bash scripts/codegen.sh"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^12.6.8",
-    "@astrojs/node": "^9.4.3",
-    "@astrojs/react": "^4.3.1",
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/node": "^9.5.2",
+    "@astrojs/react": "^4.4.2",
     "@hookform/resolvers": "^5.2.2",
     "@libsql/client": "^0.15.15",
     "@radix-ui/react-accordion": "^1.2.12",
@@ -70,7 +70,7 @@
     "@react-email/render": "^1.2.3",
     "@tailwindcss/typography": "^0.5.18",
     "@tailwindcss/vite": "^4.1.13",
-    "astro": "^5.13.9",
+    "astro": "^5.16.15",
     "better-auth": "^1.4.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -100,7 +100,7 @@
     "zod": "^4.1.11"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.4",
+    "@astrojs/check": "^0.9.6",
     "@cloudflare/vitest-pool-workers": "^0.9.3",
     "@cloudflare/workers-types": "^4.20250921.0",
     "@cretezy/cloudflare-d1-backup": "^0.2.1",
