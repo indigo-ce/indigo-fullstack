@@ -26,21 +26,7 @@ export function createAuth(env: Env) {
     database: drizzleAdapter(createDrizzle(env.DB), {provider: "sqlite"}),
     user: {
       changeEmail: {
-        enabled: true,
-        sendChangeEmailVerification: async ({user, newEmail, url}) => {
-          await sendEmail(
-            user.email,
-            "Email Change Request",
-            await render(
-              ChangeEmailVerification({
-                name: user.name || "friend",
-                url,
-                newEmail
-              })
-            ),
-            env
-          );
-        }
+        enabled: true
       },
       deleteUser: {
         enabled: true,
