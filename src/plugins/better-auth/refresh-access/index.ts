@@ -178,7 +178,6 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           // Create a session for the user
           const session = await ctx.context.internalAdapter.createSession(
             user.user.id,
-            ctx,
             true,
             {
               // Additional session properties can be added here
