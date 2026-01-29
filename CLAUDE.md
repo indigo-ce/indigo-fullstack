@@ -41,6 +41,56 @@ This is an Astro application with React components for interactivity and email t
 - **Email**: React Email templates with Resend API exclusively
 - **Deployment**: Cloudflare Workers with static assets
 
+## Better Auth Integration
+
+### Important Rules
+
+- **ALWAYS use `auth.api.*` methods** for all Better Auth interactions (both client-side and server-side)
+- **NEVER use `fetch()`** to call Better Auth endpoints
+- **NEVER use `auth.handler()`** - use the API methods instead
+- Use `asResponse: true` when you need to access response headers or cookies
+- For verification/redirect endpoints, check both `response.ok` and `response.status === 302`
+
+### Examples
+
+```typescript
+// ✅ CORRECT - Use auth.api methods
+const auth = createAuth(env);
+
+// Without response headers (simple success/error checking)
+const {status} = await auth.api.sendVerificationEmail({
+  body: {
+    email,
+    callbackURL: "/discover"
+  }
+});
+
+// With response headers (to access cookies)
+const response = await auth.api.signUpEmail({
+  body: {email, password, name},
+  asResponse: true
+});
+if (response.ok) {
+  const cookies = response.headers.getSetCookie();
+  // Forward cookies...
+}
+
+// Handle redirects (e.g., email verification)
+const response = await auth.api.verifyEmail({
+  query: {token, callbackURL},
+  asResponse: true
+});
+if (response.ok || response.status === 302) {
+  // Verification successful
+}
+
+// ❌ WRONG - Don't use fetch
+const response = await fetch(`${baseURL}/api/auth/...`);
+
+// ❌ WRONG - Don't use handler
+const response = await auth.handler(request);
+```
+
 ### Request Flow Architecture
 
 #### Web Pages (Astro SSR)

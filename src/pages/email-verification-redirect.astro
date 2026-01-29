@@ -1,0 +1,54 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import {createAuth} from "@/lib/auth";
+import {getLocaleFromParams, localizeUrl} from "@/i18n/utils";
+
+const locale = getLocaleFromParams(Astro.params);
+
+// Decode HTML entities in URL before parsing params
+const url = new URL(Astro.url.toString().replace(/&amp;/g, "&"));
+const token = url.searchParams.get("token");
+const callbackURL = url.searchParams.get("callbackURL") || localizeUrl("/discover", locale);
+
+if (!token) {
+  return Astro.redirect(localizeUrl("/", locale));
+}
+
+try {
+  const auth = createAuth(Astro.locals.runtime.env);
+
+  // Use Better Auth API method directly
+  const response = await auth.api.verifyEmail({
+    query: {
+      token: token,
+      callbackURL: callbackURL
+    },
+    asResponse: true
+  });
+
+  // Better Auth returns 302 redirect on successful verification
+  if (response.ok || response.status === 302) {
+    // Forward auth cookies
+    const cookies = response.headers.getSetCookie();
+    for (const cookie of cookies) {
+      Astro.response.headers.append("set-cookie", cookie);
+    }
+
+    // Use Better Auth's redirect location if provided, otherwise use our callbackURL
+    const redirectTo = response.headers.get("location") || callbackURL;
+    return Astro.redirect(redirectTo);
+  }
+
+  console.error("[Verify] Verification failed");
+  return Astro.redirect(localizeUrl("/?error=verification-failed", locale));
+} catch (error) {
+  console.error("[Verify] Exception:", error);
+  return Astro.redirect(localizeUrl("/?error=verification-failed", locale));
+}
+---
+
+<Layout title="Verifying Email">
+  <div class="flex min-h-screen items-center justify-center">
+    <p>Verifying your email...</p>
+  </div>
+</Layout>

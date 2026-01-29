@@ -6,7 +6,6 @@ import {refreshAccessToken} from "@/plugins/better-auth/refresh-access";
 import {render} from "@react-email/render";
 import {sendEmail} from "./email";
 import AccountDeleted from "@/components/email/AccountDeleted";
-import ChangeEmailVerification from "@/components/email/ChangeEmailVerification";
 import EmailVerification from "@/components/email/EmailVerification";
 import PasswordReset from "@/components/email/PasswordReset";
 
@@ -55,13 +54,21 @@ export function createAuth(env: Env) {
       }
     },
     emailVerification: {
-      sendOnSignUp: !(env.RESEND_API_KEY?.includes("test-key") ?? false), // Only send if we have a valid API key
+      sendOnSignUp: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({user, url}) => {
+        // Replace the API endpoint with our custom verification redirect page
+        const customUrl = url.replace(
+          "/api/auth/verify-email",
+          "/email-verification-redirect"
+        );
+
         await sendEmail(
           user.email,
           "Verify Your Email",
-          await render(EmailVerification({name: user.name || "friend", url})),
+          await render(
+            EmailVerification({name: user.name || "friend", url: customUrl})
+          ),
           env
         );
       }

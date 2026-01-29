@@ -13,10 +13,9 @@ import {actions} from "astro:actions";
 const locale = getLocaleFromParams(Astro.params);
 const t = useTranslationsFromParams(Astro.params);
 
-// Check if user is authenticated and email is already verified
-if (Astro.locals.user?.id && Astro.locals.user?.emailVerified) {
-  return Astro.redirect(localizeUrl("/dashboard", locale));
-}
+const user = Astro.locals.user;
+
+if (user?.emailVerified) return Astro.redirect(localizeUrl("/dashboard", locale));
 
 let email = "";
 let isAuthenticated = false;
@@ -84,6 +83,11 @@ if (shouldProcessPost) {
         <strong>{email}</strong>. {t.auth.verifyInstruction}
       </p>
 
+      <p class="text-muted-foreground mt-6 mb-3 text-sm">
+        {t.auth.didntReceiveEmail}
+        {t.auth.tryAgain}
+      </p>
+
       <div class="space-y-4">
         <ErrorMessage message={errors.server} />
         <SuccessMessage message={successMessage} />
@@ -99,11 +103,6 @@ if (shouldProcessPost) {
           )
         }
       </div>
-
-      <p class="text-muted-foreground mt-6 text-sm">
-        {t.auth.didntReceiveEmail}
-        {t.auth.tryAgain}
-      </p>
     </div>
   </div>
 </Layout>

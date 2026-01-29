@@ -79,7 +79,7 @@
     "resetPasswordDescription": "メールアドレスを入力すると、パスワードをリセットするためのリンクが送信されます。",
     "resetLink": "リセットリンク",
     "backToSignin": "ログインに戻る",
-    "checkEmail": "メールを確認してください",
+    "checkEmail": "新しいメールアドレスに届いた確認リンクをご確認ください。リンクをクリックするまでメールアドレスは変更されません。",
     "resetEmailSent": "パスワードリセットリンクをメールに送信しました。",
     "resetInstruction": "メール内のリンクをクリックしてパスワードをリセットしてください。",
     "didntReceiveEmail": "メールが届きませんでしたか？",

@@ -79,7 +79,7 @@
     "resetPasswordDescription": "Enter your email and we'll send you a link to reset your password.",
     "resetLink": "Reset Link",
     "backToSignin": "Back to sign in",
-    "checkEmail": "Check your email",
+    "checkEmail": "Check your new email for a verification link. Until you click that link your email won't be changed.",
     "resetEmailSent": "We've sent a password reset link to your email.",
     "resetInstruction": "Click the link in the email to reset your password.",
     "didntReceiveEmail": "Didn't receive an email?",

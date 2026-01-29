@@ -16,7 +16,20 @@ export async function sendEmail(
 
   // In test environment, skip actual email sending
   if (isTestMode) {
-    console.log(`📧 [TEST MODE] Would send email to: ${to}, subject: ${subject}`);
+    console.log("📧 [TEST MODE] Would send email:");
+    console.log("  To:", to);
+    console.log("  Subject:", subject);
+
+    // Extract links from HTML and decode HTML entities for better readability
+    const linkMatches = html.matchAll(/href="([^"]+)"/g);
+    const links = Array.from(linkMatches, (m) =>
+      m[1].replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"')
+    );
+    if (links.length > 0) {
+      console.log("  Links in email:");
+      links.forEach((link) => console.log("   ", link));
+    }
+
     return {id: "test-email-id", mock: true};
   }
 
