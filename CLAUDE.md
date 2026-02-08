@@ -38,7 +38,7 @@ This is an Astro application with React components for interactivity and email t
 - **API Layer**: Hono-based REST API mounted at `/api/v1/*` with modular route organization
 - **Database**: Drizzle ORM with Cloudflare D1 (serverless SQLite)
 - **Authentication**: Better Auth with JWT tokens and refresh token plugin
-- **Email**: React Email templates with Resend API exclusively
+- **Email**: React Email templates with Plunk API exclusively
 - **Deployment**: Cloudflare Workers with static assets
 
 ## Better Auth Integration
@@ -139,10 +139,10 @@ Type-safe i18n with locale-aware routing:
 
 ### Email System Architecture
 
-React Email templates with Resend API:
+React Email templates with Plunk API:
 
-- **Production**: Resend API with custom domain
-- **Development**: Resend API with resend.dev testing domains
+- **Production**: Plunk API with custom domain
+- **Development**: Plunk API with resend.dev testing domains
 - Template organization in `src/components/email/` with shared BaseLayout
 - Preview server available via `pnpm preview-email`
 
@@ -345,7 +345,7 @@ like.
 
 ### Development vs Production
 
-- Email: Resend API with resend.dev testing (dev) vs Resend API (prod)
+- Email: Plunk API with resend.dev testing (dev) vs Plunk API (prod)
 - Database: Local D1 file vs remote Cloudflare D1
 - Secrets: `.dev.vars` file vs Wrangler secrets
 - Assets: Dev server vs Cloudflare Workers static assets

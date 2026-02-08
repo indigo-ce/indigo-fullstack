@@ -41,8 +41,7 @@
     "welcome": "Hello,",
     "welcomeBack": "Welcome back to your dashboard. Your email is",
     "emailNotVerified": "Email is not verified",
-    "noEmailReceived": "No email received?",
-    "emailDemo": "Email Demo →"
+    "noEmailReceived": "No email received?"
   },
   "account": {
     "deleteAccount": "Delete Account",
@@ -80,8 +79,10 @@
     "resetLink": "Reset Link",
     "backToSignin": "Back to sign in",
     "checkEmail": "Check your new email for a verification link. Until you click that link your email won't be changed.",
+    "checkEmailForReset": "Check your email for a password reset link.",
     "resetEmailSent": "We've sent a password reset link to your email.",
     "resetInstruction": "Click the link in the email to reset your password.",
+    "emailVerified": "Your email has been verified. Welcome to Indigo Stack!",
     "didntReceiveEmail": "Didn't receive an email?",
     "tryAgain": "Try again",
     "enterNewPassword": "Enter your new password",
@@ -97,23 +98,7 @@
     "resendVerificationError": "Failed to resend verification email. Please try again."
   },
   "email": {
-    "demo": "Email Demo",
-    "sendCustom": "Send Custom Email",
-    "sendWelcome": "Send Welcome Email",
-    "sendReset": "Send Password Reset Email",
-    "sendVerification": "Send Verification Email",
-    "sending": "Sending...",
-    "success": "Email sent successfully",
-    "error": "Failed to send email",
-    "demoDescription": "Send a custom test email",
-    "setupTitle": "Setup Instructions",
-    "setupDescription": "To use Resend for email sending, add the following environment variables:",
-    "templateInfo": "Email templates are built with React Email for improved maintainability and design consistency.",
-    "devInfo": "For development, the app will use Resend with delivered@resend.dev for testing emails without sending to real addresses.",
-    "subject": "Subject",
-    "emailTitle": "Email Title (optional)",
-    "message": "Message",
-    "consoleInfo": "Check the console logs for more information about delivery."
+    "success": "Email sent successfully"
   },
   "error": {
     "500": {

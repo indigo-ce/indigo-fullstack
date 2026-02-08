@@ -1,8 +1,8 @@
----
-argument-hint: "Project Name"
-description: Bootstrap new project from template
----
+Bootstrap the local development environment for Indigo Stack. Run each step in order, stopping if any step fails:
 
-Read the bootstrap script and apply the instructions listed in it to rename the
-project to "$ARGUMENTS". No need to run the script itself, and make sure to use
-to-dos to keep progress trackable.
+1. Install dependencies: `pnpm install`
+2. Copy `.dev.vars.example` to `.dev.vars` only if `.dev.vars` does not already exist. If it exists, skip this step and note that it was skipped.
+3. Generate Cloudflare types: `pnpm cf-types`
+4. Apply database migrations locally: `pnpm db:migrate:local`
+
+Report the result of each step as you go.

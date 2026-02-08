@@ -7,7 +7,6 @@ const t = useTranslationsFromParams(Astro.params);
 const {env} = Astro.locals.runtime;
 const isProd = process.env.NODE_ENV === "production";
 const betterAuthSecret = env.BETTER_AUTH_SECRET;
-const resendApiKey = env.RESEND_API_KEY;
 const sendEmailFrom = env.SEND_EMAIL_FROM;
 const betterAuthBaseUrl = env.BETTER_AUTH_BASE_URL;
 ---
@@ -38,16 +37,6 @@ const betterAuthBaseUrl = env.BETTER_AUTH_BASE_URL;
                 {isProd ? "Production" : "Development"}
               </dd>
             </div>
-          </div>
-          <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
-            <dt class="text-foreground text-sm font-medium">
-              <code class="text-muted-foreground text-xs">RESEND_API_KEY</code>
-            </dt>
-            <dd
-              class="text-muted-foreground mt-1 text-sm/6 sm:col-span-2 sm:mt-0"
-            >
-              {resendApiKey ? "✅" : "❌"}
-            </dd>
           </div>
           <div class="px-4 py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
             <dt class="text-foreground text-sm font-medium">

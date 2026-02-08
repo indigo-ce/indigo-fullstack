@@ -19,8 +19,11 @@ if (!Astro.locals.user?.id) {
 
 const user = Astro.locals.user;
 const accountUrl = localizeUrl("/account", locale);
-const emailDemoUrl = localizeUrl("/email-demo", locale);
 const verifyEmailUrl = localizeUrl("/verify-email", locale);
+
+// Check for verified query param
+const url = new URL(Astro.request.url);
+const verified = url.searchParams.get("verified");
 
 // Generate button classes at compile time
 const buttonClasses = buttonVariants({variant: "outline", size: "sm"});
@@ -31,6 +34,19 @@ const buttonClasses = buttonVariants({variant: "outline", size: "sm"});
     <h1 class="text-foreground mb-4 text-2xl font-bold">
       {t.nav.dashboard}
     </h1>
+
+    {
+      verified === "true" && (
+        <div
+          class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950"
+          role="status"
+        >
+          <p class="text-sm text-green-800 dark:text-green-200">
+            {t.auth.emailVerified}
+          </p>
+        </div>
+      )
+    }
 
     {
       !user.emailVerified && (
@@ -50,9 +66,6 @@ const buttonClasses = buttonVariants({variant: "outline", size: "sm"});
     <div class="flex flex-wrap items-center gap-4">
       <a href={accountUrl} class={buttonClasses}>
         {t.nav.account}
-      </a>
-      <a href={emailDemoUrl} class={buttonClasses}>
-        {t.dashboard.emailDemo}
       </a>
       <DeleteConfirmation locale={locale} client:load />
     </div>

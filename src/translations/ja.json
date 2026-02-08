@@ -41,8 +41,7 @@
     "welcome": "こんにちは、",
     "welcomeBack": "ダッシュボードへようこそ。あなたのメールアドレスは",
     "emailNotVerified": "メールは確認されていません",
-    "noEmailReceived": "メールが届きませんか？",
-    "emailDemo": "メールデモ →"
+    "noEmailReceived": "メールが届きませんか？"
   },
   "account": {
     "deleteAccount": "アカウントを削除",
@@ -80,8 +79,10 @@
     "resetLink": "リセットリンク",
     "backToSignin": "ログインに戻る",
     "checkEmail": "新しいメールアドレスに届いた確認リンクをご確認ください。リンクをクリックするまでメールアドレスは変更されません。",
+    "checkEmailForReset": "パスワードリセットリンクをメールでご確認ください。",
     "resetEmailSent": "パスワードリセットリンクをメールに送信しました。",
     "resetInstruction": "メール内のリンクをクリックしてパスワードをリセットしてください。",
+    "emailVerified": "メールアドレスが確認されました。Indigo Stackへようこそ！",
     "didntReceiveEmail": "メールが届きませんでしたか？",
     "tryAgain": "もう一度試す",
     "enterNewPassword": "新しいパスワードを入力してください",
@@ -97,23 +98,7 @@
     "resendVerificationError": "確認メールの再送信に失敗しました。もう一度お試しください。"
   },
   "email": {
-    "demo": "メールデモ",
-    "sendCustom": "カスタムメールを送信",
-    "sendWelcome": "ウェルカムメールを送信",
-    "sendReset": "パスワードリセットメールを送信",
-    "sendVerification": "確認メールを送信",
-    "sending": "送信中...",
-    "success": "メールが正常に送信されました",
-    "error": "メールの送信に失敗しました",
-    "demoDescription": "カスタムテストメールを送信",
-    "setupTitle": "セットアップ手順",
-    "setupDescription": "Resendをメール送信に使用するには、以下の環境変数を追加してください：",
-    "templateInfo": "メールテンプレートはReact Emailで構築されており、保守性とデザインの一貫性が向上しています。",
-    "devInfo": "開発環境では、実際のアドレスに送信せずにメールをテストするためにResendのdelivered@resend.devを使用します。",
-    "subject": "件名",
-    "emailTitle": "メールタイトル（任意）",
-    "message": "メッセージ",
-    "consoleInfo": "配信の詳細についてはコンソールログを確認してください。"
+    "success": "メールが正常に送信されました"
   },
   "error": {
     "500": {

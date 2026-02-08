@@ -30,5 +30,13 @@
   "vars": {
     "BETTER_AUTH_BASE_URL": "https://ce.indigostack.org",
     "SEND_EMAIL_FROM": "Indigo Stack <noreply@indigostack.org>"
+  },
+  "queues": {
+    "producers": [
+      {
+        "binding": "EMAIL_QUEUE",
+        "queue": "indigo-email-queue"
+      }
+    ]
   }
 }
