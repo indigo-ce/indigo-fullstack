@@ -30,7 +30,7 @@ export default {
         console.log(`✅ Email sent successfully to ${to}`);
       } catch (error) {
         console.error(`❌ Failed to process email for ${to}:`, error);
-        const retryDelay = Math.min(30 * Math.pow(2, message.attempts), 300);
+        const retryDelay = 30 * Math.pow(2, message.attempts);
         message.retry({delaySeconds: retryDelay});
       }
     }

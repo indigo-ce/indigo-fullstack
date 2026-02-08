@@ -129,29 +129,6 @@ pnpm wrangler secret put PLUNK_API_KEY
 For local development, add `PLUNK_API_KEY` to your `.dev.vars` file.
 The sender email address (`SEND_EMAIL_FROM`) should be configured in your `wrangler.jsonc` file under the `vars` section for production.
 
-#### Development Testing with useplunk.com
-
-For local development, Indigo Stack automatically uses Plunk's testing domains to avoid domain verification issues:
-
-- **All verification emails** are sent to `delivered@useplunk.com` (instead of real user emails)
-- **Sender address** uses `onboarding@useplunk.com` (no domain verification required)
-- **Full functionality** - You can test the complete email verification flow
-
-**Available test scenarios:**
-
-- `delivered@useplunk.com` - Test successful email delivery
-- `bounced@useplunk.com` - Test email bounces
-- `complained@useplunk.com` - Test spam marking
-
-This setup allows you to test email verification without:
-
-- Domain verification requirements
-- Real email addresses
-- SMTP configuration
-- External email services
-
-Simply sign up with any email address locally, and the verification email will be sent to `delivered@useplunk.com`. Check your [Plunk dashboard](https://useplunk.com/emails) to see the delivery.
-
 ### Astro Session
 
 The Astro Sessions API allows you to easily store user data between requests.
@@ -538,18 +515,18 @@ pnpm test:e2e
 
 #### 🏠 **Local Development (with real Plunk API key)**
 
-- **API Key Pattern**: Any valid Plunk key (starts with `re_`)
-- **Behavior**: Emails sent to `delivered@useplunk.com` test domain
-- **Why**: Test actual email delivery without domain verification
+- **API Key Pattern**: Any valid Plunk API key
+- **Behavior**: Emails sent to actual user email addresses via Plunk
+- **Why**: Test actual email delivery
 - **Setup**: Add real Plunk API key to `.dev.vars`
-- **Dashboard**: View emails at [useplunk.com/emails](https://useplunk.com/emails)
+- **Dashboard**: View emails in your [Plunk dashboard](https://app.useplunk.com)
 
 ```bash
 # .dev.vars
-PLUNK_API_KEY=re_xxxxxxxxxx  # Your real Plunk API key
+PLUNK_API_KEY=your-plunk-api-key
 ```
 
-When you sign up locally, the verification email goes to `delivered@useplunk.com` (visible in your Plunk dashboard).
+When you sign up locally, the verification email is sent to the actual email address you used.
 
 #### 🧪 **Local Development (testing without emails)**
 
@@ -583,11 +560,9 @@ pnpm wrangler secret put PLUNK_API_KEY
 ### Summary: Email Sending Decision Tree
 
 ```shell
-Is PLUNK_API_KEY = "ci-test-key"?
-├─ YES → Mock emails (log to console)
-└─ NO → Is NODE_ENV = "production"?
-    ├─ YES → Send to real user emails
-    └─ NO → Send to delivered@useplunk.com (local dev)
+Is local development (localhost)?
+├─ YES → Log to console (not queued)
+└─ NO → Queue email for async delivery via Plunk
 ```
 
 ### Test Coverage

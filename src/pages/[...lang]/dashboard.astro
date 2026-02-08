@@ -71,3 +71,11 @@ const buttonClasses = buttonVariants({variant: "outline", size: "sm"});
     </div>
   </div>
 </Layout>
+
+<script is:inline>
+  if (new URL(window.location.href).searchParams.has("verified")) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("verified");
+    history.replaceState(null, "", url.pathname + url.search);
+  }
+</script>

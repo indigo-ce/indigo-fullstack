@@ -11,7 +11,6 @@ export interface EmailQueueMessage {
   template: EmailTemplate;
   locale: string;
   queuedAt: string;
-  idempotencyKey?: string;
 }
 
 // Localized email subjects

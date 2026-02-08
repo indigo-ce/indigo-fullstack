@@ -309,19 +309,6 @@ The worker handles errors gracefully:
 - Max 3 retries before moving to DLQ
 - Preserves message for investigation
 
-### Idempotency
-
-Use `idempotencyKey` for critical emails:
-
-```typescript
-await queueEmail(
-  user.email,
-  {type: "email-verification", props: {name: user.name, url}},
-  env,
-  {idempotencyKey: `verify-${user.id}`}
-);
-```
-
 ### Locale Detection
 
 Automatically pass user's locale preference:
