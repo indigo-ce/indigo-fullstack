@@ -3,11 +3,7 @@ import {createDrizzle} from "@/db";
 import {drizzleAdapter} from "better-auth/adapters/drizzle";
 import {jwt} from "better-auth/plugins/jwt";
 import {refreshAccessToken} from "@/plugins/better-auth/refresh-access";
-import {render} from "@react-email/render";
-import {sendEmail} from "./email";
-import AccountDeleted from "@/components/email/AccountDeleted";
-import EmailVerification from "@/components/email/EmailVerification";
-import PasswordReset from "@/components/email/PasswordReset";
+import {queueEmail} from "./email";
 
 export function createAuth(env: Env) {
   if (!env.BETTER_AUTH_SECRET) {
@@ -30,11 +26,11 @@ export function createAuth(env: Env) {
       deleteUser: {
         enabled: true,
         afterDelete: async (user) => {
-          await sendEmail(
+          await queueEmail(
             user.email,
-            "Account Deleted",
-            await render(AccountDeleted({name: user.name || "friend"})),
-            env
+            {type: "account-deleted", props: {name: user.name || "friend"}},
+            env,
+            {locale: user.locale || "en"}
           );
         }
       }
@@ -43,13 +39,14 @@ export function createAuth(env: Env) {
       enabled: true,
       requireEmailVerification: false, // Set to true to require email verification to sign in
       sendResetPassword: async ({user, url}) => {
-        await sendEmail(
+        await queueEmail(
           user.email,
-          "Reset Your Password",
-          await render(
-            PasswordReset({name: user.name || "friend", resetLink: url})
-          ),
-          env
+          {
+            type: "password-reset",
+            props: {name: user.name || "friend", resetLink: url}
+          },
+          env,
+          {locale: user.locale || "en"}
         );
       }
     },
@@ -63,13 +60,14 @@ export function createAuth(env: Env) {
           "/email-verification-redirect"
         );
 
-        await sendEmail(
+        await queueEmail(
           user.email,
-          "Verify Your Email",
-          await render(
-            EmailVerification({name: user.name || "friend", url: customUrl})
-          ),
-          env
+          {
+            type: "email-verification",
+            props: {name: user.name || "friend", url: customUrl}
+          },
+          env,
+          {locale: user.locale || "en"}
         );
       }
     },

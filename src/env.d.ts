@@ -14,7 +14,6 @@ declare namespace App {
 
 // Vite/ImportMeta Environment Variables
 interface ImportMetaEnv {
-  readonly RESEND_API_KEY?: string;
   readonly BETTER_AUTH_SECRET?: string;
   readonly SEND_EMAIL_FROM?: string;
 }

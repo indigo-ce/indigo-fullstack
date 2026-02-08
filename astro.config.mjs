@@ -12,10 +12,6 @@ export default defineConfig({
         context: "server",
         access: "secret"
       }),
-      RESEND_API_KEY: envField.string({
-        context: "server",
-        access: "secret"
-      }),
       SEND_EMAIL_FROM: envField.string({
         context: "server",
         access: "public",

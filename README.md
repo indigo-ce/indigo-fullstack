@@ -12,7 +12,7 @@ Indigo Stack is a free, open-source web application starter template built with 
 - **[Better Auth](https://better-auth.com)** - Authentication system
 - **[Drizzle ORM](https://orm.drizzle.team)** - TypeScript ORM
 - **[Drizzle Kit](https://orm.drizzle.team/docs/cli)** - CLI tool for managing Drizzle ORM migrations and database schema
-- **[Resend](https://resend.com)** - Modern email API for sending emails
+- **[Plunk](https://useplunk.com)** - Modern email API for sending emails
 - **[Hono](https://hono.dev)** - Lightweight, ultrafast web framework for API endpoints
 - **[Cloudflare D1](https://developers.cloudflare.com/d1)** - Serverless database for modern applications
 - **[React Email](https://react.email)** - Email templating library for React
@@ -27,7 +27,7 @@ Indigo Stack is a free, open-source web application starter template built with 
 - **User Authentication** flow with Better Auth.
 - **Database Integration** with Drizzle ORM and Cloudflare D1.
 - **Modern UI** with TailwindCSS v4.
-- **Email Functionality** with Resend API and templating using React Email.
+- **Email Functionality** with Plunk API and templating using React Email.
 - **Development Tools**: Prettier for code formatting.
 - **API Layer**: Built with Hono for efficient request handling.
 - **Internationalization**: Type-safe i18n with consistent naming conventions and locale-aware URLs.
@@ -55,6 +55,9 @@ pnpm run preview       # Cloudflare Workers emulation via Wrangler
 | `pnpm db:migrate:prod`  | Apply migrations to production           |
 | `pnpm db:studio:local`  | Run Drizzle Studio for local development |
 | `pnpm preview-email`    | Start email template preview server      |
+| `pnpm email-worker:dev` | Start email queue worker in dev mode     |
+| `pnpm email-worker:deploy` | Deploy email queue worker to production |
+| `pnpm queue:create`     | Create Cloudflare queues for emails     |
 
 ### AI-assisted Bootstrap
 
@@ -91,7 +94,7 @@ For local development and testing, you can use these
 
 > [!NOTE]
 > No test user is created by default. You'll need to sign up through the `/sign-up` page to create your first account. Feel free to use different credentials if preferred.
-> If you're using the placeholder `RESEND_API_KEY=test-key` in `.dev.vars`, email verification emails will not be sent during sign-up. The auth configuration automatically detects this and disables email sending to prevent errors. Users created this way will need their email manually verified in the database for testing purposes (e.g., `UPDATE user SET emailVerified = 1 WHERE email = 'your@email.com'`).
+> If you're using the placeholder `PLUNK_API_KEY=test-key` in `.dev.vars`, email verification emails will not be sent during sign-up. The auth configuration automatically detects this and disables email sending to prevent errors. Users created this way will need their email manually verified in the database for testing purposes (e.g., `UPDATE user SET emailVerified = 1 WHERE email = 'your@email.com'`).
 
 ### Better Auth
 
@@ -113,41 +116,18 @@ pnpm wrangler secret put BETTER_AUTH_SECRET
 
 Also configure `BETTER_AUTH_BASE_URL` in your `wrangler.jsonc` file under the `vars` section for production.
 
-### Resend
+### Plunk
 
-This template uses [Resend](https://resend.com) for email functionality.
+This template uses [Plunk](https://useplunk.com) for email functionality.
 
-To set up Resend for production, create an account and set the `RESEND_API_KEY` secret using wrangler CLI:
+To set up Plunk for production, create an account and set the `PLUNK_API_KEY` secret using wrangler CLI:
 
 ```bash
-pnpm wrangler secret put RESEND_API_KEY
+pnpm wrangler secret put PLUNK_API_KEY
 ```
 
-For local development, add `RESEND_API_KEY` to your `.dev.vars` file.
+For local development, add `PLUNK_API_KEY` to your `.dev.vars` file.
 The sender email address (`SEND_EMAIL_FROM`) should be configured in your `wrangler.jsonc` file under the `vars` section for production.
-
-#### Development Testing with resend.dev
-
-For local development, Indigo Stack automatically uses Resend's testing domains to avoid domain verification issues:
-
-- **All verification emails** are sent to `delivered@resend.dev` (instead of real user emails)
-- **Sender address** uses `onboarding@resend.dev` (no domain verification required)
-- **Full functionality** - You can test the complete email verification flow
-
-**Available test scenarios:**
-
-- `delivered@resend.dev` - Test successful email delivery
-- `bounced@resend.dev` - Test email bounces
-- `complained@resend.dev` - Test spam marking
-
-This setup allows you to test email verification without:
-
-- Domain verification requirements
-- Real email addresses
-- SMTP configuration
-- External email services
-
-Simply sign up with any email address locally, and the verification email will be sent to `delivered@resend.dev`. Check your [Resend dashboard](https://resend.com/emails) to see the delivery.
 
 ### Astro Session
 
@@ -271,55 +251,122 @@ const userWithSessions = await db
 
 ## Emails
 
-The application includes built-in email functionality using [Resend](https://resend.com) exclusively for both development and production.
+The application uses an **asynchronous email queue system** powered by Cloudflare Queues. Emails are queued immediately and processed by a separate worker with its own CPU budget, preventing email sending from blocking user requests.
+
+### Architecture
+
+```
+Request → queue.send(email) → Response (fast!)
+              ↓
+   [Email Queue Worker]
+              ↓
+   render(template) → send via Plunk
+```
+
+**Benefits:**
+- Fast response times (no email rendering on request path)
+- Automatic retries with exponential backoff
+- Dead letter queue for failed messages
+- Separate CPU budget for email processing
+- Built-in batch processing
+
+### Setup
+
+#### 1. Create Cloudflare Queues
+
+```bash
+pnpm queue:create
+```
+
+This creates:
+- `indigo-email-queue` - Primary queue for email messages
+- `indigo-email-queue-dlq` - Dead letter queue for failed messages
+
+#### 2. Configure Worker Secret
+
+The email worker needs the Plunk API key:
+
+```bash
+npx wrangler secret put PLUNK_API_KEY --config indigo-email-queue-consumer/wrangler.jsonc
+```
+
+#### 3. Deploy Worker
+
+```bash
+pnpm email-worker:deploy
+```
+
+#### 4. Configure Main App
+
+The main app configuration in `wrangler.jsonc` includes:
+
+- Queue producer binding (`EMAIL_QUEUE`)
+- Sender email address (`SEND_EMAIL_FROM`)
 
 ### Configuration
 
-For production, configure the following:
+**Production:**
 
-- Set the `RESEND_API_KEY` secret using `pnpm wrangler secret put RESEND_API_KEY`.
-- Set the `SEND_EMAIL_FROM` variable in `wrangler.jsonc` under `vars`.
+- Set `PLUNK_API_KEY` secret on the worker (step 2 above)
+- Configure `SEND_EMAIL_FROM` in worker's `wrangler.jsonc`
+- Deploy worker before deploying main app
 
-For local development:
+**Local Development:**
 
-- Add `RESEND_API_KEY` to your `.dev.vars` file for local email testing.
-- The `SEND_EMAIL_FROM` variable from `wrangler.jsonc` will be used if available during `wrangler dev`.
+- In dev mode, emails are logged to console (not actually queued)
+- Optional: Run `pnpm email-worker:dev` in separate terminal to process queued emails locally
+- Add `PLUNK_API_KEY` to `.dev.vars` if testing actual email delivery
 
 ### Email Templates
 
-Email templates are built with React Email for improved type safety, maintainability, and design consistency. Templates are stored in `src/components/email/`:
+Email templates are built with React Email and include **localization support** (English and Japanese). Templates are stored in `src/components/email/`:
 
-- `WelcomeEmail.tsx` - Template for welcome emails
-- `CustomEmail.tsx` - Template for custom message emails
+- `WelcomeEmail.tsx` - Welcome emails with locale-specific text
+- `CustomEmail.tsx` - Custom message emails
 - `BaseLayout.tsx` - Reusable email layout component
-- `EmailVerification.tsx` - Template for email verification
-- `PasswordReset.tsx` - Template for password reset emails
-- `ChangeEmailVerification.tsx` - Template for email change verification
-- `AccountDeleted.tsx` - Template for account deletion confirmation
+- `EmailVerification.tsx` - Email verification with translations
+- `PasswordReset.tsx` - Password reset with translations
+- `AccountDeleted.tsx` - Account deletion confirmation with translations
+
+All templates support a `locale` prop to render content in the user's preferred language.
 
 ### Sending Emails
 
+Emails are queued using the `queueEmail()` function:
+
 ```typescript
-import {sendEmail} from "@/actions/email";
+import {queueEmail} from "@/lib/email";
 
-// Send a welcome email
-await sendEmail({
-  to: "user@example.com",
-  subject: "Welcome to Indigo Stack CE!",
-  template: {name: "welcome", params: {name: "John"}}
-});
+// Queue a welcome email
+await queueEmail(
+  "user@example.com",
+  {type: "welcome", props: {name: "John"}},
+  env,
+  {locale: "en"} // Optional locale for translations
+);
 
-// Send a custom email
-await sendEmail({
-  to: "user@example.com",
-  subject: "Important Information",
-  template: {name: "custom", params: {html: "<p>Your custom message here</p>"}}
-});
+// Queue a custom email
+await queueEmail(
+  "user@example.com",
+  {type: "custom", props: {html: "<p>Your message</p>"}},
+  env,
+  {subject: "Custom Subject", locale: "ja"}
+);
 ```
 
-### Sending Test Emails
+The email is immediately queued and returns. The worker processes it asynchronously.
 
-Visit `/email-demo` to try the email functionality. In development, emails are sent via Resend's testing domains.
+### Monitoring
+
+**View worker logs:**
+```bash
+wrangler tail indigo-email-queue-consumer
+```
+
+**Check queue metrics:**
+- Navigate to Cloudflare dashboard → Workers & Pages → Queues
+- Monitor message throughput, consumer latency, and failed messages
+- Dead letter queue captures messages that fail after max retries
 
 ### Preview Emails Templates
 
@@ -405,7 +452,7 @@ To deploy to Cloudflare Workers with static assets:
 1. Create a new Workers project in the Cloudflare dashboard
 2. Link it to your GitHub repository
 3. Configure the build command: `pnpm build`
-4. Configure production environment variables and secrets (like `BETTER_AUTH_SECRET`, `RESEND_API_KEY`) in the Pages dashboard settings.
+4. Configure production environment variables and secrets (like `BETTER_AUTH_SECRET`, `PLUNK_API_KEY`) in the Pages dashboard settings.
 5. Migrate the production database.
 6. Deploy!
 
@@ -459,39 +506,39 @@ Understanding how emails work across different scenarios:
 - **Behavior**: Emails are **mocked** (not sent)
 - **Why**: Fast, reliable tests without API calls or rate limits
 - **Setup**: Automatically configured in CI workflow
-- **Example**: `RESEND_API_KEY=ci-test-key` in `.github/workflows/test.yml`
+- **Example**: `PLUNK_API_KEY=ci-test-key` in `.github/workflows/test.yml`
 
 ```bash
 # E2E tests automatically use mocked emails
 pnpm test:e2e
 ```
 
-#### 🏠 **Local Development (with real Resend API key)**
+#### 🏠 **Local Development (with real Plunk API key)**
 
-- **API Key Pattern**: Any valid Resend key (starts with `re_`)
-- **Behavior**: Emails sent to `delivered@resend.dev` test domain
-- **Why**: Test actual email delivery without domain verification
-- **Setup**: Add real Resend API key to `.dev.vars`
-- **Dashboard**: View emails at [resend.com/emails](https://resend.com/emails)
+- **API Key Pattern**: Any valid Plunk API key
+- **Behavior**: Emails sent to actual user email addresses via Plunk
+- **Why**: Test actual email delivery
+- **Setup**: Add real Plunk API key to `.dev.vars`
+- **Dashboard**: View emails in your [Plunk dashboard](https://app.useplunk.com)
 
 ```bash
 # .dev.vars
-RESEND_API_KEY=re_xxxxxxxxxx  # Your real Resend API key
+PLUNK_API_KEY=your-plunk-api-key
 ```
 
-When you sign up locally, the verification email goes to `delivered@resend.dev` (visible in your Resend dashboard).
+When you sign up locally, the verification email is sent to the actual email address you used.
 
 #### 🧪 **Local Development (testing without emails)**
 
 - **API Key Pattern**: Set to `ci-test-key` or leave empty
 - **Behavior**: Emails are **mocked** (not sent)
-- **Why**: Quick testing without needing a Resend account
+- **Why**: Quick testing without needing a Plunk account
 - **Setup**: Use `ci-test-key` in `.dev.vars`
 - **Note**: Manual email verification needed in database
 
 ```bash
 # .dev.vars - for testing without actual emails
-RESEND_API_KEY=ci-test-key
+PLUNK_API_KEY=ci-test-key
 
 # Then manually verify users in database if needed
 pnpm db:studio:local
@@ -500,24 +547,22 @@ pnpm db:studio:local
 
 #### 🚀 **Production**
 
-- **API Key Pattern**: Your production Resend API key
+- **API Key Pattern**: Your production Plunk API key
 - **Behavior**: Emails sent to actual user email addresses
 - **Setup**: Set via Wrangler secrets
-- **Domain**: Configure verified domain in Resend dashboard
+- **Domain**: Configure verified domain in Plunk dashboard
 
 ```bash
 # Set production secret
-pnpm wrangler secret put RESEND_API_KEY
+pnpm wrangler secret put PLUNK_API_KEY
 ```
 
 ### Summary: Email Sending Decision Tree
 
 ```shell
-Is RESEND_API_KEY = "ci-test-key"?
-├─ YES → Mock emails (log to console)
-└─ NO → Is NODE_ENV = "production"?
-    ├─ YES → Send to real user emails
-    └─ NO → Send to delivered@resend.dev (local dev)
+Is local development (localhost)?
+├─ YES → Log to console (not queued)
+└─ NO → Queue email for async delivery via Plunk
 ```
 
 ### Test Coverage
@@ -540,7 +585,7 @@ All tests run automatically in CI on every pull request.
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
 - [TailwindCSS Documentation](https://tailwindcss.com/docs)
 - [React Documentation](https://react.dev/learn)
-- [Resend Documentation](https://resend.com/docs)
+- [Plunk Documentation](https://useplunk.com/docs)
 - [React Email](https://react.email/docs/introduction)
 
 ## Resources

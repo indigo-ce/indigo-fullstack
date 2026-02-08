@@ -8,7 +8,7 @@ const locale = getLocaleFromParams(Astro.params);
 // Decode HTML entities in URL before parsing params
 const url = new URL(Astro.url.toString().replace(/&amp;/g, "&"));
 const token = url.searchParams.get("token");
-const callbackURL = url.searchParams.get("callbackURL") || localizeUrl("/discover", locale);
+const callbackURL = url.searchParams.get("callbackURL") || localizeUrl("/dashboard", locale);
 
 if (!token) {
   return Astro.redirect(localizeUrl("/", locale));
@@ -35,8 +35,9 @@ try {
     }
 
     // Use Better Auth's redirect location if provided, otherwise use our callbackURL
-    const redirectTo = response.headers.get("location") || callbackURL;
-    return Astro.redirect(redirectTo);
+    const redirectTo = new URL(response.headers.get("location") || callbackURL, Astro.url.origin);
+    redirectTo.searchParams.set("verified", "true");
+    return Astro.redirect(redirectTo.pathname + redirectTo.search);
   }
 
   console.error("[Verify] Verification failed");

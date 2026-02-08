@@ -21,6 +21,9 @@
     "db:migrate-dry:prod": "wrangler d1 migrations list indigo-ce --remote",
     "db:studio:local": "drizzle-kit studio",
     "better-auth:schema": "pnpm dlx @better-auth/cli generate --config src/lib/auth-config.ts",
+    "email-worker:dev": "wrangler dev --config indigo-email-queue-consumer/wrangler.jsonc",
+    "email-worker:deploy": "wrangler deploy --config indigo-email-queue-consumer/wrangler.jsonc",
+    "queue:create": "wrangler queues create indigo-email-queue && wrangler queues create indigo-email-queue-dlq",
     "test": "vitest",
     "test:run": "vitest run",
     "test:watch": "vitest --watch",
@@ -89,7 +92,7 @@
     "react-hook-form": "^7.63.0",
     "react-resizable-panels": "^3.0.6",
     "recharts": "2.15.4",
-    "resend": "^6.1.0",
+
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwind-variants": "^3.1.1",

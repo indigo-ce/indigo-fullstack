@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "indigo-email-queue-consumer",
+  "main": "src/index.ts",
+  "workers_dev": false,
+  "compatibility_date": "2026-01-14",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "SEND_EMAIL_FROM": "Indigo Stack <noreply@indigostack.org>"
+  },
+  "queues": {
+    "consumers": [
+      {
+        "queue": "indigo-email-queue",
+        "max_batch_size": 10,
+        "max_batch_timeout": 30,
+        "max_retries": 3,
+        "dead_letter_queue": "indigo-email-queue-dlq"
+      }
+    ]
+  }
+}
