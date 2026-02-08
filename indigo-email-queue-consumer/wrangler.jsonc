@@ -2,6 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "indigo-email-queue-consumer",
   "main": "src/index.ts",
+  "workers_dev": false,
   "compatibility_date": "2026-01-14",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
