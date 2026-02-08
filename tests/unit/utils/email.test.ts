@@ -1,98 +1,109 @@
 import {describe, it, expect, vi, beforeEach} from "vitest";
-import {sendEmail} from "@/lib/email";
-
-// Mock Resend
-vi.mock("resend", () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    emails: {
-      send: vi.fn().mockResolvedValue({id: "test-email-id"})
-    }
-  }))
-}));
+import {queueEmail} from "@/lib/email";
 
 describe("Email Utilities", () => {
   let mockEnv: Partial<Env>;
+  let mockQueueSend: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    mockQueueSend = vi.fn().mockResolvedValue(undefined);
+
     mockEnv = {
-      RESEND_API_KEY: "re_test_key",
-      SEND_EMAIL_FROM: "Indigo Stack CE <noreply@indigostack.org>",
-      BETTER_AUTH_BASE_URL: "http://localhost:3000"
+      BETTER_AUTH_BASE_URL: "https://example.com",
+      EMAIL_QUEUE: {
+        send: mockQueueSend
+      } as unknown as Queue
     };
 
-    // Clear all mocks
     vi.clearAllMocks();
   });
 
-  describe("sendEmail", () => {
-    it("should send email successfully in production", async () => {
-      const originalNodeEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "production";
+  describe("queueEmail", () => {
+    it("should queue email in production", async () => {
+      const result = await queueEmail(
+        "user@example.com",
+        {type: "welcome", props: {name: "John"}},
+        mockEnv as Env
+      );
 
-      // Just test that the function runs without throwing
-      await expect(
-        sendEmail(
-          "user@example.com",
-          "Test Subject",
-          "<p>Test content</p>",
-          mockEnv as Env
-        )
-      ).resolves.toBeDefined();
-
-      process.env.NODE_ENV = originalNodeEnv;
+      expect(result).toEqual({queued: true});
+      expect(mockQueueSend).toHaveBeenCalledOnce();
+      expect(mockQueueSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: "user@example.com",
+          subject: "Welcome to Indigo!",
+          template: {type: "welcome", props: {name: "John"}},
+          locale: "en"
+        })
+      );
     });
 
-    it("should redirect email to test address in development", async () => {
-      const originalNodeEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "development";
+    it("should use localized subject for Japanese locale", async () => {
+      await queueEmail(
+        "user@example.com",
+        {type: "email-verification", props: {name: "太郎", url: "https://example.com/verify"}},
+        mockEnv as Env,
+        {locale: "ja"}
+      );
 
-      // Just test that the function runs without throwing
-      await expect(
-        sendEmail(
-          "user@example.com",
-          "Test Subject",
-          "<p>Test content</p>",
-          mockEnv as Env
-        )
-      ).resolves.toBeDefined();
-
-      process.env.NODE_ENV = originalNodeEnv;
+      expect(mockQueueSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subject: "メールアドレスの確認",
+          locale: "ja"
+        })
+      );
     });
 
-    it("should throw error when RESEND_API_KEY is missing", async () => {
-      delete (mockEnv as any).RESEND_API_KEY;
+    it("should use custom subject when provided", async () => {
+      await queueEmail(
+        "user@example.com",
+        {type: "welcome", props: {name: "John"}},
+        mockEnv as Env,
+        {subject: "Custom Subject"}
+      );
 
-      await expect(
-        sendEmail(
-          "user@example.com",
-          "Test Subject",
-          "<p>Test content</p>",
-          mockEnv as Env
-        )
-      ).rejects.toThrow("RESEND_API_KEY");
+      expect(mockQueueSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subject: "Custom Subject"
+        })
+      );
     });
 
-    it("should throw error when SEND_EMAIL_FROM is missing in production", async () => {
-      const originalNodeEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "production";
+    it("should log to console in local development instead of queuing", async () => {
+      const localEnv = {
+        BETTER_AUTH_BASE_URL: "http://localhost:4321",
+        EMAIL_QUEUE: {send: mockQueueSend} as unknown as Queue
+      } as Env;
 
-      delete (mockEnv as any).SEND_EMAIL_FROM;
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-      await expect(
-        sendEmail(
-          "user@example.com",
-          "Test Subject",
-          "<p>Test content</p>",
-          mockEnv as Env
-        )
-      ).rejects.toThrow("SEND_EMAIL_FROM");
+      const result = await queueEmail(
+        "user@example.com",
+        {type: "welcome", props: {name: "John"}},
+        localEnv
+      );
 
-      process.env.NODE_ENV = originalNodeEnv;
+      expect(result).toEqual({queued: true});
+      expect(mockQueueSend).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[LOCAL DEV]"));
+
+      consoleSpy.mockRestore();
     });
 
-    it("should handle email functionality", async () => {
-      // Basic test to ensure the function exists and is callable
-      expect(typeof sendEmail).toBe("function");
+    it("should fall back to English subject for unknown locale", async () => {
+      await queueEmail(
+        "user@example.com",
+        {type: "welcome", props: {name: "John"}},
+        mockEnv as Env,
+        {locale: "fr"}
+      );
+
+      expect(mockQueueSend).toHaveBeenCalledWith(
+        expect.objectContaining({
+          subject: "Welcome to Indigo!",
+          locale: "fr"
+        })
+      );
     });
   });
 });
