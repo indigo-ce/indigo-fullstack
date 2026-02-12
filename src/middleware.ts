@@ -8,8 +8,16 @@ const authMiddleware = defineMiddleware(async (context, next) => {
     return next();
   }
 
+  // Extract locale from URL path (e.g., /ja/page -> "ja")
+  const url = new URL(context.request.url);
+  const pathSegments = url.pathname.split('/').filter(Boolean);
+  const locale = pathSegments[0] && locales.includes(pathSegments[0] as Locale)
+    ? pathSegments[0]
+    : defaultLocale;
+
   const isAuthenticated = await createAuth(
-    context.locals.runtime.env
+    context.locals.runtime.env,
+    locale
   ).api.getSession({
     headers: context.request.headers
   });

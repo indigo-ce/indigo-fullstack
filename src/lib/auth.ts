@@ -5,7 +5,7 @@ import {jwt} from "better-auth/plugins/jwt";
 import {refreshAccessToken} from "@/plugins/better-auth/refresh-access";
 import {queueEmail} from "./email";
 
-export function createAuth(env: Env) {
+export function createAuth(env: Env, locale: string = "en") {
   if (!env.BETTER_AUTH_SECRET) {
     throw new Error("BETTER_AUTH_SECRET is not set");
   }
@@ -30,7 +30,7 @@ export function createAuth(env: Env) {
             user.email,
             {type: "account-deleted", props: {name: user.name || "friend"}},
             env,
-            {locale: user.locale || "en"}
+            {locale}
           );
         }
       }
@@ -46,7 +46,7 @@ export function createAuth(env: Env) {
             props: {name: user.name || "friend", resetLink: url}
           },
           env,
-          {locale: user.locale || "en"}
+          {locale}
         );
       }
     },
@@ -67,7 +67,7 @@ export function createAuth(env: Env) {
             props: {name: user.name || "friend", url: customUrl}
           },
           env,
-          {locale: user.locale || "en"}
+          {locale}
         );
       }
     },
