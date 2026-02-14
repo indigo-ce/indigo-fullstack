@@ -2,258 +2,145 @@ import {APIError} from "better-auth/api";
 import {Hono} from "hono";
 import type {ContentfulStatusCode} from "hono/utils/http-status";
 import type {APIRouteContext} from "@/pages/api/[...path]";
+import {createAuth} from "@/lib/auth";
 import {getLanguageFromHeaders} from "@/i18n/utils";
 import {defaultLocale} from "@/i18n/constants";
 
 const authRoutes = new Hono<APIRouteContext>();
 
-authRoutes.post("/sign-up", async (c) => {
-  try {
-    const env = c.get("env");
-    const body = await c.req.json();
-
-    // Extract locale from Accept-Language header
-    const locale = getLanguageFromHeaders(c.req.raw.headers) || defaultLocale;
-
-    // Import createAuth dynamically to use the locale
-    const {createAuth} = await import("@/lib/auth");
-    const auth = createAuth(env, locale);
-
-    const response = await auth.api.signUpEmail({
-      body: {
-        email: body.email,
-        password: body.password,
-        name: body.name,
-        callbackURL: body.callbackURL || "/dashboard"
-      },
-      asResponse: true
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return c.json(data);
-    } else {
-      const error = await response.json();
-      return c.json(error, response.status as ContentfulStatusCode);
-    }
-  } catch (error: any) {
-    if (error instanceof APIError) {
-      return c.json(
-        {
-          error: error.body?.message
-        },
-        error.statusCode as ContentfulStatusCode
-      );
-    }
-
+// Centralized error handling for all auth routes
+authRoutes.onError((error, c) => {
+  if (error instanceof APIError) {
     return c.json(
-      {
-        error: "Internal server error"
-      },
-      500
+      {error: error.body?.message},
+      error.statusCode as ContentfulStatusCode
     );
   }
+  return c.json({error: "Internal server error"}, 500);
 });
 
-authRoutes.get("/sign-in", async (c) => {
-  try {
-    const auth = c.get("auth");
-    const response = await auth.api.signInTokens({
-      body: {
-        basicToken: c.req.header("Authorization") ?? ""
-      }
-    });
+function validateBody(
+  body: Record<string, unknown>,
+  required: string[]
+): string | null {
+  const missing = required.filter((f) => !body[f]);
+  return missing.length > 0
+    ? `Missing required fields: ${missing.join(", ")}`
+    : null;
+}
 
-    return c.json(response);
-  } catch (error: any) {
-    if (error instanceof APIError) {
-      return c.json(
-        {
-          error: error.body?.message
-        },
-        error.statusCode as ContentfulStatusCode
-      );
+// --- Mobile auth routes (locale-aware for email sending) ---
+
+authRoutes.post("/sign-up", async (c) => {
+  const body = await c.req.json();
+  const error = validateBody(body, ["email", "password", "name"]);
+  if (error) return c.json({error}, 400);
+
+  const locale = getLanguageFromHeaders(c.req.raw.headers) || defaultLocale;
+  const auth = createAuth(c.get("env"), locale);
+
+  const data = await auth.api.signUpEmail({
+    body: {
+      email: body.email,
+      password: body.password,
+      name: body.name,
+      callbackURL: body.callbackURL || "/dashboard"
     }
+  });
 
-    return c.json(
-      {
-        error: "Internal server error"
-      },
-      500
-    );
-  }
+  return c.json(data);
 });
 
 authRoutes.post("/send-verification-email", async (c) => {
-  try {
-    const env = c.get("env");
-    const body = await c.req.json();
+  const body = await c.req.json();
+  const error = validateBody(body, ["email"]);
+  if (error) return c.json({error}, 400);
 
-    // Extract locale from Accept-Language header
-    const locale = getLanguageFromHeaders(c.req.raw.headers) || defaultLocale;
+  const locale = getLanguageFromHeaders(c.req.raw.headers) || defaultLocale;
+  const auth = createAuth(c.get("env"), locale);
 
-    const {createAuth} = await import("@/lib/auth");
-    const auth = createAuth(env, locale);
-
-    const response = await auth.api.sendVerificationEmail({
-      body: {
-        email: body.email,
-        callbackURL: body.callbackURL || "/dashboard"
-      }
-    });
-
-    return c.json(response);
-  } catch (error: any) {
-    if (error instanceof APIError) {
-      return c.json(
-        {
-          error: error.body?.message
-        },
-        error.statusCode as ContentfulStatusCode
-      );
+  const data = await auth.api.sendVerificationEmail({
+    body: {
+      email: body.email,
+      callbackURL: body.callbackURL || "/dashboard"
     }
+  });
 
-    return c.json(
-      {
-        error: "Internal server error"
-      },
-      500
-    );
-  }
+  return c.json(data);
 });
 
-authRoutes.post("/forget-password", async (c) => {
-  try {
-    const env = c.get("env");
-    const body = await c.req.json();
+authRoutes.post("/forgot-password", async (c) => {
+  const body = await c.req.json();
+  const error = validateBody(body, ["email"]);
+  if (error) return c.json({error}, 400);
 
-    // Extract locale from Accept-Language header
-    const locale = getLanguageFromHeaders(c.req.raw.headers) || defaultLocale;
+  const locale = getLanguageFromHeaders(c.req.raw.headers) || defaultLocale;
+  const auth = createAuth(c.get("env"), locale);
 
-    const {createAuth} = await import("@/lib/auth");
-    const auth = createAuth(env, locale);
-
-    const response = await auth.api.requestPasswordReset({
-      body: {
-        email: body.email,
-        redirectTo: body.redirectTo || "/reset-password"
-      }
-    });
-
-    return c.json(response);
-  } catch (error: any) {
-    if (error instanceof APIError) {
-      return c.json(
-        {
-          error: error.body?.message
-        },
-        error.statusCode as ContentfulStatusCode
-      );
+  const data = await auth.api.requestPasswordReset({
+    body: {
+      email: body.email,
+      redirectTo: body.redirectTo || "/reset-password"
     }
+  });
 
-    return c.json(
-      {
-        error: "Internal server error"
-      },
-      500
-    );
-  }
+  return c.json(data);
 });
 
 authRoutes.post("/reset-password", async (c) => {
-  try {
-    const env = c.get("env");
-    const body = await c.req.json();
+  const body = await c.req.json();
+  const error = validateBody(body, ["newPassword", "token"]);
+  if (error) return c.json({error}, 400);
 
-    // Extract locale from Accept-Language header
-    const locale = getLanguageFromHeaders(c.req.raw.headers) || defaultLocale;
+  // No locale needed — reset doesn't send emails
+  const auth = c.get("auth");
 
-    const {createAuth} = await import("@/lib/auth");
-    const auth = createAuth(env, locale);
-
-    const response = await auth.api.resetPassword({
-      body: {
-        newPassword: body.newPassword,
-        token: body.token
-      }
-    });
-
-    return c.json(response);
-  } catch (error: any) {
-    if (error instanceof APIError) {
-      return c.json(
-        {
-          error: error.body?.message
-        },
-        error.statusCode as ContentfulStatusCode
-      );
+  const data = await auth.api.resetPassword({
+    body: {
+      newPassword: body.newPassword,
+      token: body.token
     }
+  });
 
-    return c.json(
-      {
-        error: "Internal server error"
-      },
-      500
-    );
-  }
+  return c.json(data);
 });
 
+// --- Token-based auth routes ---
+
+// POST /auth/sign-in - Exchange credentials for access + refresh tokens
+// Expects Authorization: Basic base64(email:password)
+authRoutes.post("/sign-in", async (c) => {
+  const auth = c.get("auth");
+
+  const data = await auth.api.signInTokens({
+    body: {
+      basicToken: c.req.header("Authorization") ?? ""
+    }
+  });
+
+  return c.json(data);
+});
+
+// POST /auth/refresh-access - Get new access token using refresh token
+// Expects body: { refreshToken: string }
 authRoutes.post("/refresh-access", async (c) => {
-  try {
-    const auth = c.get("auth");
-    const body = await c.req.json();
+  const auth = c.get("auth");
+  const body = await c.req.json();
 
-    const response = await auth.api.refreshTokens({
-      body: body
-    });
+  const data = await auth.api.refreshTokens({body});
 
-    return c.json(response);
-  } catch (error: any) {
-    if (error instanceof APIError) {
-      return c.json(
-        {
-          error: error.body?.message
-        },
-        error.statusCode as ContentfulStatusCode
-      );
-    }
-
-    return c.json(
-      {
-        error: "Internal server error"
-      },
-      500
-    );
-  }
+  return c.json(data);
 });
 
+// POST /auth/revoke-access - Invalidate refresh token (logout)
+// Expects body: { refreshToken: string }
 authRoutes.post("/revoke-access", async (c) => {
-  try {
-    const auth = c.get("auth");
-    const body = await c.req.json();
+  const auth = c.get("auth");
+  const body = await c.req.json();
 
-    const response = await auth.api.revokeTokens({
-      body: body
-    });
+  const data = await auth.api.revokeTokens({body});
 
-    return c.json(response);
-  } catch (error: any) {
-    if (error instanceof APIError) {
-      return c.json(
-        {
-          error: error.body?.message
-        },
-        error.statusCode as ContentfulStatusCode
-      );
-    }
-
-    return c.json(
-      {
-        error: "Internal server error"
-      },
-      500
-    );
-  }
+  return c.json(data);
 });
 
 export default authRoutes;

@@ -8,7 +8,7 @@ const authMiddleware = defineMiddleware(async (context, next) => {
     return next();
   }
 
-  // Extract locale using fallback chain: cookie > URL path > Accept-Language > default
+  // Extract locale for auth instance (used if auth triggers emails, e.g. account deletion)
   const url = new URL(context.request.url);
   const locale = getLocaleFromRequest(url, context.cookies, context.request.headers);
 
