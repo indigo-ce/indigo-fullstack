@@ -150,7 +150,7 @@ Mobile apps use the Hono API (`/api/v1/auth/*`) instead of calling Better Auth e
    }
    ```
 
-2. **GET `/api/v1/auth/sign-in`** - Exchange credentials for JWT tokens
+2. **POST `/api/v1/auth/sign-in`** - Exchange credentials for JWT tokens
    - Headers: `Authorization: Basic <base64(email:password)>`
    - Returns: `{accessToken, refreshToken}`
 
@@ -163,7 +163,7 @@ Mobile apps use the Hono API (`/api/v1/auth/*`) instead of calling Better Auth e
    }
    ```
 
-4. **POST `/api/v1/auth/forget-password`** - Send password reset email
+4. **POST `/api/v1/auth/forgot-password`** - Send password reset email
 
    ```json
    {
@@ -186,7 +186,7 @@ Mobile apps use the Hono API (`/api/v1/auth/*`) instead of calling Better Auth e
 
 **Locale Handling for Mobile:**
 
-All email-sending endpoints (`sign-up`, `send-verification-email`, `forget-password`) extract locale from the `Accept-Language` header:
+All email-sending endpoints (`sign-up`, `send-verification-email`, `forgot-password`) extract locale from the `Accept-Language` header:
 
 ```text
 Mobile App → Headers: Accept-Language: ja
