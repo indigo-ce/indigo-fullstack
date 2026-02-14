@@ -61,7 +61,8 @@ if (shouldProcessPost) {
   const {error, data} = await Astro.callAction(
     actions.authentication.resendVerificationEmail,
     {
-      email: email
+      email: email,
+      locale
     }
   );
 

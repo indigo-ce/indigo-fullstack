@@ -33,7 +33,7 @@ const fields = {
 };
 
 if (Astro.request.method === "POST") {
-  const auth = createAuth(Astro.locals.runtime.env);
+  const auth = createAuth(Astro.locals.runtime.env, locale);
   const formData = await Astro.request.formData();
   const action = formData.get("action") as string;
 

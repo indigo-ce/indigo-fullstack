@@ -15,7 +15,7 @@ if (!token) {
 }
 
 try {
-  const auth = createAuth(Astro.locals.runtime.env);
+  const auth = createAuth(Astro.locals.runtime.env, locale);
 
   // Use Better Auth API method directly
   const response = await auth.api.verifyEmail({
