@@ -1,7 +1,7 @@
 import {ActionError, defineAction} from "astro:actions";
 import {z} from "astro:schema";
 import {createAuth} from "@/lib/auth";
-import {defaultLocale, locales, type Locale} from "@/i18n/constants";
+import {defaultLocale, locales} from "@/i18n/constants";
 
 export const authentication = {
   resetPassword: defineAction({
@@ -9,7 +9,7 @@ export const authentication = {
       newPassword: z.string(),
       confirmPassword: z.string(),
       token: z.string(),
-      locale: z.string().optional()
+      locale: z.enum(locales).optional()
     }),
     handler: async ({newPassword, confirmPassword, token, locale}, context) => {
       if (newPassword !== confirmPassword) {
@@ -19,13 +19,9 @@ export const authentication = {
         });
       }
 
-      const userLocale = locale && locales.includes(locale as Locale)
-        ? locale
-        : defaultLocale;
-
       const {status} = await createAuth(
         context.locals.runtime.env,
-        userLocale
+        locale ?? defaultLocale
       ).api.resetPassword({
         body: {
           newPassword: newPassword,
@@ -46,14 +42,10 @@ export const authentication = {
   resendVerificationEmail: defineAction({
     input: z.object({
       email: z.string().email(),
-      locale: z.string().optional()
+      locale: z.enum(locales).optional()
     }),
     handler: async ({email, locale}, context) => {
-      const userLocale = locale && locales.includes(locale as Locale)
-        ? locale
-        : defaultLocale;
-
-      await createAuth(context.locals.runtime.env, userLocale).api.sendVerificationEmail({
+      await createAuth(context.locals.runtime.env, locale ?? defaultLocale).api.sendVerificationEmail({
         body: {
           email,
           callbackURL: "/dashboard"

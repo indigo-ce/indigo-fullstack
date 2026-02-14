@@ -3,8 +3,8 @@ import {createAuth} from "@/lib/auth";
 import {defaultLocale} from "@/i18n/constants";
 
 // Forward all /auth/* requests to the auth handler
+// Note: This is for web-based authentication only (session-based)
+// Mobile apps should use /api/v1/auth/* endpoints instead (JWT-based)
 export const ALL: APIRoute = async (context) => {
-  // For API routes, default to the default locale
-  // In the future, this could be extracted from Accept-Language header if needed
   return createAuth(context.locals.runtime.env, defaultLocale).handler(context.request);
 };

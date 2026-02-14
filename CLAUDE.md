@@ -128,6 +128,90 @@ Dual authentication system:
 - **API Authentication**: JWT + Refresh token system for mobile/API clients
 - **Middleware Integration**: Both systems share user context through Astro locals
 
+#### Mobile Authentication API
+
+Mobile apps use the Hono API (`/api/v1/auth/*`) instead of calling Better Auth endpoints directly. This provides API stability and protection from upstream changes.
+
+**Architecture Decision:**
+
+- ✅ Mobile → `/api/v1/auth/*` (Hono) → `auth.api.*` (Better Auth internally)
+- ❌ Mobile → `/api/auth/*` (Better Auth directly) - Not allowed
+
+**Available Endpoints:**
+
+1. **POST `/api/v1/auth/sign-up`** - Register new user + send verification email
+
+   ```json
+   {
+     "email": "user@example.com",
+     "password": "password123",
+     "name": "John Doe",
+     "callbackURL": "/dashboard" // optional
+   }
+   ```
+
+2. **GET `/api/v1/auth/sign-in`** - Exchange credentials for JWT tokens
+   - Headers: `Authorization: Basic <base64(email:password)>`
+   - Returns: `{accessToken, refreshToken}`
+
+3. **POST `/api/v1/auth/send-verification-email`** - Resend verification email
+
+   ```json
+   {
+     "email": "user@example.com",
+     "callbackURL": "/dashboard" // optional
+   }
+   ```
+
+4. **POST `/api/v1/auth/forget-password`** - Send password reset email
+
+   ```json
+   {
+     "email": "user@example.com",
+     "redirectTo": "/reset-password" // optional
+   }
+   ```
+
+5. **POST `/api/v1/auth/reset-password`** - Reset password with token
+
+   ```json
+   {
+     "newPassword": "newPassword123",
+     "token": "token-from-email"
+   }
+   ```
+
+6. **POST `/api/v1/auth/refresh-access`** - Refresh JWT tokens
+7. **POST `/api/v1/auth/revoke-access`** - Revoke JWT tokens
+
+**Locale Handling for Mobile:**
+
+All email-sending endpoints (`sign-up`, `send-verification-email`, `forget-password`) extract locale from the `Accept-Language` header:
+
+```text
+Mobile App → Headers: Accept-Language: ja
+          → getLanguageFromHeaders() extracts "ja"
+          → createAuth(env, "ja")
+          → Email sent in Japanese
+```
+
+Mobile clients should always send `Accept-Language` header with their device's preferred language to receive localized emails.
+
+**Example (React Native):**
+
+```typescript
+import * as Localization from 'expo-localization';
+
+fetch('/api/v1/auth/sign-up', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept-Language': Localization.locale // "ja-JP" or "en-US"
+  },
+  body: JSON.stringify({email, password, name})
+});
+```
+
 ### Internationalization Architecture
 
 Type-safe i18n with locale-aware routing:

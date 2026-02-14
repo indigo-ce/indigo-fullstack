@@ -128,3 +128,32 @@ export function getLanguageFromHeaders(headers: Headers): Locale | null {
 
   return null;
 }
+
+// Server-side function to extract locale from request with proper fallback chain
+// Priority: cookie > URL path > Accept-Language header > default
+export function getLocaleFromRequest(
+  url: URL,
+  cookies: {get: (name: string) => {value: string} | undefined},
+  headers: Headers
+): Locale {
+  // 1. Check cookie preference first
+  const cookieLang = cookies.get("preferred_lang")?.value;
+  if (cookieLang && locales.includes(cookieLang as Locale)) {
+    return cookieLang as Locale;
+  }
+
+  // 2. Try to extract from URL path
+  const pathSegments = url.pathname.split('/').filter(Boolean);
+  if (pathSegments[0] && locales.includes(pathSegments[0] as Locale)) {
+    return pathSegments[0] as Locale;
+  }
+
+  // 3. Try Accept-Language header
+  const headerLang = getLanguageFromHeaders(headers);
+  if (headerLang) {
+    return headerLang;
+  }
+
+  // 4. Fall back to default
+  return defaultLocale;
+}

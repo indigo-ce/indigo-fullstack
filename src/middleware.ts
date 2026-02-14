@@ -1,19 +1,16 @@
 import {defineMiddleware, sequence} from "astro:middleware";
 import {createAuth} from "@/lib/auth";
 import {defaultLocale, locales, type Locale} from "./i18n/constants";
-import {getLanguageFromHeaders} from "./i18n/utils";
+import {getLanguageFromHeaders, getLocaleFromRequest} from "./i18n/utils";
 
 const authMiddleware = defineMiddleware(async (context, next) => {
   if (context.request.url.includes("/api/")) {
     return next();
   }
 
-  // Extract locale from URL path (e.g., /ja/page -> "ja")
+  // Extract locale using fallback chain: cookie > URL path > Accept-Language > default
   const url = new URL(context.request.url);
-  const pathSegments = url.pathname.split('/').filter(Boolean);
-  const locale = pathSegments[0] && locales.includes(pathSegments[0] as Locale)
-    ? pathSegments[0]
-    : defaultLocale;
+  const locale = getLocaleFromRequest(url, context.cookies, context.request.headers);
 
   const isAuthenticated = await createAuth(
     context.locals.runtime.env,
