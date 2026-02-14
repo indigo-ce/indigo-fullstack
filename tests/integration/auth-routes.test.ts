@@ -55,14 +55,14 @@ describe("Auth Routes Integration Tests", () => {
     app.route("/auth", authRoutes);
   });
 
-  describe("GET /auth/sign-in", () => {
+  describe("POST /auth/sign-in", () => {
     it("should return JWT token and user data with valid basic auth", async () => {
       const basicToken = btoa("test@example.com:password123");
 
       const res = await app.request(
         "/auth/sign-in",
         {
-          method: "GET",
+          method: "POST",
           headers: {
             Authorization: `Basic ${basicToken}`
           }
@@ -83,7 +83,7 @@ describe("Auth Routes Integration Tests", () => {
       const res = await app.request(
         "/auth/sign-in",
         {
-          method: "GET"
+          method: "POST"
         },
         env
       );
@@ -96,7 +96,7 @@ describe("Auth Routes Integration Tests", () => {
       const res = await app.request(
         "/auth/sign-in",
         {
-          method: "GET",
+          method: "POST",
           headers: {
             Authorization: "Invalid auth header"
           }
