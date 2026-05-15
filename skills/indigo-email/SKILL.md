@@ -1,0 +1,174 @@
+---
+name: indigo-email
+description: This skill should be used when the user asks to "send an email", "add an email template", "set up the email queue", "queue an email", "add a new email type", "migrate from sendEmail to queueEmail", "configure Plunk", "set up Cloudflare Queues for email", "debug email delivery", or works with email in Indigo stack projects.
+---
+
+# Email Queue System
+
+Indigo stack projects use an asynchronous email queue powered by Cloudflare Queues. Email rendering and delivery happen in a dedicated worker with its own CPU budget — they never block user requests.
+
+## Architecture
+
+```
+User Request → Main App → queueEmail() → Cloudflare Queue → Email Worker → Plunk API
+                                    (instant)            (async)
+```
+
+The email worker: renders the React Email template, sends via Plunk, retries on failure (exponential backoff: 30s / 60s / 120s, max 3 retries), moves failures to the dead letter queue.
+
+In local development, `queueEmail()` logs to console instead of queuing — no queue setup needed locally.
+
+## Queuing Emails
+
+Import `queueEmail` from `@/lib/email`:
+
+```typescript
+import {queueEmail} from "@/lib/email";
+
+// Basic
+await queueEmail("user@example.com", {type: "welcome", props: {name: "John"}}, env);
+
+// With locale
+await queueEmail(
+  "user@example.com",
+  {type: "email-verification", props: {name: "John", url: verificationUrl}},
+  env,
+  {locale: "ja"}
+);
+
+// With custom subject
+await queueEmail(to, {type: "custom", props: {html: "<p>…</p>"}}, env, {subject: "Custom Subject"});
+```
+
+Always pass `locale` from the user object or request headers so emails arrive in the user's language.
+
+## Available Templates
+
+All templates support `en` and `ja` locales:
+
+| Type | Required props |
+|---|---|
+| `email-verification` | `name: string, url: string` |
+| `password-reset` | `name: string, resetLink: string` |
+| `account-deleted` | `name: string` |
+| `welcome` | `name: string` |
+| `custom` | `html: string, title?: string, preview?: string` |
+
+## Adding a New Template
+
+1. Create a React Email component in `src/components/email/`.
+2. Add the template type and props to the `EmailTemplate` union in `src/lib/email-queue.ts`.
+3. Add a `case` to the worker's switch statement in `workers/indigo-email-queue-consumer/src/index.ts`.
+4. Add translation strings for the subject line to `src/translations/en.json` and `src/translations/ja.json`.
+5. Test with `pnpm preview-email`.
+
+## Initial Setup
+
+Run once per deployment environment:
+
+```bash
+# 1. Create queues (primary + dead letter)
+pnpm queue:create
+
+# 2. Install worker deps
+cd workers/indigo-email-queue-consumer && pnpm install && cd ../..
+
+# 3. Regenerate Cloudflare types (adds EMAIL_QUEUE binding)
+pnpm cf-types
+
+# 4. Set worker secret
+npx wrangler secret put PLUNK_API_KEY --config workers/indigo-email-queue-consumer/wrangler.jsonc
+
+# 5. Deploy worker (before main app)
+pnpm email-worker:deploy
+```
+
+## Configuration
+
+### Main app `wrangler.jsonc`
+
+```jsonc
+{
+  "queues": {
+    "producers": [{"binding": "EMAIL_QUEUE", "queue": "indigo-email-queue"}]
+  },
+  "vars": {
+    "SEND_EMAIL_FROM": "Your App <noreply@yourdomain.com>"
+  }
+}
+```
+
+### Worker `workers/indigo-email-queue-consumer/wrangler.jsonc`
+
+```jsonc
+{
+  "name": "indigo-email-queue-consumer",
+  "queues": {
+    "consumers": [{
+      "queue": "indigo-email-queue",
+      "max_batch_size": 10,
+      "max_batch_timeout": 30,
+      "max_retries": 3,
+      "dead_letter_queue": "indigo-email-queue-dlq"
+    }]
+  },
+  "vars": {
+    "SEND_EMAIL_FROM": "Your App <noreply@yourdomain.com>"
+  }
+}
+```
+
+## Local Development with Full Queue
+
+To test the actual queue flow locally, run both servers:
+
+```bash
+# Terminal 1
+pnpm dev
+
+# Terminal 2
+pnpm email-worker:dev
+```
+
+Without Terminal 2, `queueEmail()` still works — it just logs to console.
+
+## Monitoring
+
+```bash
+# Stream live worker logs
+wrangler tail indigo-email-queue-consumer
+
+# Inspect dead letter queue
+wrangler queues consumer view indigo-email-queue-dlq
+```
+
+Queue metrics (messages in queue, throughput, latency, failures) are visible in the Cloudflare dashboard under **Workers & Pages → Queues → indigo-email-queue**.
+
+## Migrating from `sendEmail()`
+
+Replace synchronous sends with queued sends — the worker handles rendering:
+
+```typescript
+// Before
+import {sendEmail} from "@/lib/email";
+import {render} from "@react-email/render";
+import WelcomeEmail from "@/components/email/WelcomeEmail";
+
+await sendEmail(to, "Welcome!", await render(WelcomeEmail({name})), env);
+
+// After
+import {queueEmail} from "@/lib/email";
+
+await queueEmail(to, {type: "welcome", props: {name}}, env, {locale: "en"});
+```
+
+Remove all `render()` calls — that work moves to the worker.
+
+## Troubleshooting
+
+| Problem | Check |
+|---|---|
+| Worker deploy fails | `PLUNK_API_KEY` secret set? Run `wrangler secret put` |
+| Emails queued but not delivered | Worker deployed? Plunk key valid? Run `wrangler tail` |
+| Messages accumulating in DLQ | Worker logs for error details; check Plunk rate limits and template errors |
+| Main app hitting CPU limits | Verify `queueEmail()` used everywhere, not `sendEmail()` |
