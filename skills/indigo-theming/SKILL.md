@@ -81,7 +81,7 @@ Use the [OKLCH color picker](https://oklch.com/) to find values for a desired co
 
 ### Add a brand color palette
 
-1. Define the full palette (11 shades: 50–950) in `@theme inline`:
+1. Define the full palette (shades: 10, 20, 50–950) in `@theme inline`:
 
 ```css
 --color-brand-50:  oklch(0.95 0.02 240);

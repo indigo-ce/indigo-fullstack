@@ -57,8 +57,8 @@ All templates support `en` and `ja` locales:
 ## Adding a New Template
 
 1. Create a React Email component in `src/components/email/`.
-2. Add the template type and props to the `EmailTemplate` union in `src/lib/email.ts`.
-3. Add a `case` to the worker's switch statement in `indigo-email-queue-consumer/src/index.ts`.
+2. Add the template type and props to the `EmailTemplate` union in `src/lib/email-queue.ts`.
+3. Add a `case` to the worker's switch statement in `workers/indigo-email-queue-consumer/src/index.ts`.
 4. Add translation strings for the subject line to `src/translations/en.json` and `src/translations/ja.json`.
 5. Test with `pnpm preview-email`.
 
@@ -71,13 +71,13 @@ Run once per deployment environment:
 pnpm queue:create
 
 # 2. Install worker deps
-cd indigo-email-queue-consumer && pnpm install && cd ..
+cd workers/indigo-email-queue-consumer && pnpm install && cd ../..
 
 # 3. Regenerate Cloudflare types (adds EMAIL_QUEUE binding)
 pnpm cf-types
 
 # 4. Set worker secret
-npx wrangler secret put PLUNK_API_KEY --config indigo-email-queue-consumer/wrangler.jsonc
+npx wrangler secret put PLUNK_API_KEY --config workers/indigo-email-queue-consumer/wrangler.jsonc
 
 # 5. Deploy worker (before main app)
 pnpm email-worker:deploy
@@ -98,7 +98,7 @@ pnpm email-worker:deploy
 }
 ```
 
-### Worker `indigo-email-queue-consumer/wrangler.jsonc`
+### Worker `workers/indigo-email-queue-consumer/wrangler.jsonc`
 
 ```jsonc
 {

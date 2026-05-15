@@ -204,11 +204,11 @@ test.beforeEach(async ({context}) => {
 test("should switch to Japanese", async ({page}) => {
   await page.goto("/", {waitUntil: "networkidle"});
 
-  const selector = page.locator('footer button[role="combobox"]').filter({hasText: "English"});
+  const selector = page.getByTestId("language-selector");
   await selector.waitFor({state: "visible"});
   await selector.click();
 
-  await page.getByRole("option", {name: /日本語/}).click();
+  await page.getByTestId("language-option-ja").click();
 
   await page.waitForURL(/\/ja/);
   await expect(page.getByRole("link", {name: "ログイン"})).toBeVisible();
