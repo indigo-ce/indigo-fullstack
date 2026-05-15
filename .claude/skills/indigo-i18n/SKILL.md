@@ -29,6 +29,7 @@ src/
 ---
 import {useTranslations} from "@/i18n/utils";
 import {defaultLocale, locales} from "@/i18n/constants";
+import type {Locale} from "@/i18n/constants";
 
 let {lang} = Astro.params;
 const locale = lang && locales.includes(lang as Locale) ? (lang as Locale) : defaultLocale;
