@@ -2,8 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Project-specific Claude skills live in `skills/` (e.g. `indigo-email`, `indigo-i18n`, `indigo-theming`, `indigo-testing`) and are loaded automatically when invoked.
-
 ## Development Commands
 
 ### Essential Commands
