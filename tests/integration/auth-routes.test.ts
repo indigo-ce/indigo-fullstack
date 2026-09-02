@@ -1,229 +1,230 @@
-import {describe, it, expect, beforeAll, vi} from "vitest";
-import {env} from "cloudflare:test";
-import {Hono} from "hono";
-import authRoutes from "@/lib/hono/routes/auth-routes";
-import type {user} from "@/db/schema";
+import {beforeAll, describe, expect, it} from "vitest";
+import {applyD1Migrations, env} from "cloudflare:test";
+import {eq} from "drizzle-orm";
+import {createDrizzle} from "@/db";
+import {user, session} from "@/db/schema";
+import {createAuth} from "@/lib/auth";
+import {createHonoApp} from "@/pages/api/[...path]";
 
-// Type definitions for test responses
-type User = typeof user.$inferSelect;
+const email = "auth-routes-integration@example.com";
+const password = "password123";
+const name = "Auth Routes Integration User";
 
-type SignInSuccessResponse = {
-  user: User;
-  token: string;
+type SignInResponse = {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    image: string | null;
+  };
+  access: string;
+  refresh: string;
+  tokenType: string;
 };
 
-type RefreshSuccessResponse = {
-  token: string;
+type TokenResponse = {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
 };
 
-type RevokeSuccessResponse = {
-  success: boolean;
-};
+const app = createHonoApp(env as Env);
+let userId: string;
 
-// Mock auth middleware and related modules
-vi.mock("@/lib/hono/middleware/authMiddleware", () => ({
-  authMiddleware: vi.fn(() => async (c: any, next: any) => {
-    c.set("auth", {
-      api: {
-        signInTokens: vi.fn().mockResolvedValue({
-          token: "test-jwt-token",
-          user: {
-            id: "test-user-id",
-            email: "test@example.com",
-            name: "Test User"
-          }
-        }),
-        refreshTokens: vi
-          .fn()
-          .mockResolvedValue({token: "refreshed-jwt-token"}),
-        revokeTokens: vi.fn().mockResolvedValue({success: true})
-      }
-    });
-    await next();
-  })
-}));
+async function request(
+  path: string,
+  body?: Record<string, string>,
+  headers?: HeadersInit
+): Promise<Response> {
+  return app.fetch(
+    new Request(`http://localhost/api/v1${path}`, {
+      method: "POST",
+      headers: {
+        ...(body ? {"Content-Type": "application/json"} : {}),
+        ...headers
+      },
+      body: body ? JSON.stringify(body) : undefined
+    })
+  );
+}
+
+async function responseBody(
+  response: Response
+): Promise<Record<string, unknown>> {
+  return (await response.json()) as Record<string, unknown>;
+}
+
+function assertSignInResponse(
+  data: Record<string, unknown>
+): SignInResponse {
+  expect(Object.keys(data).sort()).toEqual([
+    "access",
+    "refresh",
+    "tokenType",
+    "user"
+  ]);
+  expect(data.access).toEqual(expect.any(String));
+  expect(data.refresh).toEqual(expect.any(String));
+  expect(data.tokenType).toBe("Bearer");
+  expect(data.user).toEqual({
+    id: userId,
+    email,
+    name,
+    image: null
+  });
+
+  return data as unknown as SignInResponse;
+}
+
+async function signIn(): Promise<SignInResponse> {
+  const response = await request("/auth/sign-in", undefined, {
+    Authorization: `Basic ${btoa(`${email}:${password}`)}`
+  });
+  expect(response.status).toBe(200);
+  return assertSignInResponse(await responseBody(response));
+}
 
 describe("Auth Routes Integration Tests", () => {
-  let app: Hono;
-
   beforeAll(async () => {
-    app = new Hono();
-    const {authMiddleware} = await import(
-      "@/lib/hono/middleware/authMiddleware"
-    );
-    app.use("*", authMiddleware(env as any));
-    app.route("/auth", authRoutes);
+    await applyD1Migrations(env.DB, env.TEST_MIGRATIONS);
+
+    await createAuth(env as Env).api.signUpEmail({
+      body: {email, password, name}
+    });
+
+    const db = createDrizzle(env.DB);
+    const createdUser = await db
+      .select()
+      .from(user)
+      .where(eq(user.email, email))
+      .get();
+    if (!createdUser) throw new Error("Integration test user was not created");
+    userId = createdUser.id;
   });
 
-  describe("POST /auth/sign-in", () => {
-    it("should return JWT token and user data with valid basic auth", async () => {
-      const basicToken = btoa("test@example.com:password123");
+  it("returns the real token response for valid basic auth", async () => {
+    const data = await signIn();
 
-      const res = await app.request(
-        "/auth/sign-in",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Basic ${basicToken}`
-          }
-        },
-        env
-      );
+    expect(data.user.id).toBe(userId);
+    expect(data.user.email).toBe(email);
+    expect(data.user.name).toBe(name);
+  });
 
-      expect(res.status).toBe(200);
+  it("returns 400 when sign-in authorization is missing", async () => {
+    const response = await request("/auth/sign-in");
 
-      const data = (await res.json()) as SignInSuccessResponse;
-      expect(data.token).toBe("test-jwt-token");
-      expect(data.user.id).toBe("test-user-id");
-      expect(data.user.email).toBe("test@example.com");
-      expect(data.user.name).toBe("Test User");
-    });
-
-    it("should handle requests without authorization header", async () => {
-      const res = await app.request(
-        "/auth/sign-in",
-        {
-          method: "POST"
-        },
-        env
-      );
-
-      expect(res.status).toBeGreaterThanOrEqual(200);
-      expect(res.status).toBeLessThan(600);
-    });
-
-    it("should handle invalid basic auth format", async () => {
-      const res = await app.request(
-        "/auth/sign-in",
-        {
-          method: "POST",
-          headers: {
-            Authorization: "Invalid auth header"
-          }
-        },
-        env
-      );
-
-      expect(res.status).toBeGreaterThanOrEqual(200);
-      expect(res.status).toBeLessThan(600);
+    expect(response.status).toBe(400);
+    await expect(responseBody(response)).resolves.toEqual({
+      error: "Email and password are required"
     });
   });
 
-  describe("POST /auth/refresh-access", () => {
-    it("should return new JWT token with valid refresh token", async () => {
-      const refreshData = {
-        refreshToken: "valid-refresh-token"
-      };
-
-      const res = await app.request(
-        "/auth/refresh-access",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(refreshData)
-        },
-        env
-      );
-
-      expect(res.status).toBe(200);
-
-      const data = (await res.json()) as RefreshSuccessResponse;
-      expect(data.token).toBe("refreshed-jwt-token");
+  it("returns refreshed access and refresh tokens", async () => {
+    const {refresh} = await signIn();
+    const response = await request("/auth/refresh-access", {
+      refreshToken: refresh
     });
+    const data = (await responseBody(response)) as unknown as TokenResponse;
 
-    it("should handle missing refresh token", async () => {
-      const res = await app.request(
-        "/auth/refresh-access",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({})
-        },
-        env
-      );
+    expect(response.status).toBe(200);
+    expect(Object.keys(data).sort()).toEqual([
+      "accessToken",
+      "refreshToken",
+      "tokenType"
+    ]);
+    expect(data.accessToken).toEqual(expect.any(String));
+    expect(data.refreshToken).toEqual(expect.any(String));
+    expect(data.tokenType).toBe("Bearer");
+  });
 
-      expect(res.status).toBeGreaterThanOrEqual(200);
-      expect(res.status).toBeLessThan(600);
-    });
+  it("returns 400 when refresh token is missing", async () => {
+    const response = await request("/auth/refresh-access", {});
 
-    it("should handle invalid JSON body", async () => {
-      const res = await app.request(
-        "/auth/refresh-access",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: "invalid-json"
-        },
-        env
-      );
-
-      expect(res.status).toBeGreaterThanOrEqual(200);
-      expect(res.status).toBeLessThan(600);
+    expect(response.status).toBe(400);
+    await expect(responseBody(response)).resolves.toEqual({
+      error: "Missing refresh token"
     });
   });
 
-  describe("POST /auth/revoke-access", () => {
-    it("should successfully revoke valid refresh token", async () => {
-      const revokeData = {
-        refreshToken: "valid-refresh-token"
-      };
-
-      const res = await app.request(
-        "/auth/revoke-access",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(revokeData)
-        },
-        env
-      );
-
-      expect(res.status).toBe(200);
-
-      const data = (await res.json()) as RevokeSuccessResponse;
-      expect(data.success).toBe(true);
+  it("returns 401 for a garbage refresh token", async () => {
+    const response = await request("/auth/refresh-access", {
+      refreshToken: "garbage-refresh-token"
     });
 
-    it("should handle missing refresh token", async () => {
-      const res = await app.request(
-        "/auth/revoke-access",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({})
-        },
-        env
-      );
+    expect(response.status).toBe(401);
+    await expect(responseBody(response)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
+    });
+  });
 
-      expect(res.status).toBeGreaterThanOrEqual(200);
-      expect(res.status).toBeLessThan(600);
+  it("returns 401 for an expired refresh token", async () => {
+    const db = createDrizzle(env.DB);
+    const now = new Date();
+    await db.insert(session).values({
+      id: "expired-refresh-session",
+      expiresAt: new Date(now.getTime() - 60_000),
+      token: "expired-refresh-token",
+      createdAt: new Date(now.getTime() - 120_000),
+      updatedAt: new Date(now.getTime() - 120_000),
+      userId
     });
 
-    it("should handle invalid JSON body", async () => {
-      const res = await app.request(
-        "/auth/revoke-access",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: "invalid-json"
-        },
-        env
-      );
+    const response = await request("/auth/refresh-access", {
+      refreshToken: "expired-refresh-token"
+    });
 
-      expect(res.status).toBeGreaterThanOrEqual(200);
-      expect(res.status).toBeLessThan(600);
+    expect(response.status).toBe(401);
+    await expect(responseBody(response)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
+    });
+  });
+
+  it("keeps revocation idempotent for an unknown token", async () => {
+    const response = await request("/auth/revoke-access", {
+      refreshToken: "unknown-revoke-token"
+    });
+
+    expect(response.status).toBe(200);
+    await expect(responseBody(response)).resolves.toEqual({success: true});
+  });
+
+  it("rotates refresh tokens and rejects the previous token", async () => {
+    const {refresh} = await signIn();
+    const response = await request("/auth/refresh-access", {
+      refreshToken: refresh
+    });
+    const data = (await responseBody(response)) as unknown as TokenResponse;
+
+    expect(response.status).toBe(200);
+    expect(data.refreshToken).toEqual(expect.any(String));
+    expect(data.refreshToken).not.toBe(refresh);
+
+    const oldTokenResponse = await request("/auth/refresh-access", {
+      refreshToken: refresh
+    });
+    expect(oldTokenResponse.status).toBe(401);
+    await expect(responseBody(oldTokenResponse)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
+    });
+  });
+
+  it("rejects a revoked refresh token", async () => {
+    const {refresh} = await signIn();
+    const revokeResponse = await request("/auth/revoke-access", {
+      refreshToken: refresh
+    });
+
+    expect(revokeResponse.status).toBe(200);
+    await expect(responseBody(revokeResponse)).resolves.toEqual({
+      success: true
+    });
+
+    const reuseResponse = await request("/auth/refresh-access", {
+      refreshToken: refresh
+    });
+    expect(reuseResponse.status).toBe(401);
+    await expect(responseBody(reuseResponse)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
     });
   });
 });

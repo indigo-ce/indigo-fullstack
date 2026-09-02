@@ -42,7 +42,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Validation.** `pnpm test:run` and `pnpm test:coverage` pass locally and in the `Test` workflow. `pnpm check` passes with no `cloudflare:test` type conflicts.
 
-### 2. Replace the mocked mobile auth integration test with real request coverage
+### 2. [x] Replace the mocked mobile auth integration test with real request coverage
 
 **Gap.** `tests/integration/auth-routes.test.ts` mocks `authMiddleware` and asserts against its own mock return values, so it verifies nothing about the running code. It asserts `data.token` on sign-in, a field neither the route nor the refresh-access plugin has ever returned, and three of its cases assert only `status >= 200 && status < 600`, which cannot fail. The mobile token surface therefore has no real coverage.
 
