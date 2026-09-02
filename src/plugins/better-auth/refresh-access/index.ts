@@ -236,27 +236,62 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
             ctx.body?.refreshToken || ctx.query?.refreshToken;
 
           if (!refreshToken) {
-            return ctx.json({error: "Missing refresh token"}, {status: 400});
+            throw new APIError("BAD_REQUEST", {
+              message: "Missing refresh token"
+            });
           }
 
           const session = await verifyRefreshToken(ctx, refreshToken);
 
           if (!session) {
-            return ctx.json(
-              {error: "Invalid or expired refresh token"},
-              {status: 401}
-            );
+            throw new APIError("UNAUTHORIZED", {
+              message: "Invalid or expired refresh token"
+            });
           }
 
           // Optionally rotate refresh token
+          let sessionForJwt = session;
           let newRefreshToken = refreshToken;
           if (options?.refreshToken?.rotate ?? true) {
-            // Generate new token, update session
-            newRefreshToken = generateId(32);
-            await ctx.context.internalAdapter.updateSession(session.id, {
-              token: newRefreshToken,
-              updatedAt: new Date()
+            // Claim the current token before creating its replacement so only
+            // one concurrent request can consume it.
+            const claimMarker = crypto.randomUUID();
+            const claimedSession =
+              await ctx.context.internalAdapter.updateSession(session.token, {
+                token: claimMarker,
+                updatedAt: new Date()
+              });
+
+            if (!claimedSession) {
+              throw new APIError("UNAUTHORIZED", {
+                message: "Invalid or expired refresh token"
+              });
+            }
+
+            const newSession = await ctx.context.internalAdapter.createSession(
+              session.userId,
+              false,
+              {
+                expiresAt: session.expiresAt,
+                ipAddress: session.ipAddress,
+                userAgent: session.userAgent,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              },
+              false
+            );
+            if (!newSession) {
+              throw new APIError("UNAUTHORIZED", {
+                message: "Failed to rotate refresh token"
+              });
+            }
+
+            await ctx.context.internalAdapter.updateSession(newSession.id, {
+              expiresAt: session.expiresAt
             });
+            await ctx.context.internalAdapter.deleteSession(claimMarker);
+            sessionForJwt = newSession;
+            newRefreshToken = newSession.token;
           }
 
           // Load user info
@@ -265,12 +300,14 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           );
 
           if (!user) {
-            return ctx.json({error: "User not found"}, {status: 404});
+            throw new APIError("NOT_FOUND", {
+              message: "User not found"
+            });
           }
 
           // Set session in context for JWT generation
           ctx.context.session = {
-            session,
+            session: sessionForJwt,
             user
           };
 
@@ -298,7 +335,9 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
             ctx.body?.refreshToken || ctx.query?.refreshToken;
 
           if (!refreshToken) {
-            return ctx.json({error: "Missing refresh token"}, {status: 400});
+            throw new APIError("BAD_REQUEST", {
+              message: "Missing refresh token"
+            });
           }
 
           const session = await verifyRefreshToken(ctx, refreshToken);
@@ -307,7 +346,16 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
             return ctx.json({success: true});
           }
 
-          await ctx.context.internalAdapter.deleteSession(session.id);
+          await ctx.context.adapter.deleteMany({
+            model: "session",
+            where: [
+              {
+                field: "id",
+                operator: "eq",
+                value: session.id
+              }
+            ]
+          });
           return ctx.json({success: true});
         }
       )
