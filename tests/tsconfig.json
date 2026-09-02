@@ -2,7 +2,17 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "types": ["@cloudflare/vitest-pool-workers", "vitest/globals"],
-    "moduleResolution": "bundler"
+    "moduleResolution": "bundler",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@app/*": ["./src/*"],
+      "@drizzle/*": ["../drizzle/*"]
+    }
   },
-  "include": ["./**/*", "../src/**/*", "../worker-configuration.d.ts"]
+  "include": [
+    "./**/*",
+    "../src/**/*",
+    "../workers/indigo-email-queue-consumer/src/**/*",
+    "../worker-configuration.d.ts"
+  ]
 }
