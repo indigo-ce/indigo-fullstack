@@ -88,4 +88,15 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Acceptance.** Coverage exists for both the authorized and unauthorized paths of `accountRoutes` using a genuine token, with no mocking of `jose` or the JWKS cache.
 
-**Validation.** `pnpm test:run`. Removing `envMiddleware` from the v1 chain must produce a failing, clearly attributable test.
+
+### 6. Triage Dependabot vulnerabilities on `main`
+
+**Gap.** GitHub reports 184 vulnerabilities on the default branch (3 critical, 81 high, 81 moderate, 19 low), surfaced after pushing the Claude workflow removal. None of the existing items address dependency hygiene, so the count will keep growing while the architecture work proceeds.
+
+**Scope.**
+- Open Dependabot security PRs and group them by ecosystem; merge critical and high patches that don't require code changes first.
+- For updates that touch application code (auth, queue, email), pin the dependency in a tracking issue and roll the fix into the next item in this list that owns the affected surface.
+- Add a weekly Dependabot triage note to the PR template or `CONTRIBUTING.md` so the backlog doesn't reaccumulate silently.
+
+**Acceptance.** Critical and high counts drop to zero within one PR cycle. Moderate and low counts trend down as PRs land; no individual dependency stays unpatched for more than 30 days.
+
