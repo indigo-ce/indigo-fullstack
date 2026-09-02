@@ -208,6 +208,26 @@ describe("Auth Routes Integration Tests", () => {
     });
   });
 
+  it("allows only one concurrent refresh to consume a token", async () => {
+    const {refresh} = await signIn();
+    const responses = await Promise.all([
+      request("/auth/refresh-access", {refreshToken: refresh}),
+      request("/auth/refresh-access", {refreshToken: refresh})
+    ]);
+
+    expect(responses.map((response) => response.status).sort()).toEqual([
+      200,
+      401
+    ]);
+    const rejectedResponse = responses.find(
+      (response) => response.status === 401
+    );
+    expect(rejectedResponse).toBeDefined();
+    await expect(responseBody(rejectedResponse!)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
+    });
+  });
+
   it("rejects a revoked refresh token", async () => {
     const {refresh} = await signIn();
     const revokeResponse = await request("/auth/revoke-access", {

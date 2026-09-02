@@ -253,16 +253,21 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           let sessionForJwt = session;
           let newRefreshToken = refreshToken;
           if (options?.refreshToken?.rotate ?? true) {
-            await ctx.context.adapter.deleteMany({
-              model: "session",
-              where: [
-                {
-                  field: "id",
-                  operator: "eq",
-                  value: session.id
-                }
-              ]
-            });
+            // Claim the current token before creating its replacement so only
+            // one concurrent request can consume it.
+            const claimMarker = crypto.randomUUID();
+            const claimedSession =
+              await ctx.context.internalAdapter.updateSession(session.token, {
+                token: claimMarker,
+                updatedAt: new Date()
+              });
+
+            if (!claimedSession) {
+              throw new APIError("UNAUTHORIZED", {
+                message: "Invalid or expired refresh token"
+              });
+            }
+
             const newSession = await ctx.context.internalAdapter.createSession(
               session.userId,
               false,
@@ -272,13 +277,19 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
                 userAgent: session.userAgent,
                 createdAt: new Date(),
                 updatedAt: new Date()
-              }
+              },
+              false
             );
             if (!newSession) {
               throw new APIError("UNAUTHORIZED", {
-                message: "Failed to create session"
+                message: "Failed to rotate refresh token"
               });
             }
+
+            await ctx.context.internalAdapter.updateSession(newSession.id, {
+              expiresAt: session.expiresAt
+            });
+            await ctx.context.internalAdapter.deleteSession(claimMarker);
             sessionForJwt = newSession;
             newRefreshToken = newSession.token;
           }
