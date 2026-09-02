@@ -236,3 +236,21 @@ Sign-up tests redirect to `/verify-email` because Better Auth requires email ver
 | `data-testid` not found | Verify attribute in rendered HTML; use Playwright Inspector |
 | Flaky tests | Replace fixed timeouts with `waitForURL` / `waitFor`; run headed to observe |
 | Locale wrong | Clear cookies in `beforeEach`; check `Accept-Language` handling |
+
+## Vitest
+
+Unit and integration tests run in the Cloudflare Workers pool. Run them with `pnpm test:run`.
+
+Test suites that use the database must initialize the migrated D1 schema:
+
+```typescript
+import {applyD1Migrations, env} from "cloudflare:test";
+
+beforeAll(async () => {
+  await applyD1Migrations(env.DB, env.TEST_MIGRATIONS);
+});
+```
+
+There are no global mocks for Better Auth, React Email rendering, or Web Crypto. Keep mocks local to the tests that require them so other tests exercise the real runtime behavior.
+
+Run `pnpm test:coverage` to generate coverage. Reports exclude tests, configuration files, migrations, and generated Worker types.

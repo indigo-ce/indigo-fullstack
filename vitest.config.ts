@@ -2,6 +2,7 @@ import {
   defineWorkersProject,
   readD1Migrations
 } from "@cloudflare/vitest-pool-workers/config";
+import {coverageConfigDefaults} from "vitest/config";
 import path from "path";
 
 export default defineWorkersProject(async () => {
@@ -16,9 +17,6 @@ export default defineWorkersProject(async () => {
       }
     },
     test: {
-      setupFiles: [
-        "./tests/setup/vitest-setup.ts"
-      ],
       globals: true,
       isolate: true,
       poolOptions: {
@@ -32,8 +30,8 @@ export default defineWorkersProject(async () => {
               NODE_ENV: "test",
               BETTER_AUTH_BASE_URL: "http://localhost:3000",
               SEND_EMAIL_FROM: "Test <test@example.com>",
-              RESEND_API_KEY: "ci-test-key",
-              BETTER_AUTH_SECRET: "test-secret-123456789"
+              BETTER_AUTH_SECRET: "test-secret-123456789",
+              TEST_MIGRATIONS: migrations
             },
             // Test D1 database (isolated per test)
             d1Databases: {
@@ -42,14 +40,23 @@ export default defineWorkersProject(async () => {
           }
         }
       },
-      include: ["**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+      include: ["tests/**/*.test.ts"],
       exclude: [
         "**/node_modules/**",
         "**/dist/**",
         "**/.{idea,git,cache,output,temp}/**",
         "**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*",
         "**/tests/e2e/**"
-      ]
+      ],
+      coverage: {
+        exclude: [
+          ...coverageConfigDefaults.exclude,
+          "tests/**",
+          "*.config.*",
+          "drizzle/**",
+          "worker-configuration.d.ts"
+        ]
+      }
     }
   };
 });
