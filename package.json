@@ -2,6 +2,7 @@
   "name": "indigo-stack-ce",
   "type": "module",
   "version": "0.0.1",
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
     "dev": "pnpm check && astro dev",
     "check": "astro check --minimumSeverity warning",
