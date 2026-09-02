@@ -17,8 +17,8 @@ type SignInResponse = {
     name: string;
     image: string | null;
   };
-  access: string;
-  refresh: string;
+  accessToken: string;
+  refreshToken: string;
   tokenType: string;
 };
 
@@ -58,13 +58,13 @@ function assertSignInResponse(
   data: Record<string, unknown>
 ): SignInResponse {
   expect(Object.keys(data).sort()).toEqual([
-    "access",
-    "refresh",
+    "accessToken",
+    "refreshToken",
     "tokenType",
     "user"
   ]);
-  expect(data.access).toEqual(expect.any(String));
-  expect(data.refresh).toEqual(expect.any(String));
+  expect(data.accessToken).toEqual(expect.any(String));
+  expect(data.refreshToken).toEqual(expect.any(String));
   expect(data.tokenType).toBe("Bearer");
   expect(data.user).toEqual({
     id: userId,
@@ -120,9 +120,9 @@ describe("Auth Routes Integration Tests", () => {
   });
 
   it("returns refreshed access and refresh tokens", async () => {
-    const {refresh} = await signIn();
+    const {refreshToken} = await signIn();
     const response = await request("/auth/refresh-access", {
-      refreshToken: refresh
+      refreshToken
     });
     const data = (await responseBody(response)) as unknown as TokenResponse;
 
@@ -189,18 +189,18 @@ describe("Auth Routes Integration Tests", () => {
   });
 
   it("rotates refresh tokens and rejects the previous token", async () => {
-    const {refresh} = await signIn();
+    const {refreshToken} = await signIn();
     const response = await request("/auth/refresh-access", {
-      refreshToken: refresh
+      refreshToken
     });
     const data = (await responseBody(response)) as unknown as TokenResponse;
 
     expect(response.status).toBe(200);
     expect(data.refreshToken).toEqual(expect.any(String));
-    expect(data.refreshToken).not.toBe(refresh);
+    expect(data.refreshToken).not.toBe(refreshToken);
 
     const oldTokenResponse = await request("/auth/refresh-access", {
-      refreshToken: refresh
+      refreshToken
     });
     expect(oldTokenResponse.status).toBe(401);
     await expect(responseBody(oldTokenResponse)).resolves.toEqual({
@@ -209,10 +209,10 @@ describe("Auth Routes Integration Tests", () => {
   });
 
   it("allows only one concurrent refresh to consume a token", async () => {
-    const {refresh} = await signIn();
+    const {refreshToken} = await signIn();
     const responses = await Promise.all([
-      request("/auth/refresh-access", {refreshToken: refresh}),
-      request("/auth/refresh-access", {refreshToken: refresh})
+      request("/auth/refresh-access", {refreshToken}),
+      request("/auth/refresh-access", {refreshToken})
     ]);
 
     expect(responses.map((response) => response.status).sort()).toEqual([
@@ -229,9 +229,9 @@ describe("Auth Routes Integration Tests", () => {
   });
 
   it("rejects a revoked refresh token", async () => {
-    const {refresh} = await signIn();
+    const {refreshToken} = await signIn();
     const revokeResponse = await request("/auth/revoke-access", {
-      refreshToken: refresh
+      refreshToken
     });
 
     expect(revokeResponse.status).toBe(200);
@@ -240,7 +240,7 @@ describe("Auth Routes Integration Tests", () => {
     });
 
     const reuseResponse = await request("/auth/refresh-access", {
-      refreshToken: refresh
+      refreshToken
     });
     expect(reuseResponse.status).toBe(401);
     await expect(responseBody(reuseResponse)).resolves.toEqual({
