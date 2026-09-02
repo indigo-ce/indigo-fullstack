@@ -217,8 +217,8 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               name: user.user.name,
               image: user.user.image
             },
-            access: accessToken,
-            refresh: refreshToken,
+            accessToken,
+            refreshToken,
             tokenType: "Bearer"
           });
         }
