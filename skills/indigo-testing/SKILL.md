@@ -252,5 +252,3 @@ beforeAll(async () => {
 ```
 
 There are no global mocks for Better Auth, React Email rendering, or Web Crypto. Keep mocks local to the tests that require them so other tests exercise the real runtime behavior.
-
-Run `pnpm test:coverage` to generate coverage. Reports exclude tests, configuration files, migrations, and generated Worker types.

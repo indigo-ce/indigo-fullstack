@@ -32,19 +32,6 @@ jobs:
       - name: Run unit tests
         run: pnpm test:run
 
-      - name: Generate coverage report
-        run: pnpm test:coverage
-        continue-on-error: true
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          file: ./coverage/coverage-final.json
-          flags: unittests
-          name: unit-tests
-        continue-on-error: true
-
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest

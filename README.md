@@ -488,7 +488,6 @@ This project includes comprehensive test coverage with both unit tests (Vitest) 
 | :---------------------- | :----------------------------------- |
 | `pnpm test`             | Run unit tests in watch mode         |
 | `pnpm test:run`         | Run unit tests once                  |
-| `pnpm test:coverage`    | Generate coverage report             |
 | `pnpm test:e2e`         | Run all e2e tests                    |
 | `pnpm test:e2e:ui`      | Run e2e tests in interactive UI mode |
 | `pnpm test:e2e:headed`  | Run e2e tests with visible browser   |

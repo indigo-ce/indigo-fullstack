@@ -35,12 +35,12 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 - Delete `tests/setup/vitest-setup.ts` and its `setupFiles` entry; adjust the existing unit tests that relied on the global mocks to mock locally instead.
 - Keep exactly one `cloudflare:test` declaration (`tests/env.d.ts`, extending the generated `Env` plus `TEST_MIGRATIONS`) and delete the duplicate.
 - Drop the stale `RESEND_API_KEY` binding from `vitest.config.ts` and from the E2E `.dev.vars` heredoc in `.github/workflows/test.yml`.
-- Narrow `test.include` to `tests/**/*.test.ts` and add coverage exclusions for `tests/**`, `*.config.*`, `drizzle/**`, and `worker-configuration.d.ts`.
+- Narrow `test.include` to `tests/**/*.test.ts`.
 - Extend `skills/indigo-testing/SKILL.md` with a short section on the Vitest layer (Workers pool, migration bootstrap, no global mocks); it currently documents Playwright only.
 
-**Acceptance.** A test can call `applyD1Migrations(env.DB, env.TEST_MIGRATIONS)` in `beforeAll` and then read and write the `user` and `session` tables. No test file resolves a globally mocked `better-auth` or `@react-email/render`. Coverage output reports application code only.
+**Acceptance.** A test can call `applyD1Migrations(env.DB, env.TEST_MIGRATIONS)` in `beforeAll` and then read and write the `user` and `session` tables. No test file resolves a globally mocked `better-auth` or `@react-email/render`.
 
-**Validation.** `pnpm test:run` and `pnpm test:coverage` pass locally and in the `Test` workflow. `pnpm check` passes with no `cloudflare:test` type conflicts.
+**Validation.** `pnpm test:run` passes locally and in the `Test` workflow. `pnpm check` passes with no `cloudflare:test` type conflicts.
 
 ### 2. [x] Replace the mocked mobile auth integration test with real request coverage
 
