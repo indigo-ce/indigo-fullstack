@@ -24,8 +24,9 @@ export default defineWorkersProject(async () => {
         workers: {
           // Override for testing without separate config file
           miniflare: {
-            // Required compatibility date for @cloudflare/vitest-pool-workers
+            // Mirrors wrangler.jsonc's compatibility_date and compatibility_flags
             compatibilityDate: "2025-04-30",
+            compatibilityFlags: ["nodejs_compat"],
             // Test-specific environment variables and migrations
             bindings: {
               NODE_ENV: "test",
@@ -37,6 +38,12 @@ export default defineWorkersProject(async () => {
             // Test D1 database (isolated per test)
             d1Databases: {
               DB: "00000000-0000-0000-0000-000000000000"
+            },
+            kvNamespaces: {
+              SESSION: "test-session-namespace"
+            },
+            queueProducers: {
+              EMAIL_QUEUE: "indigo-email-queue"
             }
           }
         }
