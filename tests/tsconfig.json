@@ -4,7 +4,9 @@
     "types": ["@cloudflare/vitest-pool-workers", "vitest/globals"],
     "moduleResolution": "bundler",
     "paths": {
-      "@app/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@app/*": ["./src/*"],
+      "@drizzle/*": ["../drizzle/*"]
     }
   },
   "include": [
