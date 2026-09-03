@@ -1,7 +1,7 @@
 import {describe, it, expect, vi, beforeEach} from "vitest";
-import type {Context, Next} from "hono";
+import {Hono} from "hono";
 import {authMiddleware} from "@/lib/hono/middleware/authMiddleware";
-import {createMockContext, type MockNext} from "tests/unit/utils/mock-types";
+import type {APIRouteContext} from "@/pages/api/[...path]";
 
 // Mock the auth creation function
 vi.mock("@/lib/auth", () => ({
@@ -13,14 +13,20 @@ vi.mock("@/lib/auth", () => ({
   })
 }));
 
+function buildApp(env: Env) {
+  const app = new Hono<APIRouteContext>();
+  app.use("*", authMiddleware(env));
+  app.get("/", (c) =>
+    c.json({authSet: c.get("auth") !== undefined}, 200)
+  );
+  return app;
+}
+
 describe("Auth Middleware Unit Tests", () => {
-  let mockContext: Context;
-  let mockNext: MockNext;
   let mockEnv: Env;
 
   beforeEach(() => {
-    mockContext = createMockContext();
-    mockNext = vi.fn();
+    vi.clearAllMocks();
     mockEnv = {
       SESSION: {},
       SEND_EMAIL_FROM: "test@example.com",
@@ -32,20 +38,20 @@ describe("Auth Middleware Unit Tests", () => {
   });
 
   it("should set auth object in context", async () => {
-    const middleware = authMiddleware(mockEnv);
+    const app = buildApp(mockEnv);
+    const response = await app.request("/");
+    const body = await response.json();
 
-    await middleware(mockContext, mockNext);
-
-    expect(mockContext.set).toHaveBeenCalledWith("auth", expect.any(Object));
-    expect(mockNext).toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(body).toEqual({authSet: true});
   });
 
   it("should call next middleware", async () => {
-    const middleware = authMiddleware(mockEnv);
+    const app = buildApp(mockEnv);
+    const response = await app.request("/");
 
-    await middleware(mockContext, mockNext);
-
-    expect(mockNext).toHaveBeenCalledTimes(1);
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({authSet: true});
   });
 
   it("should handle different environment configurations", async () => {
@@ -58,11 +64,10 @@ describe("Auth Middleware Unit Tests", () => {
       DB: {},
       ASSETS: {}
     } as unknown as Env;
-    const middleware = authMiddleware(testEnv);
+    const app = buildApp(testEnv);
+    const response = await app.request("/");
 
-    await middleware(mockContext, mockNext);
-
-    expect(mockContext.set).toHaveBeenCalled();
-    expect(mockNext).toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({authSet: true});
   });
 });
