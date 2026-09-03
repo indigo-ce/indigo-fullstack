@@ -42,15 +42,3 @@ export function createMockContext() {
 
 // Type for mocked Next function
 export type MockNext = MockedFunction<Next>;
-
-// Basic mock environment interface that matches Env requirements
-export interface MockEnv {
-  NODE_ENV?: string;
-  SESSION: any; // Required in Env
-  SEND_EMAIL_FROM: string; // Required in Env  
-  RESEND_API_KEY?: string;
-  BETTER_AUTH_SECRET?: string;
-  BETTER_AUTH_BASE_URL: string; // Required in Env
-  DB: any; // Required in Env
-  ASSETS: any; // Required in Env
-}
