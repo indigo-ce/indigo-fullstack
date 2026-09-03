@@ -117,7 +117,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Validation.** `pnpm test:run` (every existing file keeps its test count) and `pnpm cf-types && pnpm check`.
 
-### 8. Drive the middleware unit tests through a real Hono app
+### 8. [x] Drive the middleware unit tests through a real Hono app
 
 **Gap.** `tests/unit/utils/mock-types.ts` exports `createMockContext()` — an object literal carrying fifteen `as any` members and ending in `as unknown as Context`. `tests/unit/middleware/jwt-middleware.test.ts` does not import it; it inlines a byte-identical copy of that literal in its own `beforeEach` while still importing `MockNext` from the same file. The repository carries the same fake twice, in the same directory.
 
