@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "pnpm check && astro dev",
-    "check": "astro check --minimumSeverity warning",
+    "check": "pnpm cf-types && astro check --minimumSeverity warning",
     "build": "pnpm cf-types && astro build",
     "preview": "astro build && wrangler dev",
     "preview:test": "astro build && wrangler dev --port 8787",
