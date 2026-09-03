@@ -26,6 +26,11 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Type check
+        run: pnpm check
+
+      - name: Type check email queue consumer worker
+        run: pnpm email-worker:check
 
       - name: Run unit tests
         run: pnpm test:run
