@@ -131,7 +131,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Validation.** `pnpm test:run` with the same or a greater test count, and `pnpm check`.
 
-### 9. Make `pnpm check` produce the generated types it depends on
+### 9. [x] Make `pnpm check` produce the generated types it depends on
 
 **Gap.** `worker-configuration.d.ts` is listed in the root `tsconfig.json` `include`, is gitignored, and is produced only by `pnpm cf-types` (`wrangler types`). It is the sole declaration of `Env` — the type behind every `createAuth(env)`, every middleware factory in `src/lib/hono/middleware/`, `queueEmail(to, template, env, options)`, and `context.locals.runtime.env`. On a fresh clone the file does not exist, so `pnpm check` fails with "Cannot find name 'Env'" across most of `src/`, and `pnpm dev` fails with it because `dev` is `pnpm check && astro dev`. The command that gates the dev server cannot run until someone knows to invoke a second, undocumented command first. The composition already exists one script over: `build` is `pnpm cf-types && astro build`, so the generated file is a build product there and a manual prerequisite in `check`.
 
