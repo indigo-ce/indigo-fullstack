@@ -16,7 +16,7 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@app/*": ["../src/*"]
+      "@app/*": ["../../src/*"]
     },
     "types": ["@cloudflare/workers-types"]
   },

@@ -12,6 +12,10 @@ declare namespace App {
   }
 }
 
+interface Env {
+  BETTER_AUTH_SECRET: string;
+}
+
 // Vite/ImportMeta Environment Variables
 interface ImportMetaEnv {
   readonly BETTER_AUTH_SECRET?: string;

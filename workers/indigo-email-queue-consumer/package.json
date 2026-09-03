@@ -9,16 +9,16 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "@react-email/components": "^0.0.36",
-    "@react-email/render": "^1.0.6",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "@react-email/components": "^0.5.3",
+    "@react-email/render": "^1.2.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250127.0",
-    "@types/react": "^19.1.2",
-    "@types/react-dom": "^19.1.2",
-    "typescript": "^5.5.2",
-    "wrangler": "^4.62.0"
+    "@cloudflare/workers-types": "^4.20260310.1",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "typescript": "^5.9.2",
+    "wrangler": "4.72.0"
   }
 }

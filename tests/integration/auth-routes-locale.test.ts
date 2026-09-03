@@ -172,7 +172,7 @@ describe("Auth Routes Locale Integration Tests", () => {
       const allLocales = createAuthSpy.mock.calls.map(
         (call: unknown[]) => call[1]
       );
-      expect(allLocales.every((l: string) => l === "en")).toBe(true);
+      expect(allLocales.every((l) => l === "en")).toBe(true);
     });
   });
 
