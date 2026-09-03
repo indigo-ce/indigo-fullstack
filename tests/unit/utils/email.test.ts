@@ -13,7 +13,7 @@ describe("Email Utilities", () => {
       EMAIL_QUEUE: {
         send: mockQueueSend
       } as unknown as Queue
-    };
+    } as unknown as Partial<Env>;
 
     vi.clearAllMocks();
   });
@@ -73,7 +73,7 @@ describe("Email Utilities", () => {
       const localEnv = {
         BETTER_AUTH_BASE_URL: "http://localhost:4321",
         EMAIL_QUEUE: {send: mockQueueSend} as unknown as Queue
-      } as Env;
+      } as unknown as Env;
 
       const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
