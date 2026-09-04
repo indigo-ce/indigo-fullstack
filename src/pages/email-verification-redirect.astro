@@ -1,6 +1,7 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import {createAuth} from "@/lib/auth";
+import {env} from "cloudflare:workers";
 import {getLocaleFromParams, localizeUrl} from "@/i18n/utils";
 
 const locale = getLocaleFromParams(Astro.params);
@@ -15,7 +16,7 @@ if (!token) {
 }
 
 try {
-  const auth = createAuth(Astro.locals.runtime.env, locale);
+  const auth = createAuth(env, locale);
 
   // Use Better Auth API method directly
   const response = await auth.api.verifyEmail({

@@ -1,5 +1,6 @@
 import {ActionError, defineAction} from "astro:actions";
-import {z} from "astro:schema";
+import {z} from "astro/zod";
+import {env} from "cloudflare:workers";
 import {createAuth} from "@/lib/auth";
 import {defaultLocale, locales} from "@/i18n/constants";
 
@@ -11,7 +12,7 @@ export const authentication = {
       token: z.string(),
       locale: z.enum(locales).optional()
     }),
-    handler: async ({newPassword, confirmPassword, token, locale}, context) => {
+    handler: async ({newPassword, confirmPassword, token, locale}, _context) => {
       if (newPassword !== confirmPassword) {
         throw new ActionError({
           code: "BAD_REQUEST",
@@ -19,10 +20,7 @@ export const authentication = {
         });
       }
 
-      const {status} = await createAuth(
-        context.locals.runtime.env,
-        locale ?? defaultLocale
-      ).api.resetPassword({
+      const {status} = await createAuth(env, locale ?? defaultLocale).api.resetPassword({
         body: {
           newPassword: newPassword,
           token
@@ -41,11 +39,11 @@ export const authentication = {
   }),
   resendVerificationEmail: defineAction({
     input: z.object({
-      email: z.string().email(),
+      email: z.email(),
       locale: z.enum(locales).optional()
     }),
-    handler: async ({email, locale}, context) => {
-      await createAuth(context.locals.runtime.env, locale ?? defaultLocale).api.sendVerificationEmail({
+    handler: async ({email, locale}, _context) => {
+      await createAuth(env, locale ?? defaultLocale).api.sendVerificationEmail({
         body: {
           email,
           callbackURL: "/dashboard"

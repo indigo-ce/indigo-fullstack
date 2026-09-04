@@ -1,4 +1,5 @@
 import {defineMiddleware, sequence} from "astro:middleware";
+import {env} from "cloudflare:workers";
 import {createAuth} from "@/lib/auth";
 import {defaultLocale, locales, type Locale} from "./i18n/constants";
 import {getLanguageFromHeaders, getLocaleFromRequest} from "./i18n/utils";
@@ -12,10 +13,7 @@ const authMiddleware = defineMiddleware(async (context, next) => {
   const url = new URL(context.request.url);
   const locale = getLocaleFromRequest(url, context.cookies, context.request.headers);
 
-  const isAuthenticated = await createAuth(
-    context.locals.runtime.env,
-    locale
-  ).api.getSession({
+  const isAuthenticated = await createAuth(env, locale).api.getSession({
     headers: context.request.headers
   });
 
