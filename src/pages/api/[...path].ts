@@ -9,6 +9,7 @@ import accountRoutes from "@/lib/hono/routes/account-routes";
 import authRoutes from "@/lib/hono/routes/auth-routes";
 import responseTimeMiddleware from "@/lib/hono/middleware/response-time";
 import type {APIRoute} from "astro";
+import {env} from "cloudflare:workers";
 
 export type APIRouteContext = {
   Variables: {
@@ -50,9 +51,9 @@ export const createHonoApp = (env: Env) => {
   return app;
 };
 
-export const ALL: APIRoute = async (context) => {
-  const app = createHonoApp(context.locals.runtime.env);
-  return app.fetch(context.request);
+export const ALL: APIRoute = async (_context) => {
+  const app = createHonoApp(env);
+  return app.fetch(_context.request);
 };
 
 export type App = ReturnType<typeof createHonoApp>;

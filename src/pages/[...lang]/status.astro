@@ -1,10 +1,10 @@
 ---
 import {useTranslationsFromParams} from "@/i18n/utils";
 import Layout from "@/layouts/Layout.astro";
+import {env} from "cloudflare:workers";
 
 const t = useTranslationsFromParams(Astro.params);
 
-const {env} = Astro.locals.runtime;
 const isProd = process.env.NODE_ENV === "production";
 const betterAuthSecret = env.BETTER_AUTH_SECRET;
 const sendEmailFrom = env.SEND_EMAIL_FROM;

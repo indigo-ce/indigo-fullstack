@@ -7,6 +7,7 @@ import {PasswordField} from "@/components/PasswordField.tsx";
 import ErrorMessage from "@/components/ErrorMessage.astro";
 import SuccessMessage from "@/components/SuccessMessage.astro";
 import {createAuth} from "@/lib/auth";
+import {env} from "cloudflare:workers";
 import type {APIError} from "better-auth/api";
 import {useTranslationsFromParams, localizeUrl} from "@/i18n/utils";
 
@@ -33,7 +34,7 @@ const fields = {
 };
 
 if (Astro.request.method === "POST") {
-  const auth = createAuth(Astro.locals.runtime.env, locale);
+  const auth = createAuth(env, locale);
   const formData = await Astro.request.formData();
   const action = formData.get("action") as string;
 

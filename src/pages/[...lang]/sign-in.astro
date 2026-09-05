@@ -5,6 +5,7 @@ import {IconInputField} from "@/components/IconInputField.tsx";
 import {PasswordField} from "@/components/PasswordField.tsx";
 import ErrorMessage from "@/components/ErrorMessage.astro";
 import {createAuth} from "@/lib/auth";
+import {env} from "cloudflare:workers";
 import {APIError} from "better-auth/api";
 import {
   getLocaleFromParams,
@@ -31,7 +32,7 @@ const fields = {
 };
 
 if (Astro.request.method === "POST") {
-  const auth = createAuth(Astro.locals.runtime.env, locale);
+  const auth = createAuth(env, locale);
 
   try {
     const formData = await Astro.request.formData();
