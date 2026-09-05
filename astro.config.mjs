@@ -21,13 +21,9 @@ export default defineConfig({
   },
   output: "server",
   adapter: cloudflare({
-    platformProxy: {
-      enabled: true // Use astro built-in commands
-    },
     imageService: "cloudflare" // Use Cloudflare's native image optimization
   }),
   vite: {
-    // @ts-expect-error - tailwindcss vite plugin type compatibility issue
     plugins: [tailwindcss()],
     resolve: {
       // Use react-dom/server.edge instead of react-dom/server.browser for React 19
