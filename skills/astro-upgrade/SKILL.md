@@ -48,7 +48,7 @@ Audit the repo against the guide's checklist. The recurring surface in Astro + C
 
 **Astro core**
 
-- **Node version**: Astro 6+ requires Node `>=22.12.0`. Verify local (`node -v`), `engines` in `package.json`, and add a `.nvmrc` (`22.12.0`) so deploys pin it too.
+- **Node version**: Astro 6+ requires Node `>=22.12.0`. Verify local (`node -v`), `engines` in `package.json`, and add a `.nvmrc` so deploys pin it too. If the project is on **pnpm 11**, the floor is `22.13.0` — pnpm 11 refuses to run below it, and Cloudflare Workers builds read `.nvmrc`. Keep `.nvmrc` and `engines.node` in sync at the higher of the two floors.
 - **Zod**: Astro 6 moved to Zod 4. Replace deprecated `z.string().email()` / `z.string().url()` with `z.email()` / `z.url()`, `{ message }` with `{ error }` in refinements, and fix `.default()` values to match the **output** type. Import from `astro/zod` — never `astro:schema` or `astro:content` (both deprecated in v6).
 - **Removed APIs**: `Astro.glob()` → `import.meta.glob()`; `<ViewTransitions />` → `<ClientRouter />`; `emitESMImage()` → `emitImageMetadata()`; `handleForms` prop and `prefetch(..., { with })` option must be deleted.
 - **`getStaticPaths()`**: the `Astro` object inside it is deprecated — use `import.meta.env.SITE` instead of `Astro.site`, drop `Astro.generator`.
@@ -87,7 +87,14 @@ Audit the repo against the guide's checklist. The recurring surface in Astro + C
 
 - **`imageService` default** changed from `'compile'` to `'cloudflare-binding'`. An explicit `imageService` setting is unaffected — leave it if intentional.
 - **Pages → Workers**: Pages deployment is no longer supported. The project must deploy as a Worker.
-- **`compatibility_date`** should be refreshed (run `pnpm cf-types` / `wrangler types` and confirm), and per-environment deploys must build separately: `CLOUDFLARE_ENV=some-env astro build && wrangler deploy`.
+- **`compatibility_date` must be refreshed — this is not cosmetic.** A stale date combined with `nodejs_compat` makes every SSR route return HTTP 200 with a literal `[object Object]` body (15 bytes). See [The `[object Object]` trap](#the-object-object-trap) below. Refresh it whenever you touch the adapter major, then `pnpm cf-types` / `wrangler types` to confirm.
+- **Per-environment deploys** must build separately: `CLOUDFLARE_ENV=some-env astro build && wrangler deploy`.
+
+**Local preview and e2e (v13+)**
+
+- The documented local preview is **`astro build && astro preview`**, which runs the real `workerd`. `wrangler dev` still works and remains the better choice for Playwright.
+- `astro preview` is awkward to drive from CI: it **daemonizes when stdout is not a TTY** (so Playwright's `webServer` sees the process exit early) and binds **IPv6 `::1` only** (so a `http://127.0.0.1:PORT` health check never connects). Prefer `wrangler dev --port N` in `webServer.command`, or pass `--host 127.0.0.1` and manage the daemon yourself.
+- Playwright's `reuseExistingServer: !process.env.CI` will silently attach to **any** process already holding the port — including an unrelated project's dev server. That produces a fully green local run that proves nothing. Before trusting a local e2e pass, confirm the port was actually free (`lsof -nP -iTCP:PORT -sTCP:LISTEN`), or run once with `reuseExistingServer: false`.
 
 **Indigo-stack specifics**
 
@@ -106,6 +113,15 @@ pnpm test:run   # unit/integration
 pnpm test:e2e   # Playwright against the real runtime
 ```
 
+`pnpm build` passing proves the compiler accepted your templates — it does **not** prove pages render. Add one explicit smoke check against the built worker, because a corrupt-response bug shows up in E2E only as an assertion timeout:
+
+```bash
+pnpm build && npx wrangler dev --port 8788 &
+curl -s -w '\n%{http_code} %{size_download}b\n' http://127.0.0.1:8788/
+```
+
+A 15-byte `[object Object]` body means the runtime is misconfigured — see [The `[object Object]` trap](#the-object-object-trap). And confirm the E2E port was genuinely free before trusting a green run.
+
 ### 5. Commit per major
 
 One commit per major, naming the versions so the sequence is reviewable:
@@ -116,6 +132,50 @@ Upgrade Astro 6 to 7 with Cloudflare adapter v14
 ```
 
 Push the branch and open the PR only after the final major validates.
+
+## Troubleshooting
+
+### The `[object Object]` trap
+
+**Symptom**: every server-rendered route returns HTTP 200, `Content-Type: text/html`, and a 15-byte body containing exactly `[object Object]`. Static/prerendered pages are fine. `pnpm build` succeeds. E2E tests fail as content-assertion _timeouts_, which makes it look like a hang rather than a render bug.
+
+**Cause**: a stale `compatibility_date` in `wrangler.jsonc` combined with the `nodejs_compat` flag. Workerd's older `nodejs_compat` process semantics corrupt the `Response` the adapter returns. It is **not** an Astro or adapter bug, and it is not version-pair-specific.
+
+**Fix** — either one works:
+
+```jsonc
+// preferred: refresh the date (match what `create astro` currently scaffolds)
+"compatibility_date": "2026-09-03"
+
+// or: keep the old date and opt out of the new process semantics
+"compatibility_flags": ["nodejs_compat", "disable_nodejs_process_v2"]
+```
+
+Measured on Astro 7.3.1 + `@astrojs/cloudflare` 14.3.0 with `nodejs_compat`: dates `2025-10-15` and `2026-02-01` are broken; `2026-05-01` and later are fine. Astro 6 + adapter 13 does not exhibit it, so it surfaces during a 6 → 7 upgrade and looks like Astro 7 broke.
+
+Related upstream reports, all describing this symptom: withastro/astro [#15434](https://github.com/withastro/astro/issues/15434), [#14511](https://github.com/withastro/astro/issues/14511), [#17570](https://github.com/withastro/astro/issues/17570). Note #17570 blames `no_bundle: true` in the generated `dist/server/wrangler.json` and offers `no_bundle: false` as a workaround — that is a **red herring**. Setting it makes `wrangler` re-bundle around the corruption, but `astro preview` ignores `no_bundle` entirely and stays broken. Fix the compatibility date instead.
+
+### Diagnosing runtime breakage: compare against a fresh scaffold
+
+When an upgrade produces runtime breakage that the guides do not explain, the fastest way to separate "upstream is broken" from "our config is stale" is to scaffold a clean project on the same versions and diff the configuration:
+
+```bash
+pnpm create astro@latest scratch-app -- --template minimal
+cd scratch-app && pnpm astro add cloudflare
+```
+
+Then diff `wrangler.jsonc`, `astro.config.mjs`, and `package.json` scripts against the real project. Config that a years-old scaffold generated — `compatibility_date`, `compatibility_flags`, `main`, `assets.directory`, preview scripts — is carried forward untouched by upgrade guides and is where stale settings hide.
+
+Two pitfalls that make this test lie:
+
+- **A scaffolded template is fully prerendered.** Its default page never exercises SSR, so it renders fine no matter what. Add a page with `export const prerender = false` before concluding anything.
+- **Editing `wrangler.jsonc` requires a rebuild.** The file wrangler actually serves is the generated `dist/server/wrangler.json`. Restarting the server without re-running `astro build` tests the _old_ config and yields a false negative. Always `astro build` between config changes, and verify with:
+
+  ```bash
+  python3 -c "import json;d=json.load(open('dist/server/wrangler.json'));print(d['compatibility_date'],d['compatibility_flags'],d['no_bundle'])"
+  ```
+
+Change one variable at a time and record a small matrix. A single untested variable is what turns "this config is stale" into a wrong conclusion that the version pair is unusable.
 
 ## Porting to Another Repo
 

@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "indigo-stack-demo",
   "main": "@astrojs/cloudflare/entrypoints/server",
-  "compatibility_date": "2025-10-15",
+  "compatibility_date": "2026-09-03",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "binding": "ASSETS",
