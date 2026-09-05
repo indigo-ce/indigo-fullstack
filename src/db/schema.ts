@@ -1,4 +1,9 @@
-import {sqliteTable, text, integer} from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -23,25 +28,32 @@ export const session = sqliteTable("session", {
     .references(() => user.id, {onDelete: "cascade"}),
 });
 
-export const account = sqliteTable("account", {
-  id: text("id").primaryKey(),
-  accountId: text("accountId").notNull(),
-  providerId: text("providerId").notNull(),
-  userId: text("userId")
-    .notNull()
-    .references(() => user.id, {onDelete: "cascade"}),
-  accessToken: text("accessToken"),
-  refreshToken: text("refreshToken"),
-  idToken: text("idToken"),
-  accessTokenExpiresAt: integer("accessTokenExpiresAt", {mode: "timestamp"}),
-  refreshTokenExpiresAt: integer("refreshTokenExpiresAt", {
-    mode: "timestamp",
-  }),
-  scope: text("scope"),
-  password: text("password"),
-  createdAt: integer("createdAt", {mode: "timestamp"}).notNull(),
-  updatedAt: integer("updatedAt", {mode: "timestamp"}).notNull(),
-});
+export const account = sqliteTable(
+  "account",
+  {
+    id: text("id").primaryKey(),
+    accountId: text("accountId").notNull(),
+    // Namespaces accountId so a provider ID cannot collide with another
+    // authentication method. Required by Better Auth 1.7+.
+    issuer: text("issuer").notNull(),
+    providerId: text("providerId").notNull(),
+    userId: text("userId")
+      .notNull()
+      .references(() => user.id, {onDelete: "cascade"}),
+    accessToken: text("accessToken"),
+    refreshToken: text("refreshToken"),
+    idToken: text("idToken"),
+    accessTokenExpiresAt: integer("accessTokenExpiresAt", {mode: "timestamp"}),
+    refreshTokenExpiresAt: integer("refreshTokenExpiresAt", {
+      mode: "timestamp",
+    }),
+    scope: text("scope"),
+    password: text("password"),
+    createdAt: integer("createdAt", {mode: "timestamp"}).notNull(),
+    updatedAt: integer("updatedAt", {mode: "timestamp"}).notNull(),
+  },
+  (table) => [uniqueIndex("account_issuer_accountId_idx").on(table.issuer, table.accountId)],
+);
 
 export const verification = sqliteTable("verification", {
   id: text("id").primaryKey(),
@@ -57,4 +69,8 @@ export const jwks = sqliteTable("jwks", {
   publicKey: text("publicKey").notNull(),
   privateKey: text("privateKey").notNull(),
   createdAt: integer("createdAt", {mode: "timestamp"}).notNull(),
+  // Optional key metadata introduced by the Better Auth 1.7 JWT plugin.
+  expiresAt: integer("expiresAt", {mode: "timestamp"}),
+  alg: text("alg"),
+  crv: text("crv"),
 });

@@ -15,6 +15,13 @@
       "when": 1759699172054,
       "tag": "0001_shiny_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788600552232,
+      "tag": "0002_hard_raza",
+      "breakpoints": true
     }
   ]
 }
