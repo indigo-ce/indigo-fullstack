@@ -2,8 +2,10 @@ packages:
   - "."
 
 allowBuilds:
+  "@prisma/engines": false
   "@tailwindcss/oxide": true
   esbuild: true
+  prisma: false
   sharp: true
   workerd: true
 

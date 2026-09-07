@@ -57,4 +57,8 @@ export const jwks = sqliteTable("jwks", {
   publicKey: text("publicKey").notNull(),
   privateKey: text("privateKey").notNull(),
   createdAt: integer("createdAt", {mode: "timestamp"}).notNull(),
+  // Optional key metadata introduced by the Better Auth 1.7 JWT plugin.
+  expiresAt: integer("expiresAt", {mode: "timestamp"}),
+  alg: text("alg"),
+  crv: text("crv"),
 });
