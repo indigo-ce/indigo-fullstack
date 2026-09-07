@@ -146,6 +146,19 @@ describe("Auth Routes Integration Tests", () => {
     });
   });
 
+  it("returns a client error for an empty body on refresh-access", async () => {
+    const response = await app.fetch(
+      new Request("http://localhost/api/v1/auth/refresh-access", {
+        method: "POST"
+      })
+    );
+
+    expect(response.status).toBe(400);
+    await expect(responseBody(response)).resolves.toEqual({
+      error: "Invalid JSON body"
+    });
+  });
+
   it("returns 401 for a garbage refresh token", async () => {
     const response = await request("/auth/refresh-access", {
       refreshToken: "garbage-refresh-token"
@@ -250,6 +263,22 @@ describe("Auth Routes Integration Tests", () => {
     await expect(responseBody(oldTokenResponse)).resolves.toEqual({
       error: "Invalid or expired refresh token"
     });
+  });
+
+  it("no longer accepts a refresh token passed as a query parameter", async () => {
+    const {refreshToken} = await signIn();
+    const handlerResponse = await createAuth(env as Env).handler(
+      new Request(
+        `http://localhost/api/auth/auth-tokens/refresh?refreshToken=${encodeURIComponent(refreshToken)}`,
+        {method: "POST"}
+      )
+    );
+
+    expect(handlerResponse.status).toBe(400);
+
+    // The token was not consumed: it still refreshes through the v1 API.
+    const response = await request("/auth/refresh-access", {refreshToken});
+    expect(response.status).toBe(200);
   });
 
   it("allows only one concurrent refresh to consume a token", async () => {

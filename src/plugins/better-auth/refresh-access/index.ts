@@ -240,17 +240,13 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
         "/auth-tokens/refresh",
         {
           method: "POST",
+          body: z.object({
+            refreshToken: z.string().min(1)
+          }),
           requireHeaders: false
         },
         async (ctx) => {
-          const refreshToken =
-            ctx.body?.refreshToken || ctx.query?.refreshToken;
-
-          if (!refreshToken) {
-            throw new APIError("BAD_REQUEST", {
-              message: "Missing refresh token"
-            });
-          }
+          const refreshToken = ctx.body.refreshToken;
 
           const session = await verifyRefreshToken(ctx, refreshToken);
 
@@ -339,17 +335,13 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
         "/auth-tokens/revoke",
         {
           method: "POST",
+          body: z.object({
+            refreshToken: z.string().min(1)
+          }),
           requireHeaders: false
         },
         async (ctx) => {
-          const refreshToken =
-            ctx.body?.refreshToken || ctx.query?.refreshToken;
-
-          if (!refreshToken) {
-            throw new APIError("BAD_REQUEST", {
-              message: "Missing refresh token"
-            });
-          }
+          const refreshToken = ctx.body.refreshToken;
 
           const session = await verifyRefreshToken(ctx, refreshToken);
 
