@@ -188,6 +188,50 @@ describe("Auth Routes Integration Tests", () => {
     await expect(responseBody(response)).resolves.toEqual({success: true});
   });
 
+  it("gives the session created at sign-in the 30-day refresh-token lifetime", async () => {
+    const {refreshToken} = await signIn();
+    const db = createDrizzle(env.DB);
+    const row = await db
+      .select()
+      .from(session)
+      .where(eq(session.token, refreshToken))
+      .get();
+    if (!row) throw new Error("Session row for the refresh token was not found");
+
+    const expected = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    expect(Math.abs(row.expiresAt.getTime() - expected)).toBeLessThan(60_000);
+  });
+
+  it("preserves the refresh-token lifetime across rotation", async () => {
+    const {refreshToken} = await signIn();
+    const db = createDrizzle(env.DB);
+    const original = await db
+      .select()
+      .from(session)
+      .where(eq(session.token, refreshToken))
+      .get();
+    if (!original)
+      throw new Error("Session row for the refresh token was not found");
+
+    const response = await request("/auth/refresh-access", {
+      refreshToken
+    });
+    expect(response.status).toBe(200);
+    const data = (await responseBody(response)) as unknown as TokenResponse;
+
+    const rotated = await db
+      .select()
+      .from(session)
+      .where(eq(session.token, data.refreshToken))
+      .get();
+    if (!rotated)
+      throw new Error("Session row for the rotated refresh token was not found");
+
+    expect(
+      Math.abs(rotated.expiresAt.getTime() - original.expiresAt.getTime())
+    ).toBeLessThan(60_000);
+  });
+
   it("rotates refresh tokens and rejects the previous token", async () => {
     const {refreshToken} = await signIn();
     const response = await request("/auth/refresh-access", {

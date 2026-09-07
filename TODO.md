@@ -190,7 +190,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Validation.** All of the above, plus `pnpm install` exiting 0 on a clean `node_modules` to confirm the prisma build-script entries are in place.
 
-### 12. Preserve the refresh-token lifetime through sign-in and rotation
+### 12. [x] Preserve the refresh-token lifetime through sign-in and rotation
 
 **Gap.** `signInTokens` in `src/plugins/better-auth/refresh-access/index.ts` computes a refresh window from `options?.refreshToken?.expiresIn || 30` days and hands it to `ctx.context.internalAdapter.createSession(user.user.id, true, {…, expiresAt}, false)`. The adapter assembles the row as `{...override, expiresAt: dontRememberMe ? 24h : sessionExpiration, userId, token, createdAt, updatedAt, ...defaults, ...(overrideAll ? override : {})}` — `expiresAt` is assigned _after_ the override is spread and is restored only when `overrideAll` is true. This call passes `dontRememberMe: true` and `overrideAll: false`, so the computed 30-day value is discarded and the session lands with the 24-hour expiry. `refreshToken.expiresIn` is dead configuration, and a mobile client's refresh token stops working roughly a day after sign-in no matter how often it refreshes.
 
