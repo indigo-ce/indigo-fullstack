@@ -209,7 +209,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Validation.** `pnpm test:run` and `pnpm check`.
 
-### 13. Give the refresh and revoke endpoints a declared request body
+### 13. [x] Give the refresh and revoke endpoints a declared request body
 
 **Gap.** The plugin declares three endpoints through `createAuthEndpoint` using two conventions. `signInTokens` declares `body: z.object({basicToken: z.string()})`, so the framework validates its body and the call site gets a real type. `refreshTokens` and `revokeTokens` declare only `method` and `requireHeaders`, then read `ctx.body?.refreshToken || ctx.query?.refreshToken` and hand-check the result for emptiness. Each endpoint's contract is written in its handler instead of its definition, and `auth.api.refreshTokens({body})` in `src/lib/hono/routes/auth-routes.ts` passes an unvalidated `await c.req.json()` straight through.
 
