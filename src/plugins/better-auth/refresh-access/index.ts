@@ -175,20 +175,26 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
 
           const jwtOptions = getJwtOptions();
 
-          // Create a session for the user
+          const refreshTokenExpiry = new Date(
+            Date.now() +
+              (options?.refreshToken?.expiresIn || 30) * 24 * 60 * 60 * 1000
+          ); // Days
+
+          // Create a session for the user. `dontRememberMe: false` makes the
+          // adapter assign its own 7-day `expiresAt` after spreading this
+          // override, discarding whatever we pass here, so the intended
+          // refresh-token lifetime has to be applied as a follow-up update.
+          // `overrideAll: true` would also restore it, but it would hand the
+          // override control of `token`, `createdAt`, and `updatedAt` too.
           const session = await ctx.context.internalAdapter.createSession(
             user.user.id,
-            true,
+            false,
             {
               // Additional session properties can be added here
               ipAddress: ctx.request?.headers.get("x-forwarded-for") || null,
               userAgent: ctx.request?.headers.get("user-agent") || null,
               createdAt: new Date(),
-              updatedAt: new Date(),
-              expiresAt: new Date(
-                Date.now() +
-                  (options?.refreshToken?.expiresIn || 30) * 24 * 60 * 60 * 1000
-              ) // Days
+              updatedAt: new Date()
             },
             false
           );
@@ -199,6 +205,11 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               message: "Failed to create session"
             });
           }
+
+          await ctx.context.internalAdapter.updateSession(session.token, {
+            expiresAt: refreshTokenExpiry
+          });
+          session.expiresAt = refreshTokenExpiry;
 
           // Set session in context for JWT generation
           ctx.context.session = {
@@ -286,7 +297,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               });
             }
 
-            await ctx.context.internalAdapter.updateSession(newSession.id, {
+            await ctx.context.internalAdapter.updateSession(newSession.token, {
               expiresAt: session.expiresAt
             });
             await ctx.context.internalAdapter.deleteSession(claimMarker);
