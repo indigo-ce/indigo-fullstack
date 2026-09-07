@@ -189,3 +189,75 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 **Acceptance.** `pnpm check` reports 0 errors and 0 warnings, `pnpm test:run` passes with no unhandled errors and exits 0, `pnpm build` and `pnpm email-worker:check` succeed, and `pnpm db:migrate:local` applies cleanly against a database that already holds `account` rows — verify the backfilled `issuer` values rather than only that the migration ran.
 
 **Validation.** All of the above, plus `pnpm install` exiting 0 on a clean `node_modules` to confirm the prisma build-script entries are in place.
+
+### 12. Preserve the refresh-token lifetime through sign-in and rotation
+
+**Gap.** `signInTokens` in `src/plugins/better-auth/refresh-access/index.ts` computes a refresh window from `options?.refreshToken?.expiresIn || 30` days and hands it to `ctx.context.internalAdapter.createSession(user.user.id, true, {…, expiresAt}, false)`. The adapter assembles the row as `{...override, expiresAt: dontRememberMe ? 24h : sessionExpiration, userId, token, createdAt, updatedAt, ...defaults, ...(overrideAll ? override : {})}` — `expiresAt` is assigned _after_ the override is spread and is restored only when `overrideAll` is true. This call passes `dontRememberMe: true` and `overrideAll: false`, so the computed 30-day value is discarded and the session lands with the 24-hour expiry. `refreshToken.expiresIn` is dead configuration, and a mobile client's refresh token stops working roughly a day after sign-in no matter how often it refreshes.
+
+**Second gap, same file.** Rotation in `refreshTokens` reapplies the original expiry with `ctx.context.internalAdapter.updateSession(newSession.id, {expiresAt: session.expiresAt})`, but `updateSession` is keyed on the session **token**, not the row id — it issues `where token = <id>`, which matches nothing. The rotated row keeps whatever `createSession` assigned it rather than the window it was signed in with, and the no-op is invisible because nothing reads the row back. The adjacent `deleteSession(claimMarker)` call is correct: it passes a token.
+
+**Nothing covers either.** `tests/integration/auth-routes.test.ts` pins statuses and token shapes across sign-in, refresh, rotation, concurrency, and revoke, but never reads a `session` row's `expiresAt`, so both defects pass the suite today.
+
+**Scope.**
+
+- Read `createSession`, `updateSession`, and `deleteSession` out of the installed `better-auth` (the lockfile resolves 1.6.22) and confirm both behaviours above _before_ changing anything; record the signatures and what you observed in the PR description. If either differs, adjust the fix and say so rather than applying this description verbatim.
+- In `signInTokens`, pass `dontRememberMe: false` to `createSession` and set the intended expiry with a follow-up `updateSession(session.token, {expiresAt: refreshTokenExpiry})`, with a comment recording why the second call is required. Do not reach for `overrideAll: true` — it would also hand the override control of `token`, `createdAt`, and `updatedAt`.
+- In `refreshTokens`, key the expiry restoration on `newSession.token` instead of `newSession.id`.
+- Leave the response payloads, the claim-marker concurrency guard, and `revokeTokens` unchanged. No schema, migration, or route change.
+
+**Acceptance.** Two new cases in `tests/integration/auth-routes.test.ts` read the `session` table through Drizzle: after sign-in, the row holding the returned `refreshToken` has `expiresAt` within a minute of 30 days out; after one rotation, the new row's `expiresAt` is within a minute of the original row's. Confirm both fail against the current implementation first — a new test that passes before the fix proves nothing here, and the observed pre-change values belong in the PR description. Every existing case in that file passes unchanged.
+
+**Validation.** `pnpm test:run` and `pnpm check`.
+
+### 13. Give the refresh and revoke endpoints a declared request body
+
+**Gap.** The plugin declares three endpoints through `createAuthEndpoint` using two conventions. `signInTokens` declares `body: z.object({basicToken: z.string()})`, so the framework validates its body and the call site gets a real type. `refreshTokens` and `revokeTokens` declare only `method` and `requireHeaders`, then read `ctx.body?.refreshToken || ctx.query?.refreshToken` and hand-check the result for emptiness. Each endpoint's contract is written in its handler instead of its definition, and `auth.api.refreshTokens({body})` in `src/lib/hono/routes/auth-routes.ts` passes an unvalidated `await c.req.json()` straight through.
+
+**Second cost — the token travels in the URL.** The `ctx.query` fallback accepts a refresh token as a query parameter. Better Auth mounts plugin endpoints on the auth handler and `src/pages/api/auth/[...all].ts` forwards every path to it, so these endpoints are reachable outside the `/api/v1` router that owns the `{error}` shape and the response-time middleware. Query strings land in request logs. Confirm that reachability rather than trusting this note — issue `POST /api/auth/auth-tokens/refresh?refreshToken=<valid token>` against `pnpm preview` and record the status and body in the PR description.
+
+**Depends on:** item 12 — same file; land the lifetime fix first rather than racing two changes through it.
+
+**Scope.** Add `body: z.object({refreshToken: z.string().min(1)})` to `refreshTokens` and `revokeTokens`, read the token from `ctx.body.refreshToken` only, and drop the `ctx.query` fallback. Remove the hand-written `if (!refreshToken)` guard only after establishing what the declared schema actually rejects and with what status — if the guard is still reachable, keep it and say so. Leave `signInTokens`, the rotation and claim-marker logic, revoke idempotency, and the `{accessToken, refreshToken, tokenType}` / `{success: true}` payloads alone. Touch `src/lib/hono/routes/auth-routes.ts` only as far as the new body types require.
+
+**Acceptance.** `tests/integration/auth-routes.test.ts` is the gate and passes **unchanged** — it already pins the 400 plus `{error: "Missing refresh token"}`, the 401s for garbage and expired tokens, revoke idempotency, rotation, and the concurrent-rotation case; needing to edit any of them means the outward contract moved and the change has overshot. Add two cases: `/api/v1/auth/refresh-access` with an empty JSON body returns a client error rather than a 500, and a request built as `createAuth(env as Env).handler(new Request("http://localhost/api/auth/auth-tokens/refresh?refreshToken=<valid token>", {method: "POST"}))` no longer rotates the token. A search of `src/plugins/` for `ctx.query` returns nothing.
+
+**Validation.** `pnpm test:run` and `pnpm check`.
+
+### 14. Give the API app one error contract, including top-level error and not-found handlers
+
+**Gap.** Error rendering is declared once, inline in `src/lib/hono/routes/auth-routes.ts`: an `onError` mapping `APIError` to `{error: message}` plus `error.statusCode`, and everything else to a 500 `{error: "Internal server error"}`. Three parts of the same API do not have it.
+
+- `src/lib/hono/routes/account-routes.ts` registers no `onError`, so anything thrown under `/api/v1/account/*` escapes to Hono's default handler and reaches the client as plain-text `Internal Server Error` instead of the `{error}` shape the rest of the API returns. That router is also typed `Hono<{Variables: {user: …}}>` rather than the shared `APIRouteContext`, while the `jwtMiddleware` mounted on it reads `c.get("auth")` and `c.get("env")` — variables its local type does not declare. It works because the parent chain sets them; the type understates what the router depends on.
+- `createHonoApp` in `src/pages/api/[...path].ts` registers neither `onError` nor `notFound`. A throw inside the `v1.use("*", …)` chain (`d1Middleware`, `authMiddleware`, `envMiddleware`) renders as plain text, and `GET /api/v1/does-not-exist` returns Hono's plain-text `404 Not Found`. An API that answers JSON everywhere else hands a client text on two of its most common failure paths.
+- Every handler in `auth-routes.ts` opens with an unguarded `await c.req.json()`, so a malformed body throws a `SyntaxError` that the existing `onError` maps to 500. A syntactically invalid request is a client error.
+
+Nothing under `tests/integration/` exercises an unmatched route, a middleware failure, or a malformed body.
+
+**Scope.**
+
+- Move the `onError` body out of `auth-routes.ts` into a shared `handleAPIError` in a new `src/lib/hono/error-handler.ts`, and register it on `authRoutes`, on `accountRoutes`, and on the root app in `createHonoApp`. Add a `SyntaxError` branch returning 400 `{error: "Invalid JSON body"}` ahead of the 500 fallback; keep the existing `APIError` branch and its `console` behaviour as they are.
+- Add `app.notFound((c) => c.json({error: "Not found"}, 404))` in `createHonoApp`, after `app.route("/api/v1", v1)`.
+- Retype `accountRoutes` as `Hono<APIRouteContext>`, importing the type from `src/pages/api/[...path].ts` the way `authRoutes` already does.
+- Establish rather than assume that a throw inside `v1.use("*", …)` reaches the root `onError` — `v1.route()` flattens the sub-router into the parent's dispatch chain, so one registration should cover both routers and the shared middleware. If it does not, register on `v1` as well and record why.
+- Do not add, rename, or remove an endpoint, and do not change any success payload.
+
+**Acceptance.** A new `tests/integration/api-error-handling.test.ts` asserts three things, each confirmed to fail against the current code first: `GET /api/v1/does-not-exist` returns 404 `{error: "Not found"}`; `createHonoApp` built against an env whose `BETTER_AUTH_SECRET` is empty returns a JSON 500 `{error: "Internal server error"}` from `GET /api/v1/health` — `createAuth` throws on that input inside `authMiddleware`, so this covers the middleware path rather than a route handler; and `POST /api/v1/auth/sign-up` with `Content-Type: application/json` and a malformed body returns 400 `{error: "Invalid JSON body"}`. `tests/integration/auth-routes.test.ts`, `tests/integration/auth-routes-locale.test.ts`, and `tests/integration/api-surface.test.ts` pass unchanged.
+
+**Validation.** `pnpm test:run`, `pnpm check`, and `pnpm build`.
+
+### 15. Cover the Astro page middleware and skip its session lookup for anonymous requests
+
+**Gap.** `src/middleware.ts` runs on every non-`/api/` request and unconditionally builds an auth instance and issues `createAuth(env, locale).api.getSession({headers})` — a fresh Drizzle client and a D1 round trip — even when the request carries no session cookie at all. That is every first visit to `/`, every `/en/sign-in` load, and every 404: requests where the lookup cannot return a session and where time to first byte matters most.
+
+**Second gap.** The file also owns the locale redirect for `/` and the `/api/` short-circuit, and it has no test. `tests/unit/middleware/` covers the three Hono middlewares (`d1-middleware`, `auth-middleware`, `jwt-middleware`); `tests/unit/middleware/auth-middleware.test.ts` targets `@/lib/hono/middleware/authMiddleware`, not this file. Nothing asserts what `src/middleware.ts` writes into `context.locals` or when it redirects.
+
+**Scope.**
+
+- Add a cookie-presence predicate to the Astro `authMiddleware`: split the `Cookie` header on `;`, take the text before the first `=` as the name, trim it, and treat the request as carrying a session only when a cookie whose **name** ends with `better-auth.session_token` has a non-empty value. The suffix match is what makes the `__Secure-` prefixed production cookie work — confirm the exact name against the installed `better-auth` and a locally issued cookie rather than trusting this note. On an anonymous request, set `context.locals.user` and `context.locals.session` to `null` and call `next()` without constructing an auth instance.
+- Key the skip on cookie presence, not on pathname, so an already-signed-in visitor is still redirected away from the auth pages by the existing logic.
+- Add `tests/unit/middleware/astro-auth-middleware.test.ts`. `src/middleware.ts` imports `astro:middleware`, which does not resolve under the Workers pool: add a `resolve.alias` entry in `vitest.config.ts` pointing it at a small stub under `tests/` implementing `defineMiddleware` as identity and `sequence` as left-to-right composition, and verify that composition semantics against the installed Astro rather than guessing. If aliasing proves unworkable, fall back to exporting the predicate as a named function, cover it directly, and state in the PR that the middleware body itself remains uncovered.
+- Do not change `getLocaleFromRequest`, the locale precedence, the redirect targets, or what the middleware writes into `context.locals`.
+
+**Acceptance.** With `@/lib/auth` mocked, `createAuth` is not called for a request with no `Cookie` header, for a decoy cookie whose _value_ contains the name (`returnTo=/x?next=better-auth.session_token`), or for an empty-valued `better-auth.session_token=`; and it _is_ called when the session cookie is present but not first (`preferred_lang=ja; __Secure-better-auth.session_token=abc`). Confirm the first three fail against the current implementation before writing the fix. The same file also covers the `/api/` short-circuit and the `/` locale redirect for a `preferred_lang=ja` cookie and for an `Accept-Language: ja` header. `tests/e2e/auth/protected-routes.spec.ts` and `tests/e2e/auth/sign-in.spec.ts` pass unchanged — they are what prove the signed-in redirects survived.
+
+**Validation.** `pnpm test:run` and `pnpm check`.
