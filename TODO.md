@@ -223,7 +223,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Validation.** `pnpm test:run` and `pnpm check`.
 
-### 14. Give the API app one error contract, including top-level error and not-found handlers
+### 14. [x] Give the API app one error contract, including top-level error and not-found handlers
 
 **Gap.** Error rendering is declared once, inline in `src/lib/hono/routes/auth-routes.ts`: an `onError` mapping `APIError` to `{error: message}` plus `error.statusCode`, and everything else to a 500 `{error: "Internal server error"}`. Three parts of the same API do not have it.
 

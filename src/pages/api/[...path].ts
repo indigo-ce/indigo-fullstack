@@ -3,6 +3,7 @@ import {createAuth} from "@/lib/auth";
 import {createDrizzle} from "@/db";
 import {d1Middleware} from "@/lib/hono/middleware/d1Middleware";
 import {envMiddleware} from "@/lib/hono/middleware/envMiddleware";
+import {handleAPIError} from "@/lib/hono/error-handler";
 import {Hono} from "hono";
 import {user} from "@/db/schema";
 import accountRoutes from "@/lib/hono/routes/account-routes";
@@ -47,6 +48,11 @@ export const createHonoApp = (env: Env) => {
 
   // Mount the v1 API
   app.route("/api/v1", v1);
+
+  // Backstop for failures thrown outside the per-router `onError` handlers
+  // (e.g. the shared v1 middleware) and for unmatched paths.
+  app.onError(handleAPIError);
+  app.notFound((c) => c.json({error: "Not found"}, 404));
 
   return app;
 };
