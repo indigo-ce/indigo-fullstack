@@ -245,7 +245,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, and `pnpm build`.
 
-### 15. Cover the Astro page middleware and skip its session lookup for anonymous requests
+### 15. [x] Cover the Astro page middleware and skip its session lookup for anonymous requests
 
 **Gap.** `src/middleware.ts` runs on every non-`/api/` request and unconditionally builds an auth instance and issues `createAuth(env, locale).api.getSession({headers})` — a fresh Drizzle client and a D1 round trip — even when the request carries no session cookie at all. That is every first visit to `/`, every `/en/sign-in` load, and every 404: requests where the lookup cannot return a session and where time to first byte matters most.
 

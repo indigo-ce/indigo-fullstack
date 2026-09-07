@@ -4,8 +4,35 @@ import {createAuth} from "@/lib/auth";
 import {defaultLocale, locales, type Locale} from "./i18n/constants";
 import {getLanguageFromHeaders, getLocaleFromRequest} from "./i18n/utils";
 
-const authMiddleware = defineMiddleware(async (context, next) => {
+// Better Auth prefixes its session cookie with `__Secure-` over HTTPS, so
+// production and local dev use different cookie names. Match on the
+// unprefixed suffix instead of hardcoding one spelling.
+const SESSION_COOKIE_SUFFIX = "better-auth.session_token";
+
+function hasSessionCookie(headers: Headers): boolean {
+  const cookieHeader = headers.get("cookie");
+  if (cookieHeader === null) {
+    return false;
+  }
+
+  return cookieHeader.split(";").some((cookie) => {
+    const [rawName, ...rawValueParts] = cookie.split("=");
+    const name = rawName.trim();
+    const value = rawValueParts.join("=").trim();
+    return name.endsWith(SESSION_COOKIE_SUFFIX) && value.length > 0;
+  });
+}
+
+export const authMiddleware = defineMiddleware(async (context, next) => {
   if (context.request.url.includes("/api/")) {
+    return next();
+  }
+
+  // Anonymous requests can never resolve to a session, so skip the D1
+  // lookup entirely instead of constructing an auth instance for nothing.
+  if (!hasSessionCookie(context.request.headers)) {
+    context.locals.user = null;
+    context.locals.session = null;
     return next();
   }
 
@@ -28,7 +55,7 @@ const authMiddleware = defineMiddleware(async (context, next) => {
   return next();
 });
 
-const languageMiddleware = defineMiddleware(
+export const languageMiddleware = defineMiddleware(
   async ({request, cookies, redirect}, next) => {
     if (request.url.includes("/api/")) {
       return next();
