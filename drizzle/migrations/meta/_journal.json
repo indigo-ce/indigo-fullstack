@@ -15,6 +15,13 @@
       "when": 1759699172054,
       "tag": "0001_shiny_clea",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1788794192461,
+      "tag": "0002_steep_ricochet",
+      "breakpoints": true
     }
   ]
 }
