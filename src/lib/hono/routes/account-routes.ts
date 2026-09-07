@@ -1,12 +1,11 @@
 import {Hono} from "hono";
-import {user} from "@/db/schema";
+import type {APIRouteContext} from "@/pages/api/[...path]";
+import {handleAPIError} from "@/lib/hono/error-handler";
 import {jwtMiddleware} from "@/lib/hono/middleware/jwtMiddleware";
-const accountRoutes = new Hono<{
-  Variables: {
-    user: typeof user.$inferSelect | null;
-  };
-}>();
 
+const accountRoutes = new Hono<APIRouteContext>();
+
+accountRoutes.onError(handleAPIError);
 accountRoutes.use("*", jwtMiddleware);
 
 accountRoutes.get("/profile", (c) => {

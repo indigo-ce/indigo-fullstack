@@ -1,7 +1,6 @@
-import {APIError} from "better-auth/api";
 import {Hono} from "hono";
-import type {ContentfulStatusCode} from "hono/utils/http-status";
 import type {APIRouteContext} from "@/pages/api/[...path]";
+import {handleAPIError} from "@/lib/hono/error-handler";
 import {createAuth} from "@/lib/auth";
 import {getLanguageFromHeaders} from "@/i18n/utils";
 import {defaultLocale} from "@/i18n/constants";
@@ -9,15 +8,7 @@ import {defaultLocale} from "@/i18n/constants";
 const authRoutes = new Hono<APIRouteContext>();
 
 // Centralized error handling for all auth routes
-authRoutes.onError((error, c) => {
-  if (error instanceof APIError) {
-    return c.json(
-      {error: error.body?.message},
-      error.statusCode as ContentfulStatusCode
-    );
-  }
-  return c.json({error: "Internal server error"}, 500);
-});
+authRoutes.onError(handleAPIError);
 
 function validateBody(
   body: Record<string, unknown>,
