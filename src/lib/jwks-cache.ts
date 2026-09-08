@@ -27,22 +27,26 @@ class JWKSCache {
   ): Promise<JWKS> {
     const now = Date.now();
 
-    if (
-      this.cache &&
-      (!forceRefresh ||
-        now - this.lastRefreshAt < this.forcedRefreshIntervalMs) &&
-      now < this.cache.expiresAt
-    ) {
+    if (this.cache && now < this.cache.expiresAt && !forceRefresh) {
       return this.cache.keys;
     }
 
-    if (forceRefresh) {
-      if (
-        this.emptyKeys &&
-        now - this.lastRefreshAt < this.forcedRefreshIntervalMs
-      ) {
+    if (
+      forceRefresh &&
+      now - this.lastRefreshAt < this.forcedRefreshIntervalMs
+    ) {
+      // Throttled: serve what we have instead of another D1 read. A forced
+      // refresh skips the TTL check by design, so this covers the stale
+      // entry too while getJwks() is failing, not just fresh or empty ones.
+      if (this.cache) {
+        return this.cache.keys;
+      }
+      if (this.emptyKeys) {
         return this.emptyKeys;
       }
+    }
+
+    if (forceRefresh) {
       // Bound forced D1 refreshes for repeated invalid-token requests.
       this.lastRefreshAt = now;
     }
