@@ -10,7 +10,7 @@ interface Props {
   class?: string;
 }
 
-const { message, class: className } = Astro.props;
+const {message, class: className} = Astro.props;
 
 // Don't render if no message
 if (!message) return null;
@@ -18,7 +18,7 @@ if (!message) return null;
 
 <div
   class:list={[
-    "flex gap-3 rounded-md border border-destructive/20 bg-destructive/10 p-4",
+    "border-destructive/20 bg-destructive/10 flex gap-3 rounded-md border p-4",
     className
   ]}
   role="alert"

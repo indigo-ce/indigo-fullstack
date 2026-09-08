@@ -52,18 +52,18 @@ Defines raw color palettes in OKLCH. These are referenced by the semantic tokens
 
 Always use semantic tokens in components — never raw palette colors:
 
-| Token | Used for |
-|---|---|
-| `--background` / `--foreground` | Page background and body text |
-| `--card` / `--card-foreground` | Card surfaces and their text |
-| `--primary` / `--primary-foreground` | Primary actions (buttons, links) |
-| `--secondary` / `--secondary-foreground` | Secondary actions |
-| `--muted` / `--muted-foreground` | Subtle backgrounds and muted text |
-| `--accent` / `--accent-foreground` | Accent highlights |
-| `--destructive` / `--destructive-foreground` | Errors and danger states |
-| `--border` | Border colors |
-| `--input` | Form input backgrounds |
-| `--ring` | Focus ring colors |
+| Token                                        | Used for                          |
+| -------------------------------------------- | --------------------------------- |
+| `--background` / `--foreground`              | Page background and body text     |
+| `--card` / `--card-foreground`               | Card surfaces and their text      |
+| `--primary` / `--primary-foreground`         | Primary actions (buttons, links)  |
+| `--secondary` / `--secondary-foreground`     | Secondary actions                 |
+| `--muted` / `--muted-foreground`             | Subtle backgrounds and muted text |
+| `--accent` / `--accent-foreground`           | Accent highlights                 |
+| `--destructive` / `--destructive-foreground` | Errors and danger states          |
+| `--border`                                   | Border colors                     |
+| `--input`                                    | Form input backgrounds            |
+| `--ring`                                     | Focus ring colors                 |
 
 In Tailwind these become: `bg-background`, `text-foreground`, `bg-primary`, `text-primary-foreground`, `border-border`, etc.
 
@@ -84,12 +84,12 @@ Use the [OKLCH color picker](https://oklch.com/) to find values for a desired co
 1. Define the full palette (shades: 10, 20, 50–950) in `@theme inline`:
 
 ```css
---color-brand-50:  oklch(0.95 0.02 240);
---color-brand-100: oklch(0.90 0.04 240);
+--color-brand-50: oklch(0.95 0.02 240);
+--color-brand-100: oklch(0.9 0.04 240);
 /* ... through 950 */
 --color-brand-500: oklch(0.65 0.15 240);
 --color-brand-900: oklch(0.35 0.12 240);
---color-brand-950: oklch(0.20 0.08 240);
+--color-brand-950: oklch(0.2 0.08 240);
 ```
 
 2. Map to semantic tokens in both `:root` and `.dark`:
@@ -126,7 +126,7 @@ Modify `--radius` in `:root`. Variants (`--radius-sm`, `--radius-md`, `--radius-
 <!-- ✅ Use semantic tokens -->
 <div class="bg-background text-foreground">
   <button class="bg-primary text-primary-foreground">Submit</button>
-  <div class="bg-card text-card-foreground border border-border rounded-lg">
+  <div class="bg-card text-card-foreground border-border rounded-lg border">
     Card content
   </div>
   <p class="text-muted-foreground">Subtle text</p>

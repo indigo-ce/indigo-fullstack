@@ -143,7 +143,7 @@ export function getLocaleFromRequest(
   }
 
   // 2. Try to extract from URL path
-  const pathSegments = url.pathname.split('/').filter(Boolean);
+  const pathSegments = url.pathname.split("/").filter(Boolean);
   if (pathSegments[0] && locales.includes(pathSegments[0] as Locale)) {
     return pathSegments[0] as Locale;
   }

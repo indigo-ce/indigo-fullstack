@@ -38,7 +38,11 @@ export const authMiddleware = defineMiddleware(async (context, next) => {
 
   // Extract locale for auth instance (used if auth triggers emails, e.g. account deletion)
   const url = new URL(context.request.url);
-  const locale = getLocaleFromRequest(url, context.cookies, context.request.headers);
+  const locale = getLocaleFromRequest(
+    url,
+    context.cookies,
+    context.request.headers
+  );
 
   const isAuthenticated = await createAuth(env, locale).api.getSession({
     headers: context.request.headers

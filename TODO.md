@@ -88,12 +88,12 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Acceptance.** Coverage exists for both the authorized and unauthorized paths of `accountRoutes` using a genuine token, with no mocking of `jose` or the JWKS cache.
 
-
 ### 6. Triage Dependabot vulnerabilities on `main`
 
 **Gap.** GitHub reports 184 vulnerabilities on the default branch (3 critical, 81 high, 81 moderate, 19 low), surfaced after pushing the Claude workflow removal. None of the existing items address dependency hygiene, so the count will keep growing while the architecture work proceeds.
 
 **Scope.**
+
 - Open Dependabot security PRs and group them by ecosystem; merge critical and high patches that don't require code changes first.
 - For updates that touch application code (auth, queue, email), pin the dependency in a tracking issue and roll the fix into the next item in this list that owns the affected surface.
 - Add a weekly Dependabot triage note to the PR template or `CONTRIBUTING.md` so the backlog doesn't reaccumulate silently.
@@ -110,7 +110,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 - Add `SESSION` (KV namespace), `EMAIL_QUEUE` (queue producer), and `compatibilityFlags: ["nodejs_compat"]` to the `miniflare` block, with a comment noting that the flags and `compatibilityDate` mirror `wrangler.jsonc`. Read the pool's option names for KV namespaces and queue producers out of the installed `@cloudflare/vitest-pool-workers` rather than guessing them.
 - Delete `MockEnv` from `tests/unit/utils/mock-types.ts`; its only consumer, `tests/unit/middleware/auth-middleware.test.ts`, annotates against `Env` instead (`as unknown as Env` is fine — those fixtures are intentionally partial).
-- Establish *why* `Buffer.from(...)` works today without the flag declared — either the pool supplies node compatibility by default or the runtime provides `Buffer` at that compatibility date — and record the answer in the PR. Declaring it explicitly is right either way: the test runtime should state the same contract the deployed one does rather than inherit it silently.
+- Establish _why_ `Buffer.from(...)` works today without the flag declared — either the pool supplies node compatibility by default or the runtime provides `Buffer` at that compatibility date — and record the answer in the PR. Declaring it explicitly is right either way: the test runtime should state the same contract the deployed one does rather than inherit it silently.
 - Leave alone: `TEST_MIGRATIONS` stays hand-written (`vitest.config.ts` injects it and `wrangler.jsonc` does not declare it), the test-only values of `BETTER_AUTH_SECRET` and `BETTER_AUTH_BASE_URL`, and `include`, `exclude`, `coverage`, and `resolve.alias`. Do not add a queue consumer.
 
 **Acceptance.** A new `tests/integration/env-bindings.test.ts` reads `env` from `cloudflare:test` and asserts that `env.SESSION` round-trips a `put`/`get` and that `env.EMAIL_QUEUE.send(...)` resolves without throwing. Confirm that case fails against the current `vitest.config.ts` before writing the fix, otherwise it proves nothing. A search under `tests/` for `MockEnv` returns nothing.
@@ -166,7 +166,6 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 **Acceptance.** `pnpm email-worker:check` exits 0. If the first run surfaces pre-existing diagnostics — a missing `lib` entry for the DOM types the email components need is the most likely one — fix them minimally in the worker's own `tsconfig.json` and record what was needed in the PR description. `pnpm-lock.yaml` is unchanged by the manifest edit, which is the proof that the worker's dependencies were never installed in the first place. `pnpm email-worker:dev` still starts.
 
 **Validation.** `pnpm email-worker:check`, `pnpm check`, `pnpm test:run` (`tests/unit/email-worker-render.test.ts` passes unchanged), and `pnpm build`.
-
 
 ### 11. Land the deferred dependency upgrades
 
@@ -264,7 +263,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run` and `pnpm check`.
 
-### 16. Mechanically enforce the committed Prettier config
+### 16. [x] Mechanically enforce the committed Prettier config
 
 **Gap.** `.prettierrc.json` pins the house style (`tabWidth: 2`, `useTabs: false`, `bracketSpacing: false`, `trailingComma: "none"`) and `prettier`, `prettier-plugin-astro`, and `prettier-plugin-tailwindcss` are all in `devDependencies`. Nothing runs them. `package.json` has no `format` script, `check` is `pnpm cf-types && astro check --minimumSeverity warning`, and `.github/workflows/test.yml` has no formatting step. `README.md` advertises Prettier "for consistent code style" — a claim no command in the repository backs.
 
@@ -293,7 +292,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 - Set `compatibilityDate` to `2026-09-03` and keep the comment accurate about what it mirrors.
 - **Do the reading first, and put it in the PR description.** List the compatibility flags that become default between `2025-04-30` and `2026-09-03`, read out of the installed `wrangler`/`workerd` flag table rather than from memory, and say for each whether anything under `src/`, `tests/`, or `workers/` depends on the old behaviour. That list is the evidence for this item; a bump merged without it is a guess. If one of them does change behaviour this repository relies on, pin that single flag in `compatibilityFlags` alongside the new date and explain it, rather than abandoning the change.
 - `compatibilityFlags: ["nodejs_compat"]` stays exactly as written. `src/plugins/better-auth/refresh-access/index.ts` calls `Buffer.from(...)` on the sign-in path and `tests/integration/auth-routes.test.ts` exercises it, so the flag is load-bearing; confirm it still resolves at the newer date rather than assuming it.
-- **Out of scope, deliberately.** `workers/indigo-email-queue-consumer/wrangler.jsonc` declares `2026-01-14`, a third date. That is a separately deployed Worker with its own `wrangler dev`/`deploy` path and no coverage under `tests/`, so moving its runtime date has its own blast radius and belongs in its own PR. Do not touch it here, and do not change the root `wrangler.jsonc` — it is the value being mirrored *to*. Do not add or remove a binding, and do not upgrade `wrangler`, `@cloudflare/vitest-pool-workers`, or `@astrojs/cloudflare`.
+- **Out of scope, deliberately.** `workers/indigo-email-queue-consumer/wrangler.jsonc` declares `2026-01-14`, a third date. That is a separately deployed Worker with its own `wrangler dev`/`deploy` path and no coverage under `tests/`, so moving its runtime date has its own blast radius and belongs in its own PR. Do not touch it here, and do not change the root `wrangler.jsonc` — it is the value being mirrored _to_. Do not add or remove a binding, and do not upgrade `wrangler`, `@cloudflare/vitest-pool-workers`, or `@astrojs/cloudflare`.
 
 **Acceptance.** `pnpm test:run` reports the same file and test counts as before, with `tests/integration/auth-routes.test.ts` and `tests/integration/env-bindings.test.ts` passing unchanged — between them they exercise `Buffer`, D1, KV, and the queue producer under the test runtime. A search of `vitest.config.ts` for `2025-04-30` returns nothing.
 

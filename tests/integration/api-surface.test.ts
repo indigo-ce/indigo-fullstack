@@ -32,13 +32,9 @@ async function responseBody(response: Response): Promise<unknown> {
 }
 
 async function signIn(): Promise<string> {
-  const response = await request(
-    "/auth/sign-in",
-    "POST",
-    {
-      Authorization: `Basic ${btoa(`${email}:${password}`)}`
-    }
-  );
+  const response = await request("/auth/sign-in", "POST", {
+    Authorization: `Basic ${btoa(`${email}:${password}`)}`
+  });
 
   expect(response.status).toBe(200);
   const body = (await responseBody(response)) as Record<string, unknown>;

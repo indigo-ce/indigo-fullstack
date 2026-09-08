@@ -19,7 +19,9 @@ describe("i18n Utilities", () => {
     });
 
     it("should return first supported locale from multi-value header", () => {
-      const headers = new Headers({"Accept-Language": "fr, ja;q=0.9, en;q=0.8"});
+      const headers = new Headers({
+        "Accept-Language": "fr, ja;q=0.9, en;q=0.8"
+      });
       expect(getLanguageFromHeaders(headers)).toBe("ja");
     });
 

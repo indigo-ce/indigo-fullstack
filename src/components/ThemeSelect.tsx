@@ -1,35 +1,35 @@
-import * as React from "react"
-import { Moon, Sun, SunMoon } from "lucide-react"
+import * as React from "react";
+import {Moon, Sun, SunMoon} from "lucide-react";
 import {
   Select,
   SelectContent,
   SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select"
-import { getThemePreference, setThemePreference } from "@/lib/theme"
-import type { Theme } from "@/lib/theme"
+  SelectTrigger
+} from "@/components/ui/select";
+import {getThemePreference, setThemePreference} from "@/lib/theme";
+import type {Theme} from "@/lib/theme";
 
 const themes = [
-  { value: "light", label: "Light", icon: Sun },
-  { value: "dark", label: "Dark", icon: Moon },
-  { value: "system", label: "System", icon: SunMoon }
-] as const
+  {value: "light", label: "Light", icon: Sun},
+  {value: "dark", label: "Dark", icon: Moon},
+  {value: "system", label: "System", icon: SunMoon}
+] as const;
 
 export function ThemeSelect() {
-  const [theme, setTheme] = React.useState<Theme>("system")
+  const [theme, setTheme] = React.useState<Theme>("system");
 
   React.useEffect(() => {
-    setTheme(getThemePreference())
-  }, [])
+    setTheme(getThemePreference());
+  }, []);
 
   const handleThemeChange = (newTheme: string) => {
-    const selectedTheme = newTheme as Theme
-    setTheme(selectedTheme)
-    setThemePreference(selectedTheme)
-  }
+    const selectedTheme = newTheme as Theme;
+    setTheme(selectedTheme);
+    setThemePreference(selectedTheme);
+  };
 
-  const currentTheme = themes.find((t) => t.value === theme) || themes[2]
-  const CurrentIcon = currentTheme.icon
+  const currentTheme = themes.find((t) => t.value === theme) || themes[2];
+  const CurrentIcon = currentTheme.icon;
 
   return (
     <Select value={theme} onValueChange={handleThemeChange}>
@@ -38,7 +38,7 @@ export function ThemeSelect() {
       </SelectTrigger>
       <SelectContent>
         {themes.map((themeOption) => {
-          const ThemeIcon = themeOption.icon
+          const ThemeIcon = themeOption.icon;
           return (
             <SelectItem key={themeOption.value} value={themeOption.value}>
               <div className="flex items-center gap-2">
@@ -46,9 +46,9 @@ export function ThemeSelect() {
                 <span>{themeOption.label}</span>
               </div>
             </SelectItem>
-          )
+          );
         })}
       </SelectContent>
     </Select>
-  )
+  );
 }

@@ -32,7 +32,8 @@ import {defaultLocale, locales} from "@/i18n/constants";
 import type {Locale} from "@/i18n/constants";
 
 let {lang} = Astro.params;
-const locale = lang && locales.includes(lang as Locale) ? (lang as Locale) : defaultLocale;
+const locale =
+  lang && locales.includes(lang as Locale) ? (lang as Locale) : defaultLocale;
 const t = useTranslations(locale);
 ---
 
@@ -136,16 +137,16 @@ let languages = [
 
 All from `@/i18n/utils`:
 
-| Function | Purpose |
-|---|---|
-| `useTranslations(locale)` | Returns typed translation object for a locale |
-| `useTranslationsFromParams(params)` | Combines locale extraction + translations |
-| `getLocaleFromUrl(url)` | Extracts locale from a URL string |
-| `getLocaleFromParams(params)` | Extracts locale from Astro params |
-| `localizeUrl(path, locale)` | Builds a locale-prefixed URL |
-| `getLanguageCookieValue()` | Reads saved language preference cookie |
-| `getBrowserLanguage()` | Reads `Accept-Language` from browser |
-| `getLanguageFromHeaders(headers)` | Extracts locale from request headers (used in API routes) |
+| Function                            | Purpose                                                   |
+| ----------------------------------- | --------------------------------------------------------- |
+| `useTranslations(locale)`           | Returns typed translation object for a locale             |
+| `useTranslationsFromParams(params)` | Combines locale extraction + translations                 |
+| `getLocaleFromUrl(url)`             | Extracts locale from a URL string                         |
+| `getLocaleFromParams(params)`       | Extracts locale from Astro params                         |
+| `localizeUrl(path, locale)`         | Builds a locale-prefixed URL                              |
+| `getLanguageCookieValue()`          | Reads saved language preference cookie                    |
+| `getBrowserLanguage()`              | Reads `Accept-Language` from browser                      |
+| `getLanguageFromHeaders(headers)`   | Extracts locale from request headers (used in API routes) |
 
 ## Language Switching
 

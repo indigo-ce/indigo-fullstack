@@ -32,14 +32,19 @@ export async function queueEmail(
 
   const message: EmailQueueMessage = {
     to,
-    subject: options?.subject ?? EMAIL_SUBJECTS[locale]?.[template.type] ?? EMAIL_SUBJECTS.en[template.type],
+    subject:
+      options?.subject ??
+      EMAIL_SUBJECTS[locale]?.[template.type] ??
+      EMAIL_SUBJECTS.en[template.type],
     template,
     locale,
     queuedAt: new Date().toISOString()
   };
 
   await env.EMAIL_QUEUE.send(message);
-  console.log(`✅ [QUEUE] Email queued for ${to} (template: ${template.type}, locale: ${locale})`);
+  console.log(
+    `✅ [QUEUE] Email queued for ${to} (template: ${template.type}, locale: ${locale})`
+  );
 
   return {queued: true};
 }

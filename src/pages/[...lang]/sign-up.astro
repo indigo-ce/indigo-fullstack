@@ -104,7 +104,12 @@ const signInUrl = localizeUrl("/sign-in", locale);
       <h1 class="mb-8 text-center text-2xl font-bold">{t.auth.signup}</h1>
 
       <form method="POST">
-        <ErrorMessage message={errors.server || errors.name || errors.email || errors.password} />
+        <ErrorMessage
+          message={errors.server ||
+            errors.name ||
+            errors.email ||
+            errors.password}
+        />
 
         <IconInputField
           type="text"
@@ -140,7 +145,11 @@ const signInUrl = localizeUrl("/sign-in", locale);
           client:load
         />
 
-        <Button type="submit" data-testid="submit-button" className="mt-4 w-full">{t.auth.signup}</Button>
+        <Button
+          type="submit"
+          data-testid="submit-button"
+          className="mt-4 w-full">{t.auth.signup}</Button
+        >
 
         <p class="mt-4 text-center text-sm">
           {t.auth.alreadyHaveAccount}{" "}

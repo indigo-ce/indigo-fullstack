@@ -15,7 +15,8 @@ const t = useTranslationsFromParams(Astro.params);
 
 const user = Astro.locals.user;
 
-if (user?.emailVerified) return Astro.redirect(localizeUrl("/dashboard", locale));
+if (user?.emailVerified)
+  return Astro.redirect(localizeUrl("/dashboard", locale));
 
 let email = "";
 let isAuthenticated = false;

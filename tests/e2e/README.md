@@ -107,17 +107,13 @@ await page.getByTestId("submit-button").click();
 
 // ❌ Avoid - Coupled to implementation details
 await page.fill('input[name="email"]', email);
-await page.click('button.bg-blue-500');
+await page.click("button.bg-blue-500");
 ```
 
 When adding new UI components that need testing, add `data-testid` attributes:
 
 ```astro
-<input
-  type="email"
-  name="email"
-  data-testid="email-input"
-/>
+<input type="email" name="email" data-testid="email-input" />
 ```
 
 ### Test Patterns
@@ -198,6 +194,7 @@ pnpm test:e2e:ui
 ```
 
 Interactive mode with:
+
 - Time travel debugging
 - Step-by-step execution
 - Visual test selector

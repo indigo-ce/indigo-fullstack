@@ -16,9 +16,7 @@ vi.mock("@/lib/auth", () => ({
 function buildApp(env: Env) {
   const app = new Hono<APIRouteContext>();
   app.use("*", authMiddleware(env));
-  app.get("/", (c) =>
-    c.json({authSet: c.get("auth") !== undefined}, 200)
-  );
+  app.get("/", (c) => c.json({authSet: c.get("auth") !== undefined}, 200));
   return app;
 }
 
