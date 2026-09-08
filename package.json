@@ -9,6 +9,8 @@
   "scripts": {
     "dev": "pnpm check && astro dev",
     "check": "pnpm cf-types && astro check --minimumSeverity warning",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "build": "pnpm cf-types && astro build",
     "preview": "astro build && wrangler dev",
     "preview:test": "astro build && wrangler dev --port 8787",
@@ -96,7 +98,6 @@
     "react-hook-form": "^7.63.0",
     "react-resizable-panels": "^4.12.3",
     "recharts": "3.10.1",
-
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwind-variants": "^3.1.1",

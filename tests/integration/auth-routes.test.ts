@@ -54,9 +54,7 @@ async function responseBody(
   return (await response.json()) as Record<string, unknown>;
 }
 
-function assertSignInResponse(
-  data: Record<string, unknown>
-): SignInResponse {
+function assertSignInResponse(data: Record<string, unknown>): SignInResponse {
   expect(Object.keys(data).sort()).toEqual([
     "accessToken",
     "refreshToken",
@@ -209,7 +207,8 @@ describe("Auth Routes Integration Tests", () => {
       .from(session)
       .where(eq(session.token, refreshToken))
       .get();
-    if (!row) throw new Error("Session row for the refresh token was not found");
+    if (!row)
+      throw new Error("Session row for the refresh token was not found");
 
     const expected = Date.now() + 30 * 24 * 60 * 60 * 1000;
     expect(Math.abs(row.expiresAt.getTime() - expected)).toBeLessThan(60_000);
@@ -238,7 +237,9 @@ describe("Auth Routes Integration Tests", () => {
       .where(eq(session.token, data.refreshToken))
       .get();
     if (!rotated)
-      throw new Error("Session row for the rotated refresh token was not found");
+      throw new Error(
+        "Session row for the rotated refresh token was not found"
+      );
 
     expect(
       Math.abs(rotated.expiresAt.getTime() - original.expiresAt.getTime())
@@ -289,8 +290,7 @@ describe("Auth Routes Integration Tests", () => {
     ]);
 
     expect(responses.map((response) => response.status).sort()).toEqual([
-      200,
-      401
+      200, 401
     ]);
     const rejectedResponse = responses.find(
       (response) => response.status === 401

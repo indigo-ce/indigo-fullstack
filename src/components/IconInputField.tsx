@@ -6,7 +6,7 @@ import {User, Mail} from "lucide-react";
 // Icon map - add more icons here as needed
 const ICON_MAP = {
   User,
-  Mail,
+  Mail
 } as const;
 
 type IconName = keyof typeof ICON_MAP;

@@ -121,8 +121,7 @@ authRoutes.post("/refresh-access", async (c) => {
   // The plugin declares the body schema, but its framework-level rejection
   // carries its own message — preserve this router's pinned `{error}`
   // contract for a missing token before delegating.
-  if (!body?.refreshToken)
-    return c.json({error: "Missing refresh token"}, 400);
+  if (!body?.refreshToken) return c.json({error: "Missing refresh token"}, 400);
 
   const data = await auth.api.refreshTokens({body});
 
@@ -135,8 +134,7 @@ authRoutes.post("/revoke-access", async (c) => {
   const auth = c.get("auth");
   const body = await c.req.json();
 
-  if (!body?.refreshToken)
-    return c.json({error: "Missing refresh token"}, 400);
+  if (!body?.refreshToken) return c.json({error: "Missing refresh token"}, 400);
 
   const data = await auth.api.revokeTokens({body});
 

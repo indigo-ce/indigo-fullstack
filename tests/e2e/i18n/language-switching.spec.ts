@@ -17,7 +17,9 @@ test.describe("Language Switching", () => {
     await page.goto("/", {waitUntil: "networkidle"});
 
     // Find language selector by role and text content (works with SSR)
-    const languageSelector = page.locator('footer button[role="combobox"]').filter({hasText: "English"});
+    const languageSelector = page
+      .locator('footer button[role="combobox"]')
+      .filter({hasText: "English"});
     await languageSelector.waitFor({state: "visible"});
 
     // Open language selector
@@ -38,7 +40,9 @@ test.describe("Language Switching", () => {
     // Switch to Japanese
     await page.goto("/", {waitUntil: "networkidle"});
 
-    const languageSelector = page.locator('footer button[role="combobox"]').filter({hasText: "English"});
+    const languageSelector = page
+      .locator('footer button[role="combobox"]')
+      .filter({hasText: "English"});
     await languageSelector.waitFor({state: "visible"});
 
     await languageSelector.click();
@@ -59,7 +63,9 @@ test.describe("Language Switching", () => {
     // Start on Japanese homepage
     await page.goto("/ja", {waitUntil: "networkidle"});
 
-    const languageSelector = page.locator('footer button[role="combobox"]').filter({hasText: "日本語"});
+    const languageSelector = page
+      .locator('footer button[role="combobox"]')
+      .filter({hasText: "日本語"});
     await languageSelector.waitFor({state: "visible"});
 
     // Open language selector and switch to English

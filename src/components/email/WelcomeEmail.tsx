@@ -25,15 +25,14 @@ const translations = {
 const WelcomeEmail = ({name, locale = "en"}: WelcomeEmailProps) => {
   // Ensure name is a string
   const safeName = typeof name === "string" ? name : String(name || "friend");
-  const t = translations[locale as keyof typeof translations] || translations.en;
+  const t =
+    translations[locale as keyof typeof translations] || translations.en;
 
   return (
     <BaseLayout title={t.title}>
       <Text style={{marginBottom: "16px"}}>{t.greeting(safeName)}</Text>
       <Text style={{marginBottom: "16px"}}>{t.welcome}</Text>
-      <Text>
-        {t.body}
-      </Text>
+      <Text>{t.body}</Text>
     </BaseLayout>
   );
 };

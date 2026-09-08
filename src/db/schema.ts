@@ -7,7 +7,7 @@ export const user = sqliteTable("user", {
   emailVerified: integer("emailVerified", {mode: "boolean"}).notNull(),
   image: text("image"),
   createdAt: integer("createdAt", {mode: "timestamp"}).notNull(),
-  updatedAt: integer("updatedAt", {mode: "timestamp"}).notNull(),
+  updatedAt: integer("updatedAt", {mode: "timestamp"}).notNull()
 });
 
 export const session = sqliteTable("session", {
@@ -20,7 +20,7 @@ export const session = sqliteTable("session", {
   userAgent: text("userAgent"),
   userId: text("userId")
     .notNull()
-    .references(() => user.id, {onDelete: "cascade"}),
+    .references(() => user.id, {onDelete: "cascade"})
 });
 
 export const account = sqliteTable("account", {
@@ -35,12 +35,12 @@ export const account = sqliteTable("account", {
   idToken: text("idToken"),
   accessTokenExpiresAt: integer("accessTokenExpiresAt", {mode: "timestamp"}),
   refreshTokenExpiresAt: integer("refreshTokenExpiresAt", {
-    mode: "timestamp",
+    mode: "timestamp"
   }),
   scope: text("scope"),
   password: text("password"),
   createdAt: integer("createdAt", {mode: "timestamp"}).notNull(),
-  updatedAt: integer("updatedAt", {mode: "timestamp"}).notNull(),
+  updatedAt: integer("updatedAt", {mode: "timestamp"}).notNull()
 });
 
 export const verification = sqliteTable("verification", {
@@ -49,7 +49,7 @@ export const verification = sqliteTable("verification", {
   value: text("value").notNull(),
   expiresAt: integer("expiresAt", {mode: "timestamp"}).notNull(),
   createdAt: integer("createdAt", {mode: "timestamp"}),
-  updatedAt: integer("updatedAt", {mode: "timestamp"}),
+  updatedAt: integer("updatedAt", {mode: "timestamp"})
 });
 
 export const jwks = sqliteTable("jwks", {
@@ -60,5 +60,5 @@ export const jwks = sqliteTable("jwks", {
   // Optional key metadata introduced by the Better Auth 1.7 JWT plugin.
   expiresAt: integer("expiresAt", {mode: "timestamp"}),
   alg: text("alg"),
-  crv: text("crv"),
+  crv: text("crv")
 });

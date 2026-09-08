@@ -8,7 +8,12 @@ type CustomEmailProps = {
   locale?: string;
 };
 
-const CustomEmail = ({html, title, preview, locale = "en"}: CustomEmailProps) => {
+const CustomEmail = ({
+  html,
+  title,
+  preview,
+  locale = "en"
+}: CustomEmailProps) => {
   // Safety check - ensure html is a string
   const safeHtml = typeof html === "string" ? html : String(html || "");
 

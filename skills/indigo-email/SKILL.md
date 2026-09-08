@@ -26,7 +26,11 @@ Import `queueEmail` from `@/lib/email`:
 import {queueEmail} from "@/lib/email";
 
 // Basic
-await queueEmail("user@example.com", {type: "welcome", props: {name: "John"}}, env);
+await queueEmail(
+  "user@example.com",
+  {type: "welcome", props: {name: "John"}},
+  env
+);
 
 // With locale
 await queueEmail(
@@ -37,7 +41,9 @@ await queueEmail(
 );
 
 // With custom subject
-await queueEmail(to, {type: "custom", props: {html: "<p>…</p>"}}, env, {subject: "Custom Subject"});
+await queueEmail(to, {type: "custom", props: {html: "<p>…</p>"}}, env, {
+  subject: "Custom Subject"
+});
 ```
 
 Always pass `locale` from the user object or request headers so emails arrive in the user's language.
@@ -46,13 +52,13 @@ Always pass `locale` from the user object or request headers so emails arrive in
 
 All templates support `en` and `ja` locales:
 
-| Type | Required props |
-|---|---|
-| `email-verification` | `name: string, url: string` |
-| `password-reset` | `name: string, resetLink: string` |
-| `account-deleted` | `name: string` |
-| `welcome` | `name: string` |
-| `custom` | `html: string, title?: string, preview?: string` |
+| Type                 | Required props                                   |
+| -------------------- | ------------------------------------------------ |
+| `email-verification` | `name: string, url: string`                      |
+| `password-reset`     | `name: string, resetLink: string`                |
+| `account-deleted`    | `name: string`                                   |
+| `welcome`            | `name: string`                                   |
+| `custom`             | `html: string, title?: string, preview?: string` |
 
 ## Adding a New Template
 
@@ -104,13 +110,15 @@ pnpm email-worker:deploy
 {
   "name": "indigo-email-queue-consumer",
   "queues": {
-    "consumers": [{
-      "queue": "indigo-email-queue",
-      "max_batch_size": 10,
-      "max_batch_timeout": 30,
-      "max_retries": 3,
-      "dead_letter_queue": "indigo-email-queue-dlq"
-    }]
+    "consumers": [
+      {
+        "queue": "indigo-email-queue",
+        "max_batch_size": 10,
+        "max_batch_timeout": 30,
+        "max_retries": 3,
+        "dead_letter_queue": "indigo-email-queue-dlq"
+      }
+    ]
   },
   "vars": {
     "SEND_EMAIL_FROM": "Your App <noreply@yourdomain.com>"
@@ -166,9 +174,9 @@ Remove all `render()` calls — that work moves to the worker.
 
 ## Troubleshooting
 
-| Problem | Check |
-|---|---|
-| Worker deploy fails | `PLUNK_API_KEY` secret set? Run `wrangler secret put` |
-| Emails queued but not delivered | Worker deployed? Plunk key valid? Run `wrangler tail` |
-| Messages accumulating in DLQ | Worker logs for error details; check Plunk rate limits and template errors |
-| Main app hitting CPU limits | Verify `queueEmail()` used everywhere, not `sendEmail()` |
+| Problem                         | Check                                                                      |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| Worker deploy fails             | `PLUNK_API_KEY` secret set? Run `wrangler secret put`                      |
+| Emails queued but not delivered | Worker deployed? Plunk key valid? Run `wrangler tail`                      |
+| Messages accumulating in DLQ    | Worker logs for error details; check Plunk rate limits and template errors |
+| Main app hitting CPU limits     | Verify `queueEmail()` used everywhere, not `sendEmail()`                   |

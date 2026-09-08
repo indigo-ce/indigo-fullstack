@@ -12,7 +12,10 @@ export const authentication = {
       token: z.string(),
       locale: z.enum(locales).optional()
     }),
-    handler: async ({newPassword, confirmPassword, token, locale}, _context) => {
+    handler: async (
+      {newPassword, confirmPassword, token, locale},
+      _context
+    ) => {
       if (newPassword !== confirmPassword) {
         throw new ActionError({
           code: "BAD_REQUEST",
@@ -20,7 +23,10 @@ export const authentication = {
         });
       }
 
-      const {status} = await createAuth(env, locale ?? defaultLocale).api.resetPassword({
+      const {status} = await createAuth(
+        env,
+        locale ?? defaultLocale
+      ).api.resetPassword({
         body: {
           newPassword: newPassword,
           token

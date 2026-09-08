@@ -96,7 +96,9 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
       <h1 class="mb-8 text-center text-2xl font-bold">{t.auth.signin}</h1>
 
       <form method="POST">
-        <ErrorMessage message={errors.server || errors.email || errors.password} />
+        <ErrorMessage
+          message={errors.server || errors.email || errors.password}
+        />
 
         <IconInputField
           type="email"
@@ -128,7 +130,11 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
           </a>
         </div>
 
-        <Button type="submit" data-testid="submit-button" className="mt-4 w-full">{t.auth.signin}</Button>
+        <Button
+          type="submit"
+          data-testid="submit-button"
+          className="mt-4 w-full">{t.auth.signin}</Button
+        >
 
         <p class="mt-4 text-center text-sm">
           {t.auth.dontHaveAccount}{" "}

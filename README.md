@@ -44,20 +44,20 @@ pnpm run preview       # Cloudflare Workers emulation via Wrangler
 
 ## Commands
 
-| Command                 | Action                                   |
-| :---------------------- | :--------------------------------------- |
-| `pnpm install`          | Installs dependencies                    |
-| `pnpm dev`              | Starts local dev server with DB setup    |
-| `pnpm build`            | Build your production site with DB setup |
-| `pnpm astro`            | Run Astro CLI commands                   |
-| `pnpm db:generate`      | Generate Drizzle migrations              |
-| `pnpm db:migrate:local` | Apply migrations locally                 |
-| `pnpm db:migrate:prod`  | Apply migrations to production           |
-| `pnpm db:studio:local`  | Run Drizzle Studio for local development |
-| `pnpm preview-email`    | Start email template preview server      |
-| `pnpm email-worker:dev` | Start email queue worker in dev mode     |
-| `pnpm email-worker:deploy` | Deploy email queue worker to production |
-| `pnpm queue:create`     | Create Cloudflare queues for emails     |
+| Command                    | Action                                   |
+| :------------------------- | :--------------------------------------- |
+| `pnpm install`             | Installs dependencies                    |
+| `pnpm dev`                 | Starts local dev server with DB setup    |
+| `pnpm build`               | Build your production site with DB setup |
+| `pnpm astro`               | Run Astro CLI commands                   |
+| `pnpm db:generate`         | Generate Drizzle migrations              |
+| `pnpm db:migrate:local`    | Apply migrations locally                 |
+| `pnpm db:migrate:prod`     | Apply migrations to production           |
+| `pnpm db:studio:local`     | Run Drizzle Studio for local development |
+| `pnpm preview-email`       | Start email template preview server      |
+| `pnpm email-worker:dev`    | Start email queue worker in dev mode     |
+| `pnpm email-worker:deploy` | Deploy email queue worker to production  |
+| `pnpm queue:create`        | Create Cloudflare queues for emails      |
 
 ### AI-assisted Bootstrap
 
@@ -264,6 +264,7 @@ Request → queue.send(email) → Response (fast!)
 ```
 
 **Benefits:**
+
 - Fast response times (no email rendering on request path)
 - Automatic retries with exponential backoff
 - Dead letter queue for failed messages
@@ -279,6 +280,7 @@ pnpm queue:create
 ```
 
 This creates:
+
 - `indigo-email-queue` - Primary queue for email messages
 - `indigo-email-queue-dlq` - Dead letter queue for failed messages
 
@@ -359,11 +361,13 @@ The email is immediately queued and returns. The worker processes it asynchronou
 ### Monitoring
 
 **View worker logs:**
+
 ```bash
 wrangler tail indigo-email-queue-consumer
 ```
 
 **Check queue metrics:**
+
 - Navigate to Cloudflare dashboard → Workers & Pages → Queues
 - Monitor message throughput, consumer latency, and failed messages
 - Dead letter queue captures messages that fail after max retries

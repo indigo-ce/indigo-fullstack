@@ -70,7 +70,12 @@ CI behavior: 1 worker (sequential), 2 retries, list + HTML reporters, `forbidOnl
 All constants live in `tests/e2e/config/test-data.ts`. Never hardcode URLs or credentials inline.
 
 ```typescript
-import {TEST_USERS, TEST_PASSWORDS, TEST_EMAILS, ROUTES} from "../config/test-data";
+import {
+  TEST_USERS,
+  TEST_PASSWORDS,
+  TEST_EMAILS,
+  ROUTES
+} from "../config/test-data";
 
 // Unique user per test run — timestamp prevents collision
 const user = TEST_USERS.new();
@@ -90,7 +95,13 @@ Add new routes and fixtures to `test-data.ts` — don't scatter them across spec
 `tests/e2e/fixtures/auth-helpers.ts` wraps common flows. All helpers use `data-testid` selectors internally.
 
 ```typescript
-import {signUp, signIn, fillSignUpForm, fillSignInForm, submitForm} from "../fixtures/auth-helpers";
+import {
+  signUp,
+  signIn,
+  fillSignUpForm,
+  fillSignInForm,
+  submitForm
+} from "../fixtures/auth-helpers";
 
 // Navigate + fill + submit
 await signUp(page, email, password, name);
@@ -112,7 +123,7 @@ await page.getByTestId("submit-button").click();
 
 // ❌
 await page.fill('input[name="email"]', email);
-await page.click('button.bg-primary');
+await page.click("button.bg-primary");
 ```
 
 Add `data-testid` to any component that tests need to target:
@@ -230,12 +241,12 @@ Sign-up tests redirect to `/verify-email` because Better Auth requires email ver
 
 ## Debugging
 
-| Problem | Fix |
-|---|---|
-| Server won't start | Check port 8787 is free; run `pnpm build` to see build errors |
-| `data-testid` not found | Verify attribute in rendered HTML; use Playwright Inspector |
-| Flaky tests | Replace fixed timeouts with `waitForURL` / `waitFor`; run headed to observe |
-| Locale wrong | Clear cookies in `beforeEach`; check `Accept-Language` handling |
+| Problem                 | Fix                                                                         |
+| ----------------------- | --------------------------------------------------------------------------- |
+| Server won't start      | Check port 8787 is free; run `pnpm build` to see build errors               |
+| `data-testid` not found | Verify attribute in rendered HTML; use Playwright Inspector                 |
+| Flaky tests             | Replace fixed timeouts with `waitForURL` / `waitFor`; run headed to observe |
+| Locale wrong            | Clear cookies in `beforeEach`; check `Accept-Language` handling             |
 
 ## Vitest
 

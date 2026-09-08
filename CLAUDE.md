@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm dev` - Start development server (includes Astro type checking and Cloudflare Workers emulation)
 - `pnpm build` - Build production (includes Cloudflare types generation and Astro build)
 - `pnpm preview` - Preview production build locally with Wrangler
+- `pnpm format` - Format all files with Prettier
 - `astro check` - Run TypeScript and Astro diagnostics
 
 ### Database Operations
@@ -200,13 +201,13 @@ Mobile clients should always send `Accept-Language` header with their device's p
 **Example (React Native):**
 
 ```typescript
-import * as Localization from 'expo-localization';
+import * as Localization from "expo-localization";
 
-fetch('/api/v1/auth/sign-up', {
-  method: 'POST',
+fetch("/api/v1/auth/sign-up", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'Accept-Language': Localization.locale // "ja-JP" or "en-US"
+    "Content-Type": "application/json",
+    "Accept-Language": Localization.locale // "ja-JP" or "en-US"
   },
   body: JSON.stringify({email, password, name})
 });

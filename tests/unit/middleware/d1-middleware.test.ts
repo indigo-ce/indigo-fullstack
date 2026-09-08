@@ -28,7 +28,7 @@ describe("D1 Middleware", () => {
   it("should create database connection and call next", async () => {
     const middleware = d1Middleware(mockDB);
     await middleware(mockContext as Context, mockNext);
-    
+
     expect(mockContext.set).toHaveBeenCalledWith("db", expect.any(Object));
     expect(mockNext).toHaveBeenCalled();
   });
@@ -36,7 +36,7 @@ describe("D1 Middleware", () => {
   it("should handle database creation", async () => {
     const middleware = d1Middleware(mockDB);
     await middleware(mockContext as Context, mockNext);
-    
+
     expect(mockNext).toHaveBeenCalled();
   });
 });

@@ -41,7 +41,10 @@ describe("Email Utilities", () => {
     it("should use localized subject for Japanese locale", async () => {
       await queueEmail(
         "user@example.com",
-        {type: "email-verification", props: {name: "太郎", url: "https://example.com/verify"}},
+        {
+          type: "email-verification",
+          props: {name: "太郎", url: "https://example.com/verify"}
+        },
         mockEnv as Env,
         {locale: "ja"}
       );
@@ -85,7 +88,9 @@ describe("Email Utilities", () => {
 
       expect(result).toEqual({queued: true});
       expect(mockQueueSend).not.toHaveBeenCalled();
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("[LOCAL DEV]"));
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining("[LOCAL DEV]")
+      );
 
       consoleSpy.mockRestore();
     });
