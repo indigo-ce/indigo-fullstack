@@ -298,7 +298,9 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-### 18. Log unhandled API failures, and let a handler signal its own status
+**Status (2026-09-08).** Blocked: setting `2026-09-03` fails to boot — the installed `@cloudflare/vitest-pool-workers@0.22.0` pins `miniflare@5.20260815.0-alpha`, whose workerd refuses any date newer than `2026-08-22`. Unblocks when the pool ships a newer workerd; do not work around it with a partial date.
+
+### 18. [x] Log unhandled API failures, and let a handler signal its own status
 
 **Gap.** `handleAPIError` in `src/lib/hono/error-handler.ts` is the single error renderer for the whole API — `authRoutes` registers it, `accountRoutes` registers it, and `createHonoApp` registers it as the root backstop. It recognises `APIError` and `SyntaxError` and drops everything else onto `return c.json({error: "Internal server error"}, 500)` with no logging at all. `wrangler.jsonc` sets `observability.enabled: true`, so the platform is collecting logs; a 500 out of this API contributes nothing to them. A production failure under `/api/v1` is currently indistinguishable, from the outside and from the logs, from every other production failure.
 
