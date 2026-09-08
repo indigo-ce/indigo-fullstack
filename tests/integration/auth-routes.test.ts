@@ -320,4 +320,30 @@ describe("Auth Routes Integration Tests", () => {
       error: "Invalid or expired refresh token"
     });
   });
+
+  it("returns 400 naming email for a non-email sign-up address", async () => {
+    const response = await request("/auth/sign-up", {
+      email: "not-an-email",
+      password: "x",
+      name: "y"
+    });
+
+    expect(response.status).toBe(400);
+    const body = await responseBody(response);
+    expect(body.error).toEqual(expect.stringContaining("email"));
+  });
+
+  it("reaches sign-up with a well-formed body", async () => {
+    const response = await request("/auth/sign-up", {
+      email: `validation-${Date.now()}@example.com`,
+      password: "password123",
+      name: "Validation User"
+    });
+
+    expect(response.status).toBe(200);
+    const body = await responseBody(response);
+    expect(body.user).toEqual(
+      expect.objectContaining({email: expect.any(String)})
+    );
+  });
 });

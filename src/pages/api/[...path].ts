@@ -39,11 +39,13 @@ export const createHonoApp = (env: Env) => {
   v1.route("/account", accountRoutes);
 
   v1.get("/routes", (c) => {
-    return c.json(
+    // Validators register as separate route records, so de-duplicate.
+    const routes = new Set(
       v1.routes
         .filter((route) => route.method !== "ALL")
         .map((route) => `${route.method} /api/v1${route.path}`)
     );
+    return c.json([...routes]);
   });
 
   // Mount the v1 API

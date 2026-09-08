@@ -316,7 +316,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run` and `pnpm check`.
 
-### 19. Validate the auth request bodies at the route boundary instead of by hand
+### 19. [x] Validate the auth request bodies at the route boundary instead of by hand
 
 **Gap.** `src/lib/hono/routes/auth-routes.ts` carries a local `validateBody(body, required)` that filters on falsiness and returns a `Missing required fields: …` string. Four handlers call it, each after an unguarded `await c.req.json()`, and `/refresh-access` and `/revoke-access` repeat the same shape inline as `if (!body?.refreshToken)`. Presence is all it buys. `POST /api/v1/auth/sign-up` with `{"email": 123, "password": {}, "name": []}` passes every check in this file and hands those values to `auth.api.signUpEmail`, so the failure surfaces from inside the auth library — or does not surface at all — rather than as a 400 naming the field. `body.callbackURL || "/dashboard"` and `body.redirectTo || "/reset-password"` read off an `any`, so none of the six request shapes this router owns is type-checked.
 
