@@ -1,5 +1,6 @@
 import {beforeAll, describe, expect, it} from "vitest";
 import {applyD1Migrations, env} from "cloudflare:test";
+import {HTTPException} from "hono/http-exception";
 import {createHonoApp} from "@/pages/api/[...path]";
 
 describe("API error handling", () => {
@@ -43,5 +44,17 @@ describe("API error handling", () => {
     await expect(response.json()).resolves.toEqual({
       error: "Invalid JSON body"
     });
+  });
+
+  it("renders a thrown HTTPException with its own status and message", async () => {
+    const app = createHonoApp(env as Env);
+    app.get("/throws-http-exception", () => {
+      throw new HTTPException(429, {message: "Slow down"});
+    });
+
+    const response = await app.request("/throws-http-exception");
+
+    expect(response.status).toBe(429);
+    await expect(response.json()).resolves.toEqual({error: "Slow down"});
   });
 });
