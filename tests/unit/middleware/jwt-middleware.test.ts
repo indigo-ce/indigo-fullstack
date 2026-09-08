@@ -1,5 +1,6 @@
 import {describe, it, expect, vi, beforeEach} from "vitest";
 import {Hono} from "hono";
+import {JOSEError} from "jose/errors";
 import {jwtMiddleware} from "@/lib/hono/middleware/jwtMiddleware";
 import type {APIRouteContext} from "@/pages/api/[...path]";
 
@@ -154,5 +155,86 @@ describe("JWT Middleware Unit Tests", () => {
         email: mockPayload.email
       })
     });
+  });
+
+  it("retries verification once with a forced refresh after a non-expiry failure", async () => {
+    const {jwtVerify, createLocalJWKSet} = await import("jose");
+
+    const retryPayload = {
+      sub: "user-123",
+      name: "Test User",
+      email: "test@example.com",
+      emailVerified: true,
+      image: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {}
+    );
+    (createLocalJWKSet as ReturnType<typeof vi.fn>).mockReturnValue({});
+    (jwtVerify as ReturnType<typeof vi.fn>)
+      .mockRejectedValueOnce(
+        Object.assign(new JOSEError("Unknown key"), {code: "ERR_JWS_INVALID"})
+      )
+      .mockResolvedValueOnce({payload: retryPayload});
+
+    const app = buildApp({
+      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env
+    });
+    const response = await app.request("/", {
+      headers: {Authorization: "Bearer valid-token"}
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      user: expect.objectContaining({
+        id: retryPayload.sub,
+        email: retryPayload.email
+      })
+    });
+    expect(jwksCache.default.getKeys).toHaveBeenCalledTimes(2);
+    expect(jwksCache.default.getKeys).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      true
+    );
+  });
+
+  it("returns the same unauthorized response when the retried verification also fails", async () => {
+    const {jwtVerify, createLocalJWKSet} = await import("jose");
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {}
+    );
+    (createLocalJWKSet as ReturnType<typeof vi.fn>).mockReturnValue({});
+    (jwtVerify as ReturnType<typeof vi.fn>)
+      .mockRejectedValueOnce(
+        Object.assign(new JOSEError("Unknown key"), {code: "ERR_JWS_INVALID"})
+      )
+      .mockRejectedValueOnce(
+        Object.assign(new JOSEError("Still unknown"), {
+          code: "ERR_JWS_INVALID"
+        })
+      );
+
+    const app = buildApp({
+      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env
+    });
+    const response = await app.request("/", {
+      headers: {Authorization: "Bearer invalid-token"}
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body).toEqual({
+      error: "You are not authorized to access this resource",
+      code: "UNAUTHORIZED"
+    });
+    expect(jwksCache.default.getKeys).toHaveBeenCalledTimes(2);
   });
 });
