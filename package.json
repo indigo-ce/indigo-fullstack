@@ -88,7 +88,7 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.2",
     "embla-carousel-react": "^8.6.0",
-    "hono": "^4.12.34",
+    "hono": "^4.13.5",
     "input-otp": "^1.4.2",
     "jose": "^6.1.0",
     "lucide-react": "^0.544.0",
