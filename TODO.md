@@ -338,7 +338,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm install` exiting 0, `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-### 20. Recover from an empty JWKS cache instead of rejecting every token until the isolate recycles
+### 20. [x] Recover from an empty JWKS cache instead of rejecting every token until the isolate recycles
 
 **Gap.** `JWKSCache` in `src/lib/jwks-cache.ts` is a module-scope singleton with a 30-day TTL (`ttlMs = 3600000 * 24 * 30`). `refreshKeys` stores whatever `auth.api.getJwks()` returns on the first call in an isolate — including `{keys: []}` — and does not look again for 30 days. `invalidateCache()` is defined on the class and a repository-wide search finds no caller: the only consumer is `jwksCache.getKeys(c.get("auth"))` in `src/lib/hono/middleware/jwtMiddleware.ts`, which has no way to say that key set was wrong.
 

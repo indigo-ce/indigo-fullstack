@@ -15,10 +15,8 @@ export const jwtMiddleware = async (
     return c.json({error: "Unauthorized"}, 401);
   }
 
+  let payload;
   try {
-    const jwks = await jwksCache.getKeys(c.get("auth"));
-    const jwksSet = createLocalJWKSet(jwks);
-
     const env = c.get("env");
     const betterAuthBaseUrl = env.BETTER_AUTH_BASE_URL;
     if (!betterAuthBaseUrl) {
@@ -29,10 +27,24 @@ export const jwtMiddleware = async (
       );
     }
 
-    const {payload} = await jwtVerify(token, jwksSet, {
-      issuer: betterAuthBaseUrl,
-      audience: betterAuthBaseUrl
-    });
+    const verify = async (jwks: Parameters<typeof createLocalJWKSet>[0]) => {
+      const jwksSet = createLocalJWKSet(jwks);
+      return jwtVerify(token, jwksSet, {
+        issuer: betterAuthBaseUrl,
+        audience: betterAuthBaseUrl
+      });
+    };
+
+    try {
+      ({payload} = await verify(await jwksCache.getKeys(c.get("auth"))));
+    } catch (error) {
+      if (error instanceof JOSEError && error.code === "ERR_JWT_EXPIRED") {
+        throw error;
+      }
+      // The cached key set may predate the signing key (fresh database) or a
+      // rotation. Refetch once and retry before rejecting the token.
+      ({payload} = await verify(await jwksCache.getKeys(c.get("auth"), true)));
+    }
 
     if (!payload) {
       return c.json(
