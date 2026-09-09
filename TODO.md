@@ -25,6 +25,21 @@
 
 Ordered backlog for architecture and test-infrastructure alignment. Each item is scoped to a single focused PR. Later items assume earlier ones have landed.
 
+Item numbers are stable and are never reused; a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
+
+1. **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
+2. **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
+3. **6** — make the Dependabot config parse.
+4. **25** — drop the dependencies nothing imports.
+5. **28** — delete the orphaned Drizzle snapshots and the plugin's dead import.
+6. **22** — make the auth trusted origins configurable. Prerequisite for 30.
+7. **30** — let the dev server answer on a tunnel hostname.
+8. **23** — send browser-initiated auth emails in the visitor's language.
+9. **24** — make the token lifetimes match what the emails promise.
+10. **31** — gate merges on a production build.
+11. **26** — wire the D1 backup script into `package.json`.
+12. **29** — commit a component-registry config.
+
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
 **Gap.** `vitest.config.ts` calls `readD1Migrations()` but never binds the result, so no test can create the schema — the D1 binding is always empty. `tests/setup/vitest-setup.ts` compounds this by globally mocking `better-auth` (`betterAuth` returns `{}`), `@react-email/render`, and `crypto.randomUUID`, which makes it impossible to exercise the real auth stack, real template rendering, or real ID generation from any test. The environment also carries drift: a `RESEND_API_KEY` binding and a matching `.dev.vars` line in `.github/workflows/test.yml` that no longer correspond to any dependency or code path, and two conflicting ambient declarations of the `cloudflare:test` module (`tests/env.d.ts` and `tests/setup/test-env.d.ts`).
@@ -464,7 +479,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 - Read `scripts/backup.js` first and document what it actually does — the three variable names, and the output path it writes. Do not restate this description if the file disagrees with it; the file is the source of truth and the PR should say so.
 - Document it in the Database Operations list in `CLAUDE.md` and the database section of `README.md`. The docs must name all three variables and say they are read from the process environment: `.dev.vars` is a Wrangler file and Node does not load it, which is the mistake this documentation exists to prevent. Note that `CLOUDFLARE_DATABASE_ID` is the `database_id` already recorded in `wrangler.jsonc`.
 - Do not add these variables to `wrangler.jsonc`, `.dev.vars.example`, or `Env` — this is a local operator tool, not a Worker binding. Do not change `scripts/backup.js` itself.
-- Confirm the script's output path is gitignored. If it is not, add it in this PR; a backup of production data landing in `git status` is the one failure mode worth pre-empting here.
+- The output path is already gitignored — `.gitignore` carries `drizzle/backup.sql` under a `# SQL backups` heading, which is corroborating evidence that the script was written to be run. Confirm the path the script actually writes still matches that entry; if it has moved, fix the ignore entry in this PR rather than leaving a dump of production data showing up in `git status`.
 
 **Acceptance.** `pnpm db:backup` with the variables unset exits non-zero and prints the script's own missing-variable guard — that proves the wiring without needing a Cloudflare token, and the exact output belongs in the PR description. No dump file is committed; `git status` is clean apart from the intended changes.
 
@@ -506,3 +521,54 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 **Acceptance.** `pnpm db:migrate-dry:local` lists the same three migrations as before and reports the same applied state. `pnpm db:generate` against the unchanged `src/db/schema.ts` produces no new migration — if it does, stop: that means the deleted snapshots were the drift baseline after all, and the finding belongs in the PR instead of the deletion. `pnpm test:run` passes with the same counts, since `readD1Migrations` reads only `drizzle/migrations`.
 
 **Validation.** `pnpm db:migrate-dry:local`, `pnpm db:generate`, `pnpm check`, `pnpm test:run`, `pnpm format:check`, `pnpm build`.
+
+### 29. Commit a component-registry config so UI primitives can be added by CLI
+
+**Gap.** `src/components/ui/` carries 46 vendored shadcn primitives — `button.tsx`, `dialog.tsx`, `sidebar.tsx`, `calendar.tsx`, `chart.tsx`, `resizable.tsx`, and the rest — every one importing `cn` from `@/lib/utils` and styled off the CSS variables in `src/styles.css`. There is no `components.json` at the repository root. Without it the shadcn CLI cannot resolve where components, the `cn` helper, and the stylesheet live, so it refuses to run and each new primitive has to be transplanted by hand.
+
+**What fills the gap today.** `CLAUDE.md`'s "Adding New Components" section documents the workaround as the house process: pull sources out of five GitHub repositories with `git-ingest`/`deepwiki` and paste them in. That is a manual pipeline for files the registry installs verbatim, and it has no way to keep import paths or the matching `@radix-ui/*` dependency in sync. Item 11 already paid that cost once — refreshing `calendar.tsx`, `chart.tsx`, and `resizable.tsx` from the registry by hand after their upstream majors moved. This is a template, so every project generated from it inherits the manual process.
+
+**Scope.** A new root `components.json`, one `package.json` script, and the two `CLAUDE.md` paragraphs describing component authoring.
+
+- Every config value is derivable from the tree — read them, do not invent them. `tailwind.css` → `src/styles.css`; `tailwind.config` → `""` (Tailwind 4 has no JS config here; `@tailwindcss/vite` is wired in `astro.config.mjs`); `tailwind.cssVariables` → `true`; `aliases` → `{components: "@/components", ui: "@/components/ui", utils: "@/lib/utils", lib: "@/lib", hooks: "@/hooks"}`, all of which resolve through the `@/*` path already in `tsconfig.json` and all of which exist (`src/lib/utils.ts`, `src/hooks/use-mobile.ts`); `rsc: false`; `tsx: true`; `iconLibrary: "lucide"` (`lucide-react` is already a dependency).
+- `tailwind.baseColor` cannot be inferred from the stylesheet the way the other values can: `src/styles.css` maps `--background`/`--foreground` onto a project-specific `--color-seagull-*` palette rather than any registry scale. Pick a value, state in the PR which one and why, and prove it is inert — the acceptance below is what proves it.
+- `style`: pick the one whose generated output matches what is already committed, confirmed by the diff below rather than by guessing.
+- Add `"add-component": "pnpm dlx shadcn@latest add"` to `package.json`, matching the `pnpm dlx` form `better-auth:schema` already uses so the CLI is not added as a dependency.
+- Do not regenerate, restyle, or reformat any existing file under `src/components/ui/`, and do not touch `src/styles.css` or `src/_styles.css`. `src/_styles.css` is the starter theme `scripts/bootstrap.js` renames over `src/styles.css` for a new project; a CLI that rewrites either stylesheet has overshot.
+
+**Acceptance.** Re-add an _existing_ primitive to a throwaway path and diff it against the committed copy; anything beyond formatting means the `style` or `baseColor` value is wrong and must be fixed before merging. Then run the script for a primitive not currently in `src/components/ui/`: it writes exactly one new file there, that file imports `cn` from `@/lib/utils`, and `src/styles.css`, `src/_styles.css`, and `src/lib/utils.ts` are byte-identical afterwards. Revert both scratch files — this PR ships the config, not a new component — and confirm `git status` is clean apart from the intended changes.
+
+**Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
+
+### 30. Let the dev server answer on a tunnel hostname
+
+**Gap.** `astro.config.mjs` sets no `vite.server.allowedHosts`, so `pnpm dev` rejects any request whose `Host` is not localhost with "Blocked request. This host is not allowed." The entire `/api/v1` plus JWT surface exists to serve mobile clients, and a device or simulator cannot reach a dev server over `localhost` — a tunnel hostname is the normal route. The only way to test one today is an uncommitted local edit to `astro.config.mjs`, which every developer has to rediscover and none can commit.
+
+**Depends on:** item 22. That item makes the auth library accept a non-default origin; without it, auth rejects the tunnel request even once Vite lets it through, so landing this one first buys a dev server that answers and an API that refuses.
+
+**Scope.**
+
+- Parse an optional comma-separated `ASTRO_DEV_ALLOWED_HOSTS` in `astro.config.mjs` — split on `,`, trim, drop empties — and pass the result to `vite.server.allowedHosts`. Use the same parsing shape item 22 introduces for `BETTER_AUTH_TRUSTED_ORIGINS` so there is one idiom for this in the repository.
+- Read it from `process.env`, not from `env`. This is a dev-time Vite setting, not a Worker binding: do not add it to `wrangler.jsonc`, `.dev.vars.example`, or `Env`.
+- Unset or empty must leave `allowedHosts` exactly as Vite defaults it today, so the change is a no-op for `pnpm dev`, `pnpm build`, `pnpm preview`, and CI.
+- Add one line to the environment-configuration list in `CLAUDE.md` and `README.md`. Do not change the adapter block, the `react-dom/server.edge` alias, or the integrations list.
+
+**Acceptance.** Against a running `astro dev`: with the var unset, a request carrying `Host: example.tunnel.test` is still blocked and `Host: localhost` still returns 200; with `ASTRO_DEV_ALLOWED_HOSTS=example.tunnel.test` set, that same host returns 200 while an unlisted host is still blocked. Record all four observed responses in the PR description — the no-op half is the part worth proving.
+
+**Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
+
+### 31. Gate merges on a production build
+
+**Gap.** The `unit-tests` job in `.github/workflows/test.yml` runs `pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, and `pnpm test:run`; the `e2e-tests` job runs Playwright against `wrangler dev`. Nothing in CI runs `pnpm build`. `astro check` type-checks the sources but never asks Astro to compile the pages, bundle them through the Cloudflare adapter, or resolve the Vite config — so a broken adapter option, a page that fails to render at build time, or an import that only the bundler rejects reaches `main` with a green Test workflow. Item 9 added the type-check step and left the build ungated.
+
+**Scope.**
+
+- Add a `Build` step running `pnpm build` to the `unit-tests` job, after `Run unit tests`. Not `continue-on-error`.
+- `build` is `pnpm cf-types && astro build`, and `wrangler types` reads `wrangler.jsonc` directly, so no Cloudflare credentials are needed. Establish rather than assume that `astro build` also completes with no `.dev.vars` present — item 21 removed the Astro env schema that was the plausible reason it might not — and record the result in the PR. If the build does need a secret, add the same heredoc the `e2e-tests` job already uses rather than skipping the step.
+- Leave the `e2e-tests` job entirely alone, and do not add a coverage step, a matrix, or a caching change.
+
+**Accepted cost.** One `astro build` per CI run on the `unit-tests` job. Put the measured duration in the PR description so the trade is on the record.
+
+**Acceptance.** The gate is real, not decorative: introduce a deliberate build-only failure — a page importing a module that does not exist is the cheapest — confirm `pnpm check` still passes while `pnpm build` fails, then revert. Quote both outcomes in the PR. The workflow is green on the branch with the step added.
+
+**Validation.** `pnpm build` locally, and a green `Test` workflow with the added step.
