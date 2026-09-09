@@ -506,6 +506,8 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Unblocks:** item 17.
 
+**Status (2026-09-09).** The pool half of this item is not movable yet. `@cloudflare/vitest-pool-workers@0.22.0` is the newest published release and its manifest pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0`, so moving the pool changes nothing — it still resolves the older runtime line while the root `wrangler@^4.129.0` resolves `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`. Attribution out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` + `workerd@1.20260903.1` / `miniflare@5.20260903.0-alpha` belong to the root pin, `wrangler@4.124.0` + `workerd@1.20260815.1` / `miniflare@5.20260815.0-alpha` belong to the pool's hard dependency, and `workerd@1.20260831.1` / `miniflare@5.20260831.0-alpha` arrive via `@astrojs/cloudflare` → `@cloudflare/vite-plugin` → `@cloudflare/unenv-preset` (out of scope, moves only with the adapter). The installed `wrangler@4.129.0` peer-requires `@cloudflare/workers-types@^5.20260903.1`, so the worker manifest stays on the v4 types line the root pins instead of chasing that major. Landed here: the worker manifest's `wrangler` and `@cloudflare/workers-types` back onto the root's exact range strings (`^4.129.0`, `^4.20250921.0`), caret ranges rather than exact pins. Item 17 stays blocked until the pool ships a release on the newer runtime line.
+
 **Validation.** `pnpm install`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm email-worker:dev` still starts.
 
 ### 28. Delete the orphaned Drizzle snapshot directory and the plugin's dead import
