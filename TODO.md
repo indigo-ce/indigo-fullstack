@@ -88,17 +88,24 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Acceptance.** Coverage exists for both the authorized and unauthorized paths of `accountRoutes` using a genuine token, with no mocking of `jose` or the JWKS cache.
 
-### 6. Triage Dependabot vulnerabilities on `main`
+### 6. Make the Dependabot configuration parse and cover both ecosystems
 
-**Gap.** GitHub reports 184 vulnerabilities on the default branch (3 critical, 81 high, 81 moderate, 19 low), surfaced after pushing the Claude workflow removal. None of the existing items address dependency hygiene, so the count will keep growing while the architecture work proceeds.
+**Gap.** `.github/dependabot.yml` is the unedited GitHub template. Its single `updates` entry declares `package-ecosystem: ""` — the placeholder, still carrying the `# See documentation for possible values` comment — which is not a valid ecosystem identifier. GitHub rejects the file rather than falling back to a default, so no version-update branch has ever been opened for this repository and none will be. The file's presence is what makes that invisible: the repository looks like it has dependency automation configured.
+
+**Second gap, same file.** Even once it parses, one `npm` entry rooted at `/` covers the root manifest only. `.github/workflows/test.yml` pins `actions/checkout@v4`, `actions/setup-node@v4`, `actions/upload-artifact@v4`, and `pnpm/action-setup@v4`, and nothing tracks those at all.
 
 **Scope.**
 
-- Open Dependabot security PRs and group them by ecosystem; merge critical and high patches that don't require code changes first.
-- For updates that touch application code (auth, queue, email), pin the dependency in a tracking issue and roll the fix into the next item in this list that owns the affected surface.
-- Add a weekly Dependabot triage note to the PR template or `CONTRIBUTING.md` so the backlog doesn't reaccumulate silently.
+- Set `package-ecosystem: "npm"` on the existing entry, keep `directory: "/"`, keep the monthly schedule, and drop the placeholder comments the template shipped with.
+- Add a second entry for `package-ecosystem: "github-actions"` at `directory: "/"`, also monthly. That is the directory GitHub expects for workflow files; confirm it against the current Dependabot documentation rather than pointing it at `.github/workflows`.
+- Group the npm updates so a month's patches arrive as one or two PRs rather than one per package — a `groups:` block splitting production and development dependencies is enough. Do not add an `ignore:` list; nothing here is known to need pinning, and an empty-handed ignore rule is how real updates get silently dropped.
+- Do not add a `security-updates` block. Dependabot security alerts are repository settings, not manifest configuration, and enabling them is the owner's call.
 
-**Acceptance.** Critical and high counts drop to zero within one PR cycle. Moderate and low counts trend down as PRs land; no individual dependency stays unpatched for more than 30 days.
+**Out of scope, deliberately.** Actually landing any upgrade Dependabot proposes. `workers/indigo-email-queue-consumer/package.json` also stays out: `pnpm-workspace.yaml` lists only `"."` as a package, so that manifest is not installed and a Dependabot entry pointing at it would open PRs against versions nothing resolves. Item 27 is where that manifest gets fixed; adding it here would be premature.
+
+**Acceptance.** The file validates — push the branch and confirm GitHub reports no Dependabot configuration error on it, and quote the result in the PR description; a config that still fails to parse is the exact failure this item exists to remove, so "it looks right" is not evidence. `.github/workflows/test.yml` is unchanged and the `Test` workflow stays green.
+
+**Validation.** `pnpm format:check` (the file is YAML and Prettier formats it), and the repository's Dependabot configuration status on GitHub after the branch is pushed.
 
 ### 7. [x] Provision the test runtime from the bindings `wrangler.jsonc` declares
 
@@ -167,7 +174,7 @@ Ordered backlog for architecture and test-infrastructure alignment. Each item is
 
 **Validation.** `pnpm email-worker:check`, `pnpm check`, `pnpm test:run` (`tests/unit/email-worker-render.test.ts` passes unchanged), and `pnpm build`.
 
-### 11. Land the deferred dependency upgrades
+### 11. [x] Land the deferred dependency upgrades
 
 **Gap.** This PR takes the `npm_and_yarn` security group to the highest versions that need no code changes (`better-auth ^1.6.22`, `hono ^4.12.34`, `vitest ~3.2.6`). Everything below is a further upgrade that a `pnpm update --latest` surfaces but that does not land cleanly. Two are blocked upstream; the rest each need a specific code change. A full working implementation of all of them exists on the `deps/update-all-to-latest` branch (commit `d90f440`, opened and closed as PR #35) — that branch passes `pnpm check`, `pnpm test:run`, `pnpm build`, and `pnpm email-worker:check`, and is the reference for the work below rather than something to merge as-is.
 
@@ -298,7 +305,9 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-**Status (2026-09-08).** Blocked: setting `2026-09-03` fails to boot — the installed `@cloudflare/vitest-pool-workers@0.22.0` pins `miniflare@5.20260815.0-alpha`, whose workerd refuses any date newer than `2026-08-22`. Unblocks when the pool ships a newer workerd; do not work around it with a partial date.
+**Status (2026-09-09).** Still blocked, and the lockfile now says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22`. The tree already carries `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1` — `pnpm-workspace.yaml` even exempts that miniflare from the minimum-release-age gate — but that copy belongs to the root `wrangler@4.129.0`, not to the pool, so it does nothing for `pnpm test:run`.
+
+**Unblocks with item 27**, which moves the pool onto the same runtime line the rest of the repository already resolves. Do not attempt this item before that one lands, and do not work around it with a partial date or by overriding the pool's `miniflare` in `pnpm-workspace.yaml` — a test runtime whose workerd is pinned behind its own pool is the same class of drift this item exists to close.
 
 ### 18. [x] Log unhandled API failures, and let a handler signal its own status
 
@@ -358,3 +367,142 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 **Acceptance.** Add cases proving each half, and confirm both fail against the current implementation before writing the fix. For the cache: a `getKeys` whose first `auth.api.getJwks()` resolves `{keys: []}` and whose second resolves a real key set calls through twice and returns the real set — today it returns the empty set both times. For the middleware: `tests/unit/middleware/jwt-middleware.test.ts` mocks `@/lib/jwks-cache` as a `getKeys`-only object, so a middleware reaching for a second method on it gets `undefined` and fails confusingly — grow that mock to cover whatever the fix calls. A verification that throws a non-`ERR_JWT_EXPIRED` error on the first attempt and succeeds on the second answers 200 with the user set, having asked for a forced refresh in between; one that throws both times answers the same 401 the existing cases already pin. Every existing case in that file keeps its name and its meaning.
 
 **Validation.** `pnpm test:run` and `pnpm check`.
+
+### 21. Make the generated `Env` the only environment-variable declaration
+
+**Gap.** The repository declares its environment variables three times, and only one of the three has a reader.
+
+- The live declaration is `wrangler.jsonc`. Its `vars` and bindings are what `pnpm cf-types` turns into `Env`, and `Env` is what `context.locals.runtime.env`, `c.get("env")`, `createAuth(env, locale)`, and `queueEmail(...)` all read. `src/lib/auth.ts` reads `env.BETTER_AUTH_SECRET` off it and throws when it is absent.
+- `astro.config.mjs` separately declares an Astro `env.schema` naming `BETTER_AUTH_SECRET` (`context: "server"`, `access: "secret"`) and `SEND_EMAIL_FROM` (`access: "public"`, optional), importing `envField` to do it.
+- `src/env.d.ts` separately declares an `ImportMetaEnv` interface naming the same two, plus an `ImportMeta` interface to attach it.
+
+A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `tests/`, `workers/`, `scripts/`, and every `.astro`, `.tsx`, `.ts`, and config file returns nothing outside the `ImportMetaEnv` declaration itself and two unrelated prose mentions in `skills/astro-upgrade/SKILL.md`. Neither of the two extra declarations has a single reader.
+
+**Establish that they are inert before removing anything.** On the current, unmodified config, delete `.dev.vars` locally and run `pnpm check`, `pnpm build`, `pnpm test:run`, and `pnpm dev`. Record all four outcomes in the PR description — that is the evidence for this item. If all four pass, both declarations are vestigial and go. If one fails on a missing `BETTER_AUTH_SECRET`, the Astro schema is load-bearing after all: keep it, and close this item with that finding rather than removing a guard that works.
+
+**Scope.** The `env` block and the then-unused `envField` import in `astro.config.mjs`, and the `ImportMetaEnv` and `ImportMeta` blocks in `src/env.d.ts`. Nothing else in `src/env.d.ts` moves — the `Runtime` alias, the `App.Locals` namespace, the bare `interface Env {BETTER_AUTH_SECRET: string}`, and the `declare namespace Cloudflare` augmentation that puts the secret on the generated `Env` all stay; that augmentation is the surviving declaration and is load-bearing. Do not add anything to `wrangler.jsonc` or `.dev.vars.example`: this item removes a declaration, it does not relocate one.
+
+**Acceptance.** `astro.config.mjs` no longer imports `envField`, and a search for `astro:env`, `envField`, and `ImportMetaEnv` across the repository returns nothing outside `node_modules`, `.astro/`, `pnpm-lock.yaml`, and the `SKILL.md` prose. `pnpm check` reports zero errors and zero warnings, and `pnpm test:run` reports the same file and test counts as before.
+
+**Prerequisite for:** item 22, which adds a var and should land against one environment declaration rather than three.
+
+**Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
+
+### 22. Make the auth trusted origins configurable
+
+**Gap.** `src/lib/auth.ts` hardcodes `trustedOrigins: [env.BETTER_AUTH_BASE_URL]`. Every other origin — a `*.workers.dev` preview deployment, a staging hostname, a local tunnel used to point a mobile client at a development server — is rejected by the auth library, and the only way to allow one today is to edit and redeploy source. This is a template: the single-origin assumption is baked into the file every downstream project inherits.
+
+**Depends on:** item 21, which leaves `Env` as the one place a variable is declared.
+
+**Scope.**
+
+- Read an optional `BETTER_AUTH_TRUSTED_ORIGINS` off `env`, split on `,`, trim each entry, drop empties, and append the result after the base URL. Unset or empty must behave exactly as today, so the change is a no-op for the current deployment and for CI.
+- Declare the var in `wrangler.jsonc` under `vars` with an empty-string default so `pnpm cf-types` puts it on `Env` and no `as` cast is needed in application code. Add it to `.dev.vars.example` if that file lists vars rather than only secrets — check before adding.
+- Add the matching entry to the `bindings` block in `vitest.config.ts`, so the test runtime declares the same binding set the deployed one does. That block is already the mirror of `wrangler.jsonc`.
+- Add one line to the environment-configuration list in `CLAUDE.md` and `README.md`.
+- Do not change `createAuth`'s signature, its `"en"` locale default, or either of its two existing throw guards.
+
+**Acceptance.** A unit test under `tests/unit/` covers four inputs — unset, a single origin, comma-plus-whitespace, and a trailing comma — and asserts in every case that `env.BETTER_AUTH_BASE_URL` is present and first in the resulting array. `pnpm cf-types` regenerates `worker-configuration.d.ts` with the new var and `pnpm check` is clean against it.
+
+**Validation.** `pnpm cf-types && pnpm check`, `pnpm test:run`, `pnpm format:check`, `pnpm build`.
+
+### 23. Send browser-initiated auth emails in the visitor's language
+
+**Gap.** `createAuth(env, locale)` decides the language of every email the auth library queues, and the second argument is threaded from the request almost everywhere. One caller does not thread it: `src/pages/api/auth/[...all].ts` passes `defaultLocale` outright. That file is the catch-all forwarding every browser Better Auth request to the handler, so it owns the locale for every email triggered from the client rather than from page frontmatter — which is exactly the set of flows `src/lib/auth-client.ts` drives. A visitor on a `ja` page who changes their address or requests account deletion gets the English template even though `src/components/email/*` carries the `ja` copy and `workers/indigo-email-queue-consumer/src/render-template.ts` threads the queued locale all the way through. The `ja` half of four templates is unreachable from the browser.
+
+**Scope.**
+
+- Replace `defaultLocale` with the locale derived from the request, using the same `getLocaleFromRequest` helper `src/middleware.ts` already uses, called with the request URL, `context.cookies`, and `context.request.headers`. The handler's `_context` parameter is already in scope and only needs renaming to `context`.
+- Its precedence is cookie → URL path → `Accept-Language` → default. These requests land on `/api/auth/...` with no locale segment, so in practice the `preferred_lang` cookie the language switcher sets is what decides — which is the right answer for a browser client. Confirm that precedence against the installed helper rather than trusting this note.
+- Leave `src/lib/hono/middleware/authMiddleware.ts` alone: the `/api/v1` handlers build their own locale-aware instance per request off `Accept-Language`, and that is a different client with a different signal.
+- No route path, template, `queueEmail`, or `createAuth` signature change, and nothing under `/api/v1`.
+
+**Acceptance.** A new case under `tests/unit/` mocks `@/lib/auth`, invokes the route's `ALL` handler against a hand-built context, and asserts `createAuth`'s **second argument** — `"ja"` for a request carrying `preferred_lang=ja`, `"ja"` for one carrying `Accept-Language: ja` with no cookie, `"en"` otherwise. Assert on that argument, not on the response: a test that only checks a status passes before and after and proves nothing. Confirm it fails against the current file before writing the fix.
+
+**Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`.
+
+### 24. Make the verification and reset token lifetimes match what the emails promise
+
+**Gap.** `src/components/email/EmailVerification.tsx` and `src/components/email/PasswordReset.tsx` both promise a 24-hour window, in both locales — `"This link will expire in 24 hours."` and `"このリンクは24時間で期限切れになります。"`. `createAuth()` in `src/lib/auth.ts` sets neither `emailVerification.expiresIn` nor `emailAndPassword.resetPasswordTokenExpiresIn`, so the auth library's much shorter defaults apply. A user who follows the stated window gets a dead link, and for verification the resend flow is the only recovery path; for password reset there is no in-page recovery at all, only starting over.
+
+**Scope.**
+
+- Read the two defaults out of the installed `better-auth` and put them in the PR description. That number is what makes this a mismatch rather than a guess, and it decides how large the change is.
+- Set both options to `86400` in `createAuth()`, with a short comment on each naming the template it is keeping in sync.
+- If the team would rather shorten the promise than lengthen the token, changing the `expiry` string in both templates and both locales is an equally acceptable resolution — but the two must agree, and whichever direction is taken must be stated in the PR. Do not split the difference by changing one flow and not the other.
+- Nothing else in `createAuth()` moves: `requireEmailVerification`, `sendOnSignUp`, `autoSignInAfterVerification`, the custom verification-redirect URL rewrite, and both `queueEmail` calls stay exactly as written.
+
+**Acceptance.** The configured lifetime and the `expiry` string in both `en` and `ja` describe the same duration for both flows. `tests/integration/auth-routes.test.ts` and `tests/integration/auth-routes-locale.test.ts` pass unchanged — this item changes a token lifetime, not a route contract. `tests/unit/email-worker-render.test.ts` passes unchanged unless the copy direction was taken, in which case its locale assertions move with the copy and the PR says so.
+
+**Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`.
+
+### 25. Drop the dependencies nothing in the repository imports
+
+**Gap.** A case-insensitive search for each of the following across `src/`, `tests/`, `workers/`, `scripts/`, `drizzle/`, both stylesheets, and every config file matches nothing outside `package.json` and `pnpm-lock.yaml`. Each is resolved on every install and each misstates what this template is built on — which matters more here than in an application, because every project generated from it inherits the misstatement.
+
+- `@astrojs/node` is a second Astro adapter. `astro.config.mjs` sets `adapter: cloudflare({...})` and Astro takes one adapter; the Node one has never been wired up, so `package.json` alone misstates what this app deploys onto.
+- `@internationalized/date` has no importer. There are no Svelte components here, so the calendar primitive that usually pulls it in is not present.
+- `date-fns` has no importer. `src/components/ui/calendar.tsx` uses `react-day-picker`'s own date handling, and `react-day-picker` carries `date-fns` transitively anyway.
+
+**Verify before removing, do not assume — `@libsql/client`.** Nothing imports it, but `drizzle.config.ts` sets `dialect: "sqlite"` and points drizzle-kit at the `.sqlite` file it finds under `.wrangler`, and drizzle-kit selects a SQLite driver from what it can resolve at run time — a dependency reached that way is invisible to a source search. After removing it, run `pnpm db:generate` and `pnpm db:studio:local` against a local database. If either fails to resolve a driver, put `@libsql/client` back, add a one-line comment in `drizzle.config.ts` recording that drizzle-kit resolves it, and ship the other three. Do not add `better-sqlite3` or any substitute driver to make the removal succeed.
+
+**Explicitly keep — both animation packages.** `tw-animate-css` and `tailwindcss-animate` look like two generations of the same thing, and in most repositories one would be dead. Here both are live: `src/styles.css` imports `tw-animate-css` and `src/_styles.css` loads `@plugin "tailwindcss-animate"`. `src/_styles.css` is the neutral starter theme that `scripts/bootstrap.js` renames over `src/styles.css` when a new project is generated, so removing either package breaks one of the two themes this template ships. Also keep `@cretezy/cloudflare-d1-backup`, which `scripts/backup.js` imports (item 26 gives that script an entry point).
+
+**Scope.** `package.json` and `pnpm-lock.yaml`, plus at most the one explanatory comment in `drizzle.config.ts` described above. No source, stylesheet, component, or workflow changes.
+
+**Acceptance.** `pnpm install` refreshes the lockfile with the removed packages gone as direct dependencies, and a repository-wide search for each removed name matches only transitive lockfile entries. If `pnpm install` reports a missing peer dependency — `react-day-picker` is the most likely package to have been pulling a date library in as a peer — that is the signal to keep the package, not to silence the warning. Record which packages were removed and the `@libsql/client` verdict together with the command output that decided it.
+
+**Validation.** `pnpm install --frozen-lockfile`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm preview-email` still renders every template.
+
+### 26. Wire the D1 backup script into `package.json`
+
+**Gap.** `scripts/backup.js` imports `@cretezy/cloudflare-d1-backup`, validates `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE_ID`, and `CLOUDFLARE_TOKEN`, and writes a SQL dump. The dependency is in `devDependencies` and the script was clearly written to be run — but no `package.json` script invokes it, and neither `README.md` nor `CLAUDE.md` mentions it. Every other file under `scripts/` has an entry point: `test:e2e:codegen` runs `scripts/codegen.sh`, and `README.md` documents `node scripts/bootstrap.js`. This one is reachable only by someone who happens to open the directory. The net effect is that the `db:*` family covers generate, migrate, and studio against production but offers no way to take a copy of the database first, while a dependency ships in every install for code nothing runs.
+
+**Scope.**
+
+- Add `"db:backup": "node scripts/backup.js"` to `package.json`, next to `db:migrate:prod`.
+- Read `scripts/backup.js` first and document what it actually does — the three variable names, and the output path it writes. Do not restate this description if the file disagrees with it; the file is the source of truth and the PR should say so.
+- Document it in the Database Operations list in `CLAUDE.md` and the database section of `README.md`. The docs must name all three variables and say they are read from the process environment: `.dev.vars` is a Wrangler file and Node does not load it, which is the mistake this documentation exists to prevent. Note that `CLOUDFLARE_DATABASE_ID` is the `database_id` already recorded in `wrangler.jsonc`.
+- Do not add these variables to `wrangler.jsonc`, `.dev.vars.example`, or `Env` — this is a local operator tool, not a Worker binding. Do not change `scripts/backup.js` itself.
+- Confirm the script's output path is gitignored. If it is not, add it in this PR; a backup of production data landing in `git status` is the one failure mode worth pre-empting here.
+
+**Acceptance.** `pnpm db:backup` with the variables unset exits non-zero and prints the script's own missing-variable guard — that proves the wiring without needing a Cloudflare token, and the exact output belongs in the PR description. No dump file is committed; `git status` is clean apart from the intended changes.
+
+**Validation.** `pnpm db:backup` with no credentials set, `pnpm check`, `pnpm format:check`.
+
+### 27. Resolve one Cloudflare runtime toolchain instead of three
+
+**Gap.** One `pnpm install` resolves three `wrangler` versions, three `workerd` builds, and three `miniflare` copies. Read out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` and `wrangler@4.124.0` both appear, alongside `workerd@1.20260815.1`, `workerd@1.20260831.1`, and `workerd@1.20260903.1`, and `miniflare@5.20260815.0-alpha`, `5.20260831.0-alpha`, and `5.20260903.0-alpha`. Attribute each one to the package that owns it before changing anything and put that table in the PR description — the root `wrangler` pin, `@cloudflare/vitest-pool-workers@0.22.0`, and `@astrojs/cloudflare` are the three candidates, and which owns which decides how much of this is movable.
+
+**What it costs.** `pnpm build` runs through the adapter's runtime, `pnpm test:run` through the pool's, and `pnpm email-worker:dev`/`pnpm email-worker:deploy` through the root's. Every install downloads three platform-specific `workerd` binaries. And the spread is what blocks item 17: the pool's `miniflare@5.20260815.0-alpha` refuses any compatibility date after `2026-08-22`, so `vitest.config.ts` is stuck on a runtime date sixteen months behind `wrangler.jsonc` while a newer `workerd` sits in the same `node_modules` serving a different consumer.
+
+**Second gap — the worker manifest has drifted again.** Item 10 brought `workers/indigo-email-queue-consumer/package.json` onto the root's ranges. It no longer is: the worker declares `wrangler: "4.72.0"` (an exact pin) against the root's `^4.129.0`, and `@cloudflare/workers-types: "^4.20260310.1"` against the root's `^4.20250921.0` — drifted in both directions at once. Because `pnpm-workspace.yaml` still lists only `"."` under `packages:`, that manifest is not installed and neither range resolves anything, which is exactly why the drift went unnoticed. Item 10's fix had no mechanism to hold it.
+
+**Scope.**
+
+- Move `@cloudflare/vitest-pool-workers` to the newest release whose `miniflare`/`workerd` matches the line the root `wrangler` already resolves. The pool depends on `wrangler` directly rather than through a peer range, so moving the root pin alone collapses nothing — the pool has to move with it, which is why it is in scope here.
+- Bring the worker manifest's `wrangler` and `@cloudflare/workers-types` back onto the root's exact range strings. Keep it a caret range, not an exact pin: an exact pin in an uninstalled manifest is drift with extra steps.
+- If the newest pool release still carries an older `miniflare` than the root `wrangler` does, say so plainly and land the alignment you can — item 17 stays blocked and this item records the new gap rather than pretending it closed.
+- Read `wrangler`'s declared `@cloudflare/workers-types` peer range out of the installed package. If it demands a `^5.x` major, that is a separate major and out of scope: lower to the line the currently pinned types satisfy instead, and record which direction you took and what decided it.
+
+**Out of scope, deliberately.** Do not upgrade `@astrojs/cloudflare` — it carries its own `wrangler` as an ordinary dependency, so that copy can only move by moving the adapter, which is its own PR with its own blast radius. Do not add the worker under `packages:` in `pnpm-workspace.yaml`; item 10 excluded that on the grounds that a second importer resolves a second `wrangler` and `workerd` for every install, and that reasoning is stronger now, not weaker. Do not touch `compatibility_date` in either `wrangler.jsonc`, and do not touch `compatibilityDate` in `vitest.config.ts` — that is item 17, and it should follow this on its own evidence.
+
+**Acceptance.** After `pnpm install`, searching `pnpm-lock.yaml` for `wrangler@`, `workerd@`, and `miniflare@` shows fewer version keys than the three-each it shows today; state how many remain and which package owns each. Quote the `pnpm install` output in the PR, including any peer-dependency warning. `pnpm test:run` reports the same file and test counts as before — a pool bump that silently drops a test file is the failure mode to watch for, so compare the counts rather than only the exit code.
+
+**Unblocks:** item 17.
+
+**Validation.** `pnpm install`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm email-worker:dev` still starts.
+
+### 28. Delete the orphaned Drizzle snapshot directory and the plugin's dead import
+
+**Gap.** `drizzle.config.ts` sets `out: "./drizzle/migrations"`, and that directory holds the live migrations — `0000_faithful_sally_floyd.sql` through `0002_steep_ricochet.sql`, with a `meta/_journal.json` listing exactly those three. Alongside it sits `drizzle/meta/`, a second journal and two snapshots naming `0000_amusing_guardsmen` and `0001_bright_living_tribunal` — migrations whose `.sql` files exist nowhere in the repository. It is the output of an earlier `drizzle.config.ts` that wrote to `drizzle/` directly, left behind when `out` moved. Nothing reads it: `wrangler.jsonc` points `migrations_dir` at `./drizzle/migrations`, and `vitest.config.ts` reads the same path. A second `_journal.json` describing a migration history this database never had is a trap for anyone debugging a migration, and for anyone generating a new project from this template.
+
+**Second, unrelated but adjacent.** `src/plugins/better-auth/refresh-access/index.ts` imports `generateId` from `better-auth` on its first line and never calls it — a leftover from the rotation rewrite that replaced a self-minted token with the library's own. `astro check` does not flag unused imports, so nothing catches it.
+
+**Scope.** Delete the `drizzle/meta/` directory and its three files. Remove `generateId` from the import list in the plugin, leaving the three type imports beside it. Nothing else — no migration is added, renamed, or replayed, and no other file changes.
+
+**Confirm the directory is genuinely unreferenced before deleting it.** Search the repository for `drizzle/meta`, for `"out"` in `drizzle.config.ts`, and for `migrations_dir` in both `wrangler.jsonc` files, and quote the results in the PR. This is a deletion of version-control history for a schema, so the evidence that nothing reads it is the whole justification.
+
+**Acceptance.** `pnpm db:migrate-dry:local` lists the same three migrations as before and reports the same applied state. `pnpm db:generate` against the unchanged `src/db/schema.ts` produces no new migration — if it does, stop: that means the deleted snapshots were the drift baseline after all, and the finding belongs in the PR instead of the deletion. `pnpm test:run` passes with the same counts, since `readD1Migrations` reads only `drizzle/migrations`.
+
+**Validation.** `pnpm db:migrate-dry:local`, `pnpm db:generate`, `pnpm check`, `pnpm test:run`, `pnpm format:check`, `pnpm build`.
