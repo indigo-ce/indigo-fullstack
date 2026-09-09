@@ -28,15 +28,14 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **25** — drop the dependencies nothing imports.
-3. **28** — delete the orphaned Drizzle snapshots and the plugin's dead import.
-4. **22** — make the auth trusted origins configurable. Prerequisite for 30.
-5. **30** — let the dev server answer on a tunnel hostname.
-6. **23** — send browser-initiated auth emails in the visitor's language.
-7. **24** — make the token lifetimes match what the emails promise.
-8. **31** — gate merges on a production build.
-9. **26** — wire the D1 backup script into `package.json`.
-10. **29** — commit a component-registry config.
+2. **28** — delete the orphaned Drizzle snapshots and the plugin's dead import.
+3. **22** — make the auth trusted origins configurable. Prerequisite for 30.
+4. **30** — let the dev server answer on a tunnel hostname.
+5. **23** — send browser-initiated auth emails in the visitor's language.
+6. **24** — make the token lifetimes match what the emails promise.
+7. **31** — gate merges on a production build.
+8. **26** — wire the D1 backup script into `package.json`.
+9. **29** — commit a component-registry config.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
@@ -417,7 +416,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 **Scope.**
 
 - Read an optional `BETTER_AUTH_TRUSTED_ORIGINS` off `env`, split on `,`, trim each entry, drop empties, and append the result after the base URL. Unset or empty must behave exactly as today, so the change is a no-op for the current deployment and for CI.
-- Declare the var in `wrangler.jsonc` under `vars` with an empty-string default so `pnpm cf-types` puts it on `Env` and no `as` cast is needed in application code. Add it to `.dev.vars.example` if that file lists vars rather than only secrets — check before adding.
+- Declare the var in `wrangler.jsonc` under `vars` with an empty-string default so `pnpm cf-types` puts it on `Env` and no `as` cast is needed in application code. Add an empty `BETTER_AUTH_TRUSTED_ORIGINS=` line to `.dev.vars.example` as well: that file already carries the non-secret `BETTER_AUTH_BASE_URL` and `SEND_EMAIL_FROM` alongside the secrets, so it is a var list, not a secrets-only list.
 - Add the matching entry to the `bindings` block in `vitest.config.ts`, so the test runtime declares the same binding set the deployed one does. That block is already the mirror of `wrangler.jsonc`.
 - Add one line to the environment-configuration list in `CLAUDE.md` and `README.md`.
 - Do not change `createAuth`'s signature, its `"en"` locale default, or either of its two existing throw guards.
@@ -481,12 +480,11 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 **Scope.**
 
 - Add `"db:backup": "node scripts/backup.js"` to `package.json`, next to `db:migrate:prod`.
-- Read `scripts/backup.js` first and document what it actually does — the three variable names, and the output path it writes. Do not restate this description if the file disagrees with it; the file is the source of truth and the PR should say so.
-- Document it in the Database Operations list in `CLAUDE.md` and the database section of `README.md`. The docs must name all three variables and say they are read from the process environment: `.dev.vars` is a Wrangler file and Node does not load it, which is the mistake this documentation exists to prevent. Note that `CLOUDFLARE_DATABASE_ID` is the `database_id` already recorded in `wrangler.jsonc`.
-- Do not add these variables to `wrangler.jsonc`, `.dev.vars.example`, or `Env` — this is a local operator tool, not a Worker binding. Do not change `scripts/backup.js` itself.
-- The output path is already gitignored — `.gitignore` carries `drizzle/backup.sql` under a `# SQL backups` heading, which is corroborating evidence that the script was written to be run. Confirm the path the script actually writes still matches that entry; if it has moved, fix the ignore entry in this PR rather than leaving a dump of production data showing up in `git status`.
+- Document it in the Database Operations list in `CLAUDE.md` (the `db:migrate:prod` line is at `CLAUDE.md:19`) and the database section of `README.md`. The docs must name all three variables and say they are read from the process environment: `.dev.vars` is a Wrangler file and Node does not load it, which is the mistake this documentation exists to prevent. Note that `CLOUDFLARE_DATABASE_ID` is the `database_id` already recorded in `wrangler.jsonc`.
+- The script writes `drizzle/backup.sql` (it resolves `path.resolve()` against the working directory, so it must be run from the repository root) and pages the export at `limit: 1000`. `.gitignore` already carries `drizzle/backup.sql` under a `# SQL backups` heading, which is corroborating evidence that the script was written to be run and means no ignore change is needed. Say so in the PR rather than editing `.gitignore`.
+- Do not add these variables to `wrangler.jsonc`, `.dev.vars.example`, or `Env` — this is a local operator tool, not a Worker binding. Do not change `scripts/backup.js` itself: its guard, its page size, and its output path all stay as written.
 
-**Acceptance.** `pnpm db:backup` with the variables unset exits non-zero and prints the script's own missing-variable guard — that proves the wiring without needing a Cloudflare token, and the exact output belongs in the PR description. No dump file is committed; `git status` is clean apart from the intended changes.
+**Acceptance.** `pnpm db:backup` with the variables unset exits non-zero and prints the script's own guard — `Backup failed: Missing required environment variable: CLOUDFLARE_ACCOUNT_ID`, since the guard iterates in declaration order and stops at the first missing one. That proves the wiring without needing a Cloudflare token, and the exact output belongs in the PR description. No dump file is committed; `git status` is clean apart from the intended changes.
 
 **Validation.** `pnpm db:backup` with no credentials set, `pnpm check`, `pnpm format:check`.
 
@@ -533,13 +531,13 @@ The one thing to check before picking this up: read the newest published `@cloud
 
 ### 29. Commit a component-registry config so UI primitives can be added by CLI
 
-**Gap.** `src/components/ui/` carries 46 vendored shadcn primitives — `button.tsx`, `dialog.tsx`, `sidebar.tsx`, `calendar.tsx`, `chart.tsx`, `resizable.tsx`, and the rest — every one importing `cn` from `@/lib/utils` and styled off the CSS variables in `src/styles.css`. There is no `components.json` at the repository root. Without it the shadcn CLI cannot resolve where components, the `cn` helper, and the stylesheet live, so it refuses to run and each new primitive has to be transplanted by hand.
+**Gap.** `src/components/ui/` carries 47 vendored shadcn primitives — `button.tsx`, `dialog.tsx`, `sidebar.tsx`, `calendar.tsx`, `chart.tsx`, `resizable.tsx`, and the rest — every one importing `cn` from `@/lib/utils` and styled off the CSS variables in `src/styles.css`. There is no `components.json` at the repository root. Without it the shadcn CLI cannot resolve where components, the `cn` helper, and the stylesheet live, so it refuses to run and each new primitive has to be transplanted by hand.
 
 **What fills the gap today.** `CLAUDE.md`'s "Adding New Components" section documents the workaround as the house process: pull sources out of five GitHub repositories with `git-ingest`/`deepwiki` and paste them in. That is a manual pipeline for files the registry installs verbatim, and it has no way to keep import paths or the matching `@radix-ui/*` dependency in sync. Item 11 already paid that cost once — refreshing `calendar.tsx`, `chart.tsx`, and `resizable.tsx` from the registry by hand after their upstream majors moved. This is a template, so every project generated from it inherits the manual process.
 
 **Scope.** A new root `components.json`, one `package.json` script, and the two `CLAUDE.md` paragraphs describing component authoring.
 
-- Every config value is derivable from the tree — read them, do not invent them. `tailwind.css` → `src/styles.css`; `tailwind.config` → `""` (Tailwind 4 has no JS config here; `@tailwindcss/vite` is wired in `astro.config.mjs`); `tailwind.cssVariables` → `true`; `aliases` → `{components: "@/components", ui: "@/components/ui", utils: "@/lib/utils", lib: "@/lib", hooks: "@/hooks"}`, all of which resolve through the `@/*` path already in `tsconfig.json` and all of which exist (`src/lib/utils.ts`, `src/hooks/use-mobile.ts`); `rsc: false`; `tsx: true`; `iconLibrary: "lucide"` (`lucide-react` is already a dependency).
+- Every config value is derivable from the tree — read them, do not invent them. `$schema` → `https://ui.shadcn.com/schema.json`; `tailwind.css` → `src/styles.css`; `tailwind.config` → `""` (Tailwind 4 has no JS config here; `@tailwindcss/vite` is wired in `astro.config.mjs`); `tailwind.cssVariables` → `true`; `aliases` → `{components: "@/components", ui: "@/components/ui", utils: "@/lib/utils", lib: "@/lib", hooks: "@/hooks"}`, all of which resolve through the `@/*` path already in `tsconfig.json` and all of which exist (`src/lib/utils.ts`, `src/hooks/use-mobile.ts`); `rsc: false`; `tsx: true`; `iconLibrary: "lucide"` (`lucide-react` is already a dependency).
 - `tailwind.baseColor` → `gray`, and the evidence is in the tree rather than a preference. `src/styles.css` maps `--background`/`--foreground` onto a project-specific `--color-seagull-*` palette that matches no registry scale, so it cannot decide the value — but `src/_styles.css`, the neutral starter theme `scripts/bootstrap.js` renames over `src/styles.css` for a new project, declares `--foreground: oklch(0.13 0.028 261.692)` and `--background: oklch(1 0 0)`, which is the registry's gray scale rather than its neutral one. Read both files and confirm that value before writing the config; the acceptance below is what proves the choice is inert either way.
 - `style` → `new-york`, likewise confirmed rather than assumed: the committed primitives are current-registry Tailwind 4 output, which is the only style the registry still ships. `src/components/ui/button.tsx` carries `shadow-xs`, `size-9`, `has-[>svg]:px-3`, and `data-slot="button"` — check the re-add diff in the acceptance below, and if it comes back different, the value is wrong and must be fixed before merging.
 - Add `"add-component": "pnpm dlx shadcn@latest add"` to `package.json`, matching the `pnpm dlx` form `better-auth:schema` already uses so the CLI is not added as a dependency.
@@ -559,7 +557,8 @@ The one thing to check before picking this up: read the newest published `@cloud
 
 - Parse an optional comma-separated `ASTRO_DEV_ALLOWED_HOSTS` in `astro.config.mjs` — split on `,`, trim, drop empties — and pass the result to `vite.server.allowedHosts`. Use the same parsing shape item 22 introduces for `BETTER_AUTH_TRUSTED_ORIGINS` so there is one idiom for this in the repository.
 - Read it from `process.env`, not from `env`. This is a dev-time Vite setting, not a Worker binding: do not add it to `wrangler.jsonc`, `.dev.vars.example`, or `Env`.
-- Unset or empty must leave `allowedHosts` exactly as Vite defaults it today, so the change is a no-op for `pnpm dev`, `pnpm build`, `pnpm preview`, and CI.
+- Unset or empty must leave `allowedHosts` exactly as Vite defaults it today, so the change is a no-op for `pnpm dev`, `pnpm build`, `pnpm preview`, and CI. Confirm Vite's own default for `server.allowedHosts` against the installed version before choosing the unset form: if it is the empty array, `process.env.ASTRO_DEV_ALLOWED_HOSTS?.split(",").map(trim).filter(Boolean) ?? []` is already the no-op and no conditional block is needed. Do not reach for `allowedHosts: true` in any branch — that disables the host check outright rather than allowing a named host.
+- Leave `vite.preview` alone. `pnpm preview` runs `wrangler dev`, not Vite's preview server, so a `preview.allowedHosts` entry here would configure a server this project never starts.
 - Add one line to the environment-configuration list in `CLAUDE.md` and `README.md`. Do not change the adapter block, the `react-dom/server.edge` alias, or the integrations list.
 
 **Acceptance.** Against a running `astro dev`: with the var unset, a request carrying `Host: example.tunnel.test` is still blocked and `Host: localhost` still returns 200; with `ASTRO_DEV_ALLOWED_HOSTS=example.tunnel.test` set, that same host returns 200 while an unlisted host is still blocked. Record all four observed responses in the PR description — the no-op half is the part worth proving.
