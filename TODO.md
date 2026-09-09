@@ -456,7 +456,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`.
 
-### 25. Drop the dependencies nothing in the repository imports
+### 25. [x] Drop the dependencies nothing in the repository imports
 
 **Gap.** A case-insensitive search for each of the following across `src/`, `tests/`, `workers/`, `scripts/`, `drizzle/`, both stylesheets, and every config file matches nothing outside `package.json` and `pnpm-lock.yaml`. Each is resolved on every install and each misstates what this template is built on — which matters more here than in an application, because every project generated from it inherits the misstatement.
 
