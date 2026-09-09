@@ -368,7 +368,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run` and `pnpm check`.
 
-### 21. Make the generated `Env` the only environment-variable declaration
+### 21. [x] Make the generated `Env` the only environment-variable declaration
 
 **Gap.** The repository declares its environment variables three times, and only one of the three has a reader.
 
