@@ -1,5 +1,4 @@
 import {
-  generateId,
   type BetterAuthPlugin,
   type GenericEndpointContext,
   type Session
