@@ -1,24 +1,11 @@
 // @ts-check
-import {defineConfig, envField} from "astro/config";
+import {defineConfig} from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  env: {
-    schema: {
-      BETTER_AUTH_SECRET: envField.string({
-        context: "server",
-        access: "secret"
-      }),
-      SEND_EMAIL_FROM: envField.string({
-        context: "server",
-        access: "public",
-        optional: true
-      })
-    }
-  },
   output: "server",
   adapter: cloudflare({
     imageService: "cloudflare" // Use Cloudflare's native image optimization

@@ -26,13 +26,3 @@ declare namespace Cloudflare {
     BETTER_AUTH_SECRET: string;
   }
 }
-
-// Vite/ImportMeta Environment Variables
-interface ImportMetaEnv {
-  readonly BETTER_AUTH_SECRET?: string;
-  readonly SEND_EMAIL_FROM?: string;
-}
-
-interface ImportMeta {
-  readonly env: ImportMetaEnv;
-}
