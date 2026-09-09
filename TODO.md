@@ -23,22 +23,27 @@
 
 ## Architecture Sync
 
-Ordered backlog for architecture and test-infrastructure alignment. Each item is scoped to a single focused PR. Later items assume earlier ones have landed.
+Backlog for architecture and test-infrastructure alignment. Each item is scoped to a single focused PR, and every item states its own dependencies.
 
-Item numbers are stable and are never reused; a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
+The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
-1. **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
-2. **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
-3. **6** — make the Dependabot config parse.
-4. **25** — drop the dependencies nothing imports.
-5. **28** — delete the orphaned Drizzle snapshots and the plugin's dead import.
-6. **22** — make the auth trusted origins configurable. Prerequisite for 30.
-7. **30** — let the dev server answer on a tunnel hostname.
-8. **23** — send browser-initiated auth emails in the visitor's language.
-9. **24** — make the token lifetimes match what the emails promise.
-10. **31** — gate merges on a production build.
-11. **26** — wire the D1 backup script into `package.json`.
-12. **29** — commit a component-registry config.
+1. **6** — make the Dependabot config parse.
+2. **25** — drop the dependencies nothing imports.
+3. **28** — delete the orphaned Drizzle snapshots and the plugin's dead import.
+4. **22** — make the auth trusted origins configurable. Prerequisite for 30.
+5. **30** — let the dev server answer on a tunnel hostname.
+6. **23** — send browser-initiated auth emails in the visitor's language.
+7. **24** — make the token lifetimes match what the emails promise.
+8. **31** — gate merges on a production build.
+9. **26** — wire the D1 backup script into `package.json`.
+10. **29** — commit a component-registry config.
+
+**Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
+
+- **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
+- **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
+
+Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -116,7 +121,7 @@ Item numbers are stable and are never reused; a checked box means current code o
 - Group the npm updates so a month's patches arrive as one or two PRs rather than one per package — a `groups:` block splitting production and development dependencies is enough. Do not add an `ignore:` list; nothing here is known to need pinning, and an empty-handed ignore rule is how real updates get silently dropped.
 - Do not add a `security-updates` block. Dependabot security alerts are repository settings, not manifest configuration, and enabling them is the owner's call.
 
-**Out of scope, deliberately.** Actually landing any upgrade Dependabot proposes. `workers/indigo-email-queue-consumer/package.json` also stays out: `pnpm-workspace.yaml` lists only `"."` as a package, so that manifest is not installed and a Dependabot entry pointing at it would open PRs against versions nothing resolves. Item 27 is where that manifest gets fixed; adding it here would be premature.
+**Out of scope, deliberately.** Actually landing any upgrade Dependabot proposes. `workers/indigo-email-queue-consumer/package.json` also stays out, and this is now a standing exclusion rather than a deferral: `pnpm-workspace.yaml` lists only `"."` under `packages:`, so that manifest is not installed, and item 27 — which had the strongest reason to change that — deliberately left it alone, because a second importer resolves a second `wrangler` and `workerd` for every install. A Dependabot entry pointing at an uninstalled manifest opens PRs against versions nothing resolves. Add the entry only in whatever PR adds the worker under `packages:`, if one is ever wanted.
 
 **Acceptance.** The file validates — push the branch and confirm GitHub reports no Dependabot configuration error on it, and quote the result in the PR description; a config that still fails to parse is the exact failure this item exists to remove, so "it looks right" is not evidence. `.github/workflows/test.yml` is unchanged and the `Test` workflow stays green.
 
@@ -320,9 +325,9 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-**Status (2026-09-09).** Still blocked, and the lockfile now says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22`. The tree already carries `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1` — `pnpm-workspace.yaml` even exempts that miniflare from the minimum-release-age gate — but that copy belongs to the root `wrangler@4.129.0`, not to the pool, so it does nothing for `pnpm test:run`.
+**Parked (verified 2026-09-09), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree already carries `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`, and `pnpm-workspace.yaml` even exempts that miniflare from the minimum-release-age gate, but that copy belongs to the root `wrangler@4.129.0` rather than to the pool, so it does nothing for `pnpm test:run`.
 
-**Unblocks with item 27**, which moves the pool onto the same runtime line the rest of the repository already resolves. Do not attempt this item before that one lands, and do not work around it with a partial date or by overriding the pool's `miniflare` in `pnpm-workspace.yaml` — a test runtime whose workerd is pinned behind its own pool is the same class of drift this item exists to close.
+Item 27 is what moves the pool onto the runtime line the rest of the repository already resolves. Do not attempt this item before that one has landed; confirm the pool's `workerd` accepts `2026-09-03` first, and treat a run that fails on the date as evidence 27 is not done rather than as something to work around. Do not settle for a partial date — a value chosen to satisfy the pool rather than to mirror `wrangler.jsonc` recreates the drift this item exists to close, one shorter interval later — and do not override the pool's `miniflare` in `pnpm-workspace.yaml` to force the newer date through.
 
 ### 18. [x] Log unhandled API failures, and let a handler signal its own status
 
@@ -487,26 +492,28 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 ### 27. Resolve one Cloudflare runtime toolchain instead of three
 
-**Gap.** One `pnpm install` resolves three `wrangler` versions, three `workerd` builds, and three `miniflare` copies. Read out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` and `wrangler@4.124.0` both appear, alongside `workerd@1.20260815.1`, `workerd@1.20260831.1`, and `workerd@1.20260903.1`, and `miniflare@5.20260815.0-alpha`, `5.20260831.0-alpha`, and `5.20260903.0-alpha`. Attribute each one to the package that owns it before changing anything and put that table in the PR description — the root `wrangler` pin, `@cloudflare/vitest-pool-workers@0.22.0`, and `@astrojs/cloudflare` are the three candidates, and which owns which decides how much of this is movable.
+**Gap.** One `pnpm install` resolves two `wrangler` versions, three `workerd` builds, and three `miniflare` copies. Read out of the committed `pnpm-lock.yaml`: `wrangler@4.124.0` and `wrangler@4.129.0` both appear, alongside `workerd@1.20260815.1`, `workerd@1.20260831.1`, and `workerd@1.20260903.1`, and `miniflare@5.20260815.0-alpha`, `5.20260831.0-alpha`, and `5.20260903.0-alpha`. Attribute each one to the package that owns it before changing anything and put that table in the PR description — the root `wrangler` pin, `@cloudflare/vitest-pool-workers@0.22.0`, and `@astrojs/cloudflare` are the three candidates, and which owns which decides how much of this is movable. The attribution as of the current lockfile is recorded under **Parked** below; confirm it still holds rather than copying it forward.
 
 **What it costs.** `pnpm build` runs through the adapter's runtime, `pnpm test:run` through the pool's, and `pnpm email-worker:dev`/`pnpm email-worker:deploy` through the root's. Every install downloads three platform-specific `workerd` binaries. And the spread is what blocks item 17: the pool's `miniflare@5.20260815.0-alpha` refuses any compatibility date after `2026-08-22`, so `vitest.config.ts` is stuck on a runtime date sixteen months behind `wrangler.jsonc` while a newer `workerd` sits in the same `node_modules` serving a different consumer.
 
-**Second gap — the worker manifest has drifted again.** Item 10 brought `workers/indigo-email-queue-consumer/package.json` onto the root's ranges. It no longer is: the worker declares `wrangler: "4.72.0"` (an exact pin) against the root's `^4.129.0`, and `@cloudflare/workers-types: "^4.20260310.1"` against the root's `^4.20250921.0` — drifted in both directions at once. Because `pnpm-workspace.yaml` still lists only `"."` under `packages:`, that manifest is not installed and neither range resolves anything, which is exactly why the drift went unnoticed. Item 10's fix had no mechanism to hold it.
+**The worker-manifest half already landed.** `workers/indigo-email-queue-consumer/package.json` now declares `wrangler: "^4.129.0"` and `@cloudflare/workers-types: "^4.20250921.0"`, the root's own range strings, as caret ranges. That closed the drift half of this item; the runtime half below is all that remains, and it is not movable from inside this repository today.
 
-**Scope.**
+**Remaining scope — one change, and only when it is available.**
 
-- Move `@cloudflare/vitest-pool-workers` to the newest release whose `miniflare`/`workerd` matches the line the root `wrangler` already resolves. The pool depends on `wrangler` directly rather than through a peer range, so moving the root pin alone collapses nothing — the pool has to move with it, which is why it is in scope here.
-- Bring the worker manifest's `wrangler` and `@cloudflare/workers-types` back onto the root's exact range strings. Keep it a caret range, not an exact pin: an exact pin in an uninstalled manifest is drift with extra steps.
-- If the newest pool release still carries an older `miniflare` than the root `wrangler` does, say so plainly and land the alignment you can — item 17 stays blocked and this item records the new gap rather than pretending it closed.
-- Read `wrangler`'s declared `@cloudflare/workers-types` peer range out of the installed package. If it demands a `^5.x` major, that is a separate major and out of scope: lower to the line the currently pinned types satisfy instead, and record which direction you took and what decided it.
+- Move `@cloudflare/vitest-pool-workers` to the newest release whose `miniflare`/`workerd` matches the line the root `wrangler` already resolves. The pool depends on `wrangler` directly rather than through a peer range, so moving the root pin alone collapses nothing — the pool has to move with it, which is the whole of this item.
+- Read `wrangler`'s declared `@cloudflare/workers-types` peer range out of the installed package before touching the worker manifest again. On the current root pin it demands `^5.20260903.1`, which is a separate major and out of scope; the manifest stays on the v4 line the root pins.
+- **Do not resolve this by lowering the root `wrangler` to the pool's line.** That direction does collapse the versions, but `wrangler.jsonc` declares `compatibility_date: "2026-09-03"` and the pool's `workerd` refuses any date after `2026-08-22`, so it would force the deployed compatibility date backwards to make the test runtime happy — the opposite of what item 17 wants, and a production-behaviour change smuggled into a toolchain PR. If that trade ever looks worth making, it is a separate item with the owner's sign-off, not a shortcut inside this one.
+- **Do not** work around the block by overriding the pool's `miniflare` in `pnpm-workspace.yaml`. A pool whose runtime is overridden out from under it is the same class of drift this item exists to close.
 
 **Out of scope, deliberately.** Do not upgrade `@astrojs/cloudflare` — it carries its own `wrangler` as an ordinary dependency, so that copy can only move by moving the adapter, which is its own PR with its own blast radius. Do not add the worker under `packages:` in `pnpm-workspace.yaml`; item 10 excluded that on the grounds that a second importer resolves a second `wrangler` and `workerd` for every install, and that reasoning is stronger now, not weaker. Do not touch `compatibility_date` in either `wrangler.jsonc`, and do not touch `compatibilityDate` in `vitest.config.ts` — that is item 17, and it should follow this on its own evidence.
 
-**Acceptance.** After `pnpm install`, searching `pnpm-lock.yaml` for `wrangler@`, `workerd@`, and `miniflare@` shows fewer version keys than the three-each it shows today; state how many remain and which package owns each. Quote the `pnpm install` output in the PR, including any peer-dependency warning. `pnpm test:run` reports the same file and test counts as before — a pool bump that silently drops a test file is the failure mode to watch for, so compare the counts rather than only the exit code.
+**Acceptance.** After `pnpm install`, searching `pnpm-lock.yaml` for `wrangler@`, `workerd@`, and `miniflare@` shows two version keys each rather than three — this repository's own line plus the adapter's — and the pool's copy is gone from that list. State how many remain and which package owns each, and quote the `pnpm install` output in the PR including any peer-dependency warning. `pnpm test:run` reports the same file and test counts as before: a pool bump that silently drops a test file is the failure mode to watch for, so compare the counts rather than only the exit code.
 
 **Unblocks:** item 17.
 
-**Status (2026-09-09).** The pool half of this item is not movable yet. `@cloudflare/vitest-pool-workers@0.22.0` is the newest published release and its manifest pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0`, so moving the pool changes nothing — it still resolves the older runtime line while the root `wrangler@^4.129.0` resolves `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`. Attribution out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` + `workerd@1.20260903.1` / `miniflare@5.20260903.0-alpha` belong to the root pin, `wrangler@4.124.0` + `workerd@1.20260815.1` / `miniflare@5.20260815.0-alpha` belong to the pool's hard dependency, and `workerd@1.20260831.1` / `miniflare@5.20260831.0-alpha` arrive via `@astrojs/cloudflare` → `@cloudflare/vite-plugin` → `@cloudflare/unenv-preset` (out of scope, moves only with the adapter). The installed `wrangler@4.129.0` peer-requires `@cloudflare/workers-types@^5.20260903.1`, so the worker manifest stays on the v4 types line the root pins instead of chasing that major. Landed here: the worker manifest's `wrangler` and `@cloudflare/workers-types` back onto the root's exact range strings (`^4.129.0`, `^4.20250921.0`), caret ranges rather than exact pins. Item 17 stays blocked until the pool ships a release on the newer runtime line.
+**Parked (verified 2026-09-09), and the check that unparks it.** `@cloudflare/vitest-pool-workers@0.22.0` is the newest published release and its manifest pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0`, so moving the pool today changes nothing — it resolves the older runtime line either way, while the root `wrangler@^4.129.0` resolves `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`. Attribution out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` + `workerd@1.20260903.1` / `miniflare@5.20260903.0-alpha` belong to the root pin, `wrangler@4.124.0` + `workerd@1.20260815.1` / `miniflare@5.20260815.0-alpha` belong to the pool's hard dependency, and `workerd@1.20260831.1` / `miniflare@5.20260831.0-alpha` arrive via `@astrojs/cloudflare` → `@cloudflare/vite-plugin` → `@cloudflare/unenv-preset` (out of scope, moves only with the adapter).
+
+The one thing to check before picking this up: read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked and there is nothing to land — record the version you read and stop, rather than shipping a pool bump that collapses nothing. Do not attempt item 17 until this one has actually landed.
 
 **Validation.** `pnpm install`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm email-worker:dev` still starts.
 
@@ -533,8 +540,8 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 **Scope.** A new root `components.json`, one `package.json` script, and the two `CLAUDE.md` paragraphs describing component authoring.
 
 - Every config value is derivable from the tree — read them, do not invent them. `tailwind.css` → `src/styles.css`; `tailwind.config` → `""` (Tailwind 4 has no JS config here; `@tailwindcss/vite` is wired in `astro.config.mjs`); `tailwind.cssVariables` → `true`; `aliases` → `{components: "@/components", ui: "@/components/ui", utils: "@/lib/utils", lib: "@/lib", hooks: "@/hooks"}`, all of which resolve through the `@/*` path already in `tsconfig.json` and all of which exist (`src/lib/utils.ts`, `src/hooks/use-mobile.ts`); `rsc: false`; `tsx: true`; `iconLibrary: "lucide"` (`lucide-react` is already a dependency).
-- `tailwind.baseColor` cannot be inferred from the stylesheet the way the other values can: `src/styles.css` maps `--background`/`--foreground` onto a project-specific `--color-seagull-*` palette rather than any registry scale. Pick a value, state in the PR which one and why, and prove it is inert — the acceptance below is what proves it.
-- `style`: pick the one whose generated output matches what is already committed, confirmed by the diff below rather than by guessing.
+- `tailwind.baseColor` → `gray`, and the evidence is in the tree rather than a preference. `src/styles.css` maps `--background`/`--foreground` onto a project-specific `--color-seagull-*` palette that matches no registry scale, so it cannot decide the value — but `src/_styles.css`, the neutral starter theme `scripts/bootstrap.js` renames over `src/styles.css` for a new project, declares `--foreground: oklch(0.13 0.028 261.692)` and `--background: oklch(1 0 0)`, which is the registry's gray scale rather than its neutral one. Read both files and confirm that value before writing the config; the acceptance below is what proves the choice is inert either way.
+- `style` → `new-york`, likewise confirmed rather than assumed: the committed primitives are current-registry Tailwind 4 output, which is the only style the registry still ships. `src/components/ui/button.tsx` carries `shadow-xs`, `size-9`, `has-[>svg]:px-3`, and `data-slot="button"` — check the re-add diff in the acceptance below, and if it comes back different, the value is wrong and must be fixed before merging.
 - Add `"add-component": "pnpm dlx shadcn@latest add"` to `package.json`, matching the `pnpm dlx` form `better-auth:schema` already uses so the CLI is not added as a dependency.
 - Do not regenerate, restyle, or reformat any existing file under `src/components/ui/`, and do not touch `src/styles.css` or `src/_styles.css`. `src/_styles.css` is the starter theme `scripts/bootstrap.js` renames over `src/styles.css` for a new project; a CLI that rewrites either stylesheet has overshot.
 
