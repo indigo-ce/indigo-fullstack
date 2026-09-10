@@ -570,7 +570,7 @@ Two things follow, and both belong in the PR. The re-add diff below cannot be fo
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
 
-### 31. Gate merges on a production build
+### 31. [x] Gate merges on a production build
 
 **Gap.** The `unit-tests` job in `.github/workflows/test.yml` runs `pnpm install --frozen-lockfile`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, and `pnpm test:run`; the `e2e-tests` job runs Playwright against `wrangler dev`. Nothing in CI runs `pnpm build`. `astro check` type-checks the sources but never asks Astro to compile the pages, bundle them through the Cloudflare adapter, or resolve the Vite config — so a broken adapter option, a page that fails to render at build time, or an import that only the bundler rejects reaches `main` with a green Test workflow. Item 9 added the type-check step and left the build ungated.
 
