@@ -28,14 +28,13 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **28** — delete the orphaned Drizzle snapshots and the plugin's dead import.
-3. **22** — make the auth trusted origins configurable. Prerequisite for 30.
-4. **30** — let the dev server answer on a tunnel hostname.
-5. **23** — send browser-initiated auth emails in the visitor's language.
-6. **24** — make the token lifetimes match what the emails promise.
-7. **31** — gate merges on a production build.
-8. **26** — wire the D1 backup script into `package.json`.
-9. **29** — commit a component-registry config.
+2. **22** — make the auth trusted origins configurable. Prerequisite for 30.
+3. **30** — let the dev server answer on a tunnel hostname.
+4. **23** — send browser-initiated auth emails in the visitor's language.
+5. **24** — make the token lifetimes match what the emails promise.
+6. **31** — gate merges on a production build.
+7. **26** — wire the D1 backup script into `package.json`.
+8. **29** — commit a component-registry config.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
@@ -531,7 +530,7 @@ The one thing to check before picking this up: read the newest published `@cloud
 
 ### 29. Commit a component-registry config so UI primitives can be added by CLI
 
-**Gap.** `src/components/ui/` carries 47 vendored shadcn primitives — `button.tsx`, `dialog.tsx`, `sidebar.tsx`, `calendar.tsx`, `chart.tsx`, `resizable.tsx`, and the rest — every one importing `cn` from `@/lib/utils` and styled off the CSS variables in `src/styles.css`. There is no `components.json` at the repository root. Without it the shadcn CLI cannot resolve where components, the `cn` helper, and the stylesheet live, so it refuses to run and each new primitive has to be transplanted by hand.
+**Gap.** `src/components/ui/` carries 46 vendored shadcn primitives — `button.tsx`, `dialog.tsx`, `sidebar.tsx`, `calendar.tsx`, `chart.tsx`, `resizable.tsx`, and the rest — every one importing `cn` from `@/lib/utils` and styled off the CSS variables in `src/styles.css`. There is no `components.json` at the repository root. Without it the shadcn CLI cannot resolve where components, the `cn` helper, and the stylesheet live, so it refuses to run and each new primitive has to be transplanted by hand.
 
 **What fills the gap today.** `CLAUDE.md`'s "Adding New Components" section documents the workaround as the house process: pull sources out of five GitHub repositories with `git-ingest`/`deepwiki` and paste them in. That is a manual pipeline for files the registry installs verbatim, and it has no way to keep import paths or the matching `@radix-ui/*` dependency in sync. Item 11 already paid that cost once — refreshing `calendar.tsx`, `chart.tsx`, and `resizable.tsx` from the registry by hand after their upstream majors moved. This is a template, so every project generated from it inherits the manual process.
 
@@ -539,11 +538,17 @@ The one thing to check before picking this up: read the newest published `@cloud
 
 - Every config value is derivable from the tree — read them, do not invent them. `$schema` → `https://ui.shadcn.com/schema.json`; `tailwind.css` → `src/styles.css`; `tailwind.config` → `""` (Tailwind 4 has no JS config here; `@tailwindcss/vite` is wired in `astro.config.mjs`); `tailwind.cssVariables` → `true`; `aliases` → `{components: "@/components", ui: "@/components/ui", utils: "@/lib/utils", lib: "@/lib", hooks: "@/hooks"}`, all of which resolve through the `@/*` path already in `tsconfig.json` and all of which exist (`src/lib/utils.ts`, `src/hooks/use-mobile.ts`); `rsc: false`; `tsx: true`; `iconLibrary: "lucide"` (`lucide-react` is already a dependency).
 - `tailwind.baseColor` → `gray`, and the evidence is in the tree rather than a preference. `src/styles.css` maps `--background`/`--foreground` onto a project-specific `--color-seagull-*` palette that matches no registry scale, so it cannot decide the value — but `src/_styles.css`, the neutral starter theme `scripts/bootstrap.js` renames over `src/styles.css` for a new project, declares `--foreground: oklch(0.13 0.028 261.692)` and `--background: oklch(1 0 0)`, which is the registry's gray scale rather than its neutral one. Read both files and confirm that value before writing the config; the acceptance below is what proves the choice is inert either way.
-- `style` → `new-york`, likewise confirmed rather than assumed: the committed primitives are current-registry Tailwind 4 output, which is the only style the registry still ships. `src/components/ui/button.tsx` carries `shadow-xs`, `size-9`, `has-[>svg]:px-3`, and `data-slot="button"` — check the re-add diff in the acceptance below, and if it comes back different, the value is wrong and must be fixed before merging.
+- `style` → `new-york`, likewise confirmed rather than assumed: the committed primitives are Tailwind 4 registry output, which is the only style the registry still ships. `src/components/ui/button.tsx` carries `shadow-xs`, `size-9`, `has-[>svg]:px-3`, and `data-slot="button"`. Confirm the value against the re-add diff in the acceptance below, reading that diff against the import caveat immediately following.
 - Add `"add-component": "pnpm dlx shadcn@latest add"` to `package.json`, matching the `pnpm dlx` form `better-auth:schema` already uses so the CLI is not added as a dependency.
 - Do not regenerate, restyle, or reformat any existing file under `src/components/ui/`, and do not touch `src/styles.css` or `src/_styles.css`. `src/_styles.css` is the starter theme `scripts/bootstrap.js` renames over `src/styles.css` for a new project; a CLI that rewrites either stylesheet has overshot.
 
-**Acceptance.** Re-add an _existing_ primitive to a throwaway path and diff it against the committed copy; anything beyond formatting means the `style` or `baseColor` value is wrong and must be fixed before merging. Then run the script for a primitive not currently in `src/components/ui/`: it writes exactly one new file there, that file imports `cn` from `@/lib/utils`, and `src/styles.css`, `src/_styles.css`, and `src/lib/utils.ts` are byte-identical afterwards. Revert both scratch files — this PR ships the config, not a new component — and confirm `git status` is clean apart from the intended changes.
+**Establish the registry's current import contract before writing the acceptance.** The committed tree is on one contract: `src/components/ui/button.tsx` imports `cn` from `@/lib/utils` and `Slot` from `@radix-ui/react-slot`, `src/lib/utils.ts` defines `cn` over `clsx` and `tailwind-merge`, and `package.json` carries 27 individual `@radix-ui/react-*` entries. The registry's Tailwind 4 output is reported to have moved off that contract, emitting bare `cn` and `radix-ui` specifiers instead, with the CLI's import rewriter mapping only specifiers that already begin with `@/` — so `aliases.utils` never sees a bare `"cn"` and cannot redirect it. **Run the CLI once and record what it actually emits before deciding anything below.** That output, not this note, is the evidence.
+
+If it emits the bare specifiers, two things follow and both belong in the PR. The re-add diff below cannot be formatting-only, so a difference confined to those two import lines is the expected result rather than a wrong `style` or `baseColor`; and a freshly added primitive will not compile until its `cn` and Radix imports are rewritten to `@/lib/utils` and the matching `@radix-ui/react-*` package. Document that rewrite as the required step in the `CLAUDE.md` paragraphs this item already updates, so nobody later "fixes" a generated file in the wrong direction.
+
+**Out of scope, and deliberately not decided here.** Adopting the registry's contract wholesale — adding `cn` and `radix-ui`, regenerating all 46 primitives, and dropping the individual `@radix-ui/react-*`, `clsx`, and `tailwind-merge` entries — would remove that manual step, but it is a 46-file regeneration plus a dependency swap, and it changes what every downstream project generated from this template inherits. That is the owner's call and its own PR. This item ships the config against the tree as it stands; do not regenerate an existing primitive to close the gap.
+
+**Acceptance.** Re-add an _existing_ primitive to a throwaway path and diff it against the committed copy. The diff must be confined to formatting and, if the CLI emits them, the two import specifiers established above; anything else — a changed variant, class string, or exported symbol — means the `style` or `baseColor` value is wrong and must be fixed before merging. Then run the script for a primitive not currently in `src/components/ui/`: it writes exactly one new file there and nothing else, and `src/styles.css`, `src/_styles.css`, and `src/lib/utils.ts` are byte-identical afterwards. Revert both scratch files — this PR ships the config, not a new component — and confirm `git status` is clean apart from the intended changes.
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
 
