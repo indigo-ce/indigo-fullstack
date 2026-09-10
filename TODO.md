@@ -515,7 +515,7 @@ The one thing to check before picking this up: read the newest published `@cloud
 
 **Validation.** `pnpm install`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm email-worker:dev` still starts.
 
-### 28. Delete the orphaned Drizzle snapshot directory and the plugin's dead import
+### 28. [x] Delete the orphaned Drizzle snapshot directory and the plugin's dead import
 
 **Gap.** `drizzle.config.ts` sets `out: "./drizzle/migrations"`, and that directory holds the live migrations — `0000_faithful_sally_floyd.sql` through `0002_steep_ricochet.sql`, with a `meta/_journal.json` listing exactly those three. Alongside it sits `drizzle/meta/`, a second journal and two snapshots naming `0000_amusing_guardsmen` and `0001_bright_living_tribunal` — migrations whose `.sql` files exist nowhere in the repository. It is the output of an earlier `drizzle.config.ts` that wrote to `drizzle/` directly, left behind when `out` moved. Nothing reads it: `wrangler.jsonc` points `migrations_dir` at `./drizzle/migrations`, and `vitest.config.ts` reads the same path. A second `_journal.json` describing a migration history this database never had is a trap for anyone debugging a migration, and for anyone generating a new project from this template.
 
