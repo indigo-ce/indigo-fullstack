@@ -22,6 +22,7 @@ export default defineConfig({
           bindings: {
             NODE_ENV: "test",
             BETTER_AUTH_BASE_URL: "http://localhost:3000",
+            BETTER_AUTH_TRUSTED_ORIGINS: "",
             SEND_EMAIL_FROM: "Test <test@example.com>",
             BETTER_AUTH_SECRET: "test-secret-123456789",
             TEST_MIGRATIONS: migrations

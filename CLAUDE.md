@@ -238,6 +238,7 @@ React Email templates with Plunk API:
 - **Local secrets**: `.dev.vars` (copy from `.dev.vars.example`)
 - **Production secrets**: Set via `pnpm wrangler secret put VARIABLE_NAME`
 - **Public vars**: Configured in `wrangler.jsonc` under `vars` section
+- **Optional trusted origins**: `BETTER_AUTH_TRUSTED_ORIGINS` is a comma-separated list appended after `BETTER_AUTH_BASE_URL`
 - **Schema validation**: Defined in `astro.config.mjs` env schema
 
 ### Database Configuration
