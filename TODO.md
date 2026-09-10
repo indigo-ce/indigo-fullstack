@@ -28,19 +28,20 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **30** — let the dev server answer on a tunnel hostname.
+2. **31** — gate merges on a production build.
 3. **23** — send browser-initiated auth emails in the visitor's language.
 4. **24** — make the token lifetimes match what the emails promise.
-5. **31** — gate merges on a production build.
-6. **26** — wire the D1 backup script into `package.json`.
-7. **29** — commit a component-registry config.
+5. **26** — wire the D1 backup script into `package.json`.
+6. **29** — commit a component-registry config.
+
+**31 is second on purpose.** Nothing below it depends on it to compile. But 23 and 24 both change source that only `astro build` bundles end to end, and no job on `main` runs a build today — so landing the gate first means those two arrive against a real build signal in CI rather than only on the author's machine. It costs the config-only items after them nothing.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
 - **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it.
+Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. The committed `pnpm-lock.yaml` still resolves the pool at 0.22.0 as of 2026-09-10, so nothing has moved in the tree; that is the floor, not the check — the registry read is what decides.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -322,7 +323,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-**Parked (verified 2026-09-09), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree already carries `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`, and `pnpm-workspace.yaml` even exempts that miniflare from the minimum-release-age gate, but that copy belongs to the root `wrangler@4.129.0` rather than to the pool, so it does nothing for `pnpm test:run`.
+**Parked (re-confirmed against the committed `pnpm-lock.yaml` on 2026-09-10), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree already carries `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`, and `pnpm-workspace.yaml` even exempts that miniflare from the minimum-release-age gate, but that copy belongs to the root `wrangler@4.129.0` rather than to the pool, so it does nothing for `pnpm test:run`.
 
 Item 27 is what moves the pool onto the runtime line the rest of the repository already resolves. Do not attempt this item before that one has landed; confirm the pool's `workerd` accepts `2026-09-03` first, and treat a run that fails on the date as evidence 27 is not done rather than as something to work around. Do not settle for a partial date — a value chosen to satisfy the pool rather than to mirror `wrangler.jsonc` recreates the drift this item exists to close, one shorter interval later — and do not override the pool's `miniflare` in `pnpm-workspace.yaml` to force the newer date through.
 
@@ -507,7 +508,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Unblocks:** item 17.
 
-**Parked (verified 2026-09-09), and the check that unparks it.** `@cloudflare/vitest-pool-workers@0.22.0` is the newest published release and its manifest pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0`, so moving the pool today changes nothing — it resolves the older runtime line either way, while the root `wrangler@^4.129.0` resolves `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`. Attribution out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` + `workerd@1.20260903.1` / `miniflare@5.20260903.0-alpha` belong to the root pin, `wrangler@4.124.0` + `workerd@1.20260815.1` / `miniflare@5.20260815.0-alpha` belong to the pool's hard dependency, and `workerd@1.20260831.1` / `miniflare@5.20260831.0-alpha` arrive via `@astrojs/cloudflare` → `@cloudflare/vite-plugin` → `@cloudflare/unenv-preset` (out of scope, moves only with the adapter).
+**Parked, and the check that unparks it.** As of 2026-09-10 the committed `pnpm-lock.yaml` still resolves `@cloudflare/vitest-pool-workers@0.22.0`, whose entry pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0` — so nothing in the tree has moved. When it was last checked against the registry (2026-09-09) 0.22.0 was also the newest published release, which is why moving the pool today changes nothing — it resolves the older runtime line either way, while the root `wrangler@^4.129.0` resolves `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`. Attribution out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` + `workerd@1.20260903.1` / `miniflare@5.20260903.0-alpha` belong to the root pin, `wrangler@4.124.0` + `workerd@1.20260815.1` / `miniflare@5.20260815.0-alpha` belong to the pool's hard dependency, and `workerd@1.20260831.1` / `miniflare@5.20260831.0-alpha` arrive via `@astrojs/cloudflare` → `@cloudflare/vite-plugin` → `@cloudflare/unenv-preset` (out of scope, moves only with the adapter).
 
 The one thing to check before picking this up: read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked and there is nothing to land — record the version you read and stop, rather than shipping a pool bump that collapses nothing. Do not attempt item 17 until this one has actually landed.
 
@@ -541,9 +542,9 @@ The one thing to check before picking this up: read the newest published `@cloud
 - Add `"add-component": "pnpm dlx shadcn@latest add"` to `package.json`, matching the `pnpm dlx` form `better-auth:schema` already uses so the CLI is not added as a dependency.
 - Do not regenerate, restyle, or reformat any existing file under `src/components/ui/`, and do not touch `src/styles.css` or `src/_styles.css`. `src/_styles.css` is the starter theme `scripts/bootstrap.js` renames over `src/styles.css` for a new project; a CLI that rewrites either stylesheet has overshot.
 
-**Establish the registry's current import contract before writing the acceptance.** The committed tree is on one contract: `src/components/ui/button.tsx` imports `cn` from `@/lib/utils` and `Slot` from `@radix-ui/react-slot`, `src/lib/utils.ts` defines `cn` over `clsx` and `tailwind-merge`, and `package.json` carries 27 individual `@radix-ui/react-*` entries. The registry's Tailwind 4 output is reported to have moved off that contract, emitting bare `cn` and `radix-ui` specifiers instead, with the CLI's import rewriter mapping only specifiers that already begin with `@/` — so `aliases.utils` never sees a bare `"cn"` and cannot redirect it. **Run the CLI once and record what it actually emits before deciding anything below.** That output, not this note, is the evidence.
+**Expect the generated imports not to match the committed ones, and confirm it before writing the acceptance.** The committed tree is on one contract: `src/components/ui/button.tsx` imports `cn` from `@/lib/utils` and `Slot` from `@radix-ui/react-slot`, `src/lib/utils.ts` defines `cn` over `clsx` and `tailwind-merge`, and `package.json` carries 27 individual `@radix-ui/react-*` entries. The registry's current Tailwind 4 output is on a different one: it emits `import {cn} from "cn"` and `import {Slot} from "radix-ui"` — a standalone `cn` package and the unified `radix-ui` package — and the CLI's import rewriter only remaps specifiers that already begin with `@/`, so `aliases.utils` never sees the bare `"cn"` and cannot redirect it. **Run the CLI once and record what the release you actually invoke emits**; that output, not this note, is what the acceptance below is read against.
 
-If it emits the bare specifiers, two things follow and both belong in the PR. The re-add diff below cannot be formatting-only, so a difference confined to those two import lines is the expected result rather than a wrong `style` or `baseColor`; and a freshly added primitive will not compile until its `cn` and Radix imports are rewritten to `@/lib/utils` and the matching `@radix-ui/react-*` package. Document that rewrite as the required step in the `CLAUDE.md` paragraphs this item already updates, so nobody later "fixes" a generated file in the wrong direction.
+Two things follow, and both belong in the PR. The re-add diff below cannot be formatting-only, so a difference confined to those import lines is the expected result rather than evidence of a wrong `style` or `baseColor`. And a freshly added primitive will not compile against this tree until its `cn` and Radix imports are rewritten to `@/lib/utils` and the matching `@radix-ui/react-*` package. Document that rewrite as the required step in the `CLAUDE.md` paragraphs this item already updates, so nobody later "fixes" a generated file in the wrong direction by adding `cn` or `radix-ui` to `package.json` to make one component resolve.
 
 **Out of scope, and deliberately not decided here.** Adopting the registry's contract wholesale — adding `cn` and `radix-ui`, regenerating all 46 primitives, and dropping the individual `@radix-ui/react-*`, `clsx`, and `tailwind-merge` entries — would remove that manual step, but it is a 46-file regeneration plus a dependency swap, and it changes what every downstream project generated from this template inherits. That is the owner's call and its own PR. This item ships the config against the tree as it stands; do not regenerate an existing primitive to close the gap.
 
