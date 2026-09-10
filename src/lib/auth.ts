@@ -13,12 +13,16 @@ export function createAuth(env: Env, locale: string = "en") {
   if (!env.BETTER_AUTH_BASE_URL) {
     throw new Error("BETTER_AUTH_BASE_URL is not set");
   }
+  const extraOrigins =
+    env.BETTER_AUTH_TRUSTED_ORIGINS?.split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean) ?? [];
 
   return betterAuth({
     secret: env.BETTER_AUTH_SECRET,
     baseURL: env.BETTER_AUTH_BASE_URL,
     generateId: () => crypto.randomUUID().toUpperCase(),
-    trustedOrigins: [env.BETTER_AUTH_BASE_URL],
+    trustedOrigins: [env.BETTER_AUTH_BASE_URL, ...extraOrigins],
     database: drizzleAdapter(createDrizzle(env.DB), {provider: "sqlite"}),
     user: {
       changeEmail: {

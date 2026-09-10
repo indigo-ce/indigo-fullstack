@@ -29,6 +29,7 @@
   ],
   "vars": {
     "BETTER_AUTH_BASE_URL": "https://ce.indigostack.org",
+    "BETTER_AUTH_TRUSTED_ORIGINS": "",
     "SEND_EMAIL_FROM": "Indigo Stack <noreply@indigostack.org>"
   },
   "queues": {

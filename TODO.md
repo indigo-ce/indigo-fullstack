@@ -406,7 +406,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
 
-### 22. Make the auth trusted origins configurable
+### 22. [x] Make the auth trusted origins configurable
 
 **Gap.** `src/lib/auth.ts` hardcodes `trustedOrigins: [env.BETTER_AUTH_BASE_URL]`. Every other origin — a `*.workers.dev` preview deployment, a staging hostname, a local tunnel used to point a mobile client at a development server — is rejected by the auth library, and the only way to allow one today is to edit and redeploy source. This is a template: the single-origin assumption is baked into the file every downstream project inherits.
 
