@@ -551,7 +551,7 @@ If it emits the bare specifiers, two things follow and both belong in the PR. Th
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
 
-### 30. Let the dev server answer on a tunnel hostname
+### 30. [x] Let the dev server answer on a tunnel hostname
 
 **Gap.** `astro.config.mjs` sets no `vite.server.allowedHosts`, so `pnpm dev` rejects any request whose `Host` is not localhost with "Blocked request. This host is not allowed." The entire `/api/v1` plus JWT surface exists to serve mobile clients, and a device or simulator cannot reach a dev server over `localhost` — a tunnel hostname is the normal route. The only way to test one today is an uncommitted local edit to `astro.config.mjs`, which every developer has to rediscover and none can commit.
 

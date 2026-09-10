@@ -239,6 +239,7 @@ React Email templates with Plunk API:
 - **Production secrets**: Set via `pnpm wrangler secret put VARIABLE_NAME`
 - **Public vars**: Configured in `wrangler.jsonc` under `vars` section
 - **Optional trusted origins**: `BETTER_AUTH_TRUSTED_ORIGINS` is a comma-separated list appended after `BETTER_AUTH_BASE_URL`
+- **Optional dev server hosts**: `ASTRO_DEV_ALLOWED_HOSTS` is a comma-separated list read from `process.env` in `astro.config.mjs` and passed to `vite.server.allowedHosts` (dev-time only, not a Worker binding). A tunnel hostname usually has to be named here and in `BETTER_AUTH_TRUSTED_ORIGINS` — this var so the dev server answers it, and the trusted origins so auth accepts the origin
 - **Schema validation**: Defined in `astro.config.mjs` env schema
 
 ### Database Configuration

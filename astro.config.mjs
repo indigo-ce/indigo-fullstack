@@ -23,6 +23,14 @@ export default defineConfig({
             }
           : {})
       }
+    },
+    server: {
+      // Lets the dev server answer on a tunnel hostname (e.g. for testing
+      // mobile clients against `pnpm dev`) without hardcoding one.
+      allowedHosts:
+        process.env.ASTRO_DEV_ALLOWED_HOSTS?.split(",")
+          .map((host) => host.trim())
+          .filter(Boolean) ?? []
     }
   },
   integrations: [react()]

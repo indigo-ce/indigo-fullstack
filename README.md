@@ -114,7 +114,7 @@ Copy the generated string. Then, add it as a secret named `BETTER_AUTH_SECRET` u
 pnpm wrangler secret put BETTER_AUTH_SECRET
 ```
 
-Also configure `BETTER_AUTH_BASE_URL` in your `wrangler.jsonc` file under the `vars` section for production. To allow additional origins (for example preview deployments), set the optional comma-separated `BETTER_AUTH_TRUSTED_ORIGINS` var alongside it.
+Also configure `BETTER_AUTH_BASE_URL` in your `wrangler.jsonc` file under the `vars` section for production. To allow additional origins (for example preview deployments), set the optional comma-separated `BETTER_AUTH_TRUSTED_ORIGINS` var alongside it. When testing against `pnpm dev` through a tunnel hostname, name that host in both `ASTRO_DEV_ALLOWED_HOSTS` (so the dev server answers it) and `BETTER_AUTH_TRUSTED_ORIGINS` (so auth accepts the origin).
 
 ### Plunk
 
