@@ -28,13 +28,12 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **22** — make the auth trusted origins configurable. Prerequisite for 30.
-3. **30** — let the dev server answer on a tunnel hostname.
-4. **23** — send browser-initiated auth emails in the visitor's language.
-5. **24** — make the token lifetimes match what the emails promise.
-6. **31** — gate merges on a production build.
-7. **26** — wire the D1 backup script into `package.json`.
-8. **29** — commit a component-registry config.
+2. **30** — let the dev server answer on a tunnel hostname.
+3. **23** — send browser-initiated auth emails in the visitor's language.
+4. **24** — make the token lifetimes match what the emails promise.
+5. **31** — gate merges on a production build.
+6. **26** — wire the D1 backup script into `package.json`.
+7. **29** — commit a component-registry config.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
@@ -556,15 +555,15 @@ If it emits the bare specifiers, two things follow and both belong in the PR. Th
 
 **Gap.** `astro.config.mjs` sets no `vite.server.allowedHosts`, so `pnpm dev` rejects any request whose `Host` is not localhost with "Blocked request. This host is not allowed." The entire `/api/v1` plus JWT surface exists to serve mobile clients, and a device or simulator cannot reach a dev server over `localhost` — a tunnel hostname is the normal route. The only way to test one today is an uncommitted local edit to `astro.config.mjs`, which every developer has to rediscover and none can commit.
 
-**Depends on:** item 22. That item makes the auth library accept a non-default origin; without it, auth rejects the tunnel request even once Vite lets it through, so landing this one first buys a dev server that answers and an API that refuses.
+**Its prerequisite has landed.** Item 22 shipped, so `createAuth()` already appends the entries of `BETTER_AUTH_TRUSTED_ORIGINS` to `trustedOrigins`. Nothing blocks this item now. The two settings stay separate and both are needed in practice: Vite decides whether the dev server answers a `Host` at all, and the auth library decides whether it trusts the resulting origin.
 
 **Scope.**
 
-- Parse an optional comma-separated `ASTRO_DEV_ALLOWED_HOSTS` in `astro.config.mjs` — split on `,`, trim, drop empties — and pass the result to `vite.server.allowedHosts`. Use the same parsing shape item 22 introduces for `BETTER_AUTH_TRUSTED_ORIGINS` so there is one idiom for this in the repository.
+- Parse an optional comma-separated `ASTRO_DEV_ALLOWED_HOSTS` in `astro.config.mjs` — split on `,`, trim, drop empties — and pass the result to `vite.server.allowedHosts`. Reuse the idiom already in `src/lib/auth.ts` for `BETTER_AUTH_TRUSTED_ORIGINS` (`?.split(",").map((entry) => entry.trim()).filter(Boolean) ?? []`) so the repository parses these lists one way.
 - Read it from `process.env`, not from `env`. This is a dev-time Vite setting, not a Worker binding: do not add it to `wrangler.jsonc`, `.dev.vars.example`, or `Env`.
 - Unset or empty must leave `allowedHosts` exactly as Vite defaults it today, so the change is a no-op for `pnpm dev`, `pnpm build`, `pnpm preview`, and CI. Confirm Vite's own default for `server.allowedHosts` against the installed version before choosing the unset form: if it is the empty array, `process.env.ASTRO_DEV_ALLOWED_HOSTS?.split(",").map(trim).filter(Boolean) ?? []` is already the no-op and no conditional block is needed. Do not reach for `allowedHosts: true` in any branch — that disables the host check outright rather than allowing a named host.
 - Leave `vite.preview` alone. `pnpm preview` runs `wrangler dev`, not Vite's preview server, so a `preview.allowedHosts` entry here would configure a server this project never starts.
-- Add one line to the environment-configuration list in `CLAUDE.md` and `README.md`. Do not change the adapter block, the `react-dom/server.edge` alias, or the integrations list.
+- Add one line to the environment-configuration list in `CLAUDE.md` and `README.md`, beside the `BETTER_AUTH_TRUSTED_ORIGINS` line item 22 added (`CLAUDE.md:241`, `README.md:117`). Say there that a tunnel hostname usually has to be named in both places — this var so the dev server answers it, and `BETTER_AUTH_TRUSTED_ORIGINS` so auth accepts the origin — since discovering that in two steps is the whole friction this item removes. Do not change the adapter block, the `react-dom/server.edge` alias, or the integrations list.
 
 **Acceptance.** Against a running `astro dev`: with the var unset, a request carrying `Host: example.tunnel.test` is still blocked and `Host: localhost` still returns 200; with `ASTRO_DEV_ALLOWED_HOSTS=example.tunnel.test` set, that same host returns 200 while an unlisted host is still blocked. Record all four observed responses in the PR description — the no-op half is the part worth proving.
 
