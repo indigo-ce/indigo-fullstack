@@ -423,7 +423,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Validation.** `pnpm cf-types && pnpm check`, `pnpm test:run`, `pnpm format:check`, `pnpm build`.
 
-### 23. Send browser-initiated auth emails in the visitor's language
+### 23. [x] Send browser-initiated auth emails in the visitor's language
 
 **Gap.** `createAuth(env, locale)` decides the language of every email the auth library queues, and the second argument is threaded from the request almost everywhere. One caller does not thread it: `src/pages/api/auth/[...all].ts` passes `defaultLocale` outright. That file is the catch-all forwarding every browser Better Auth request to the handler, so it owns the locale for every email triggered from the client rather than from page frontmatter — which is exactly the set of flows `src/lib/auth-client.ts` drives. A visitor on a `ja` page who changes their address or requests account deletion gets the English template even though `src/components/email/*` carries the `ja` copy and `workers/indigo-email-queue-consumer/src/render-template.ts` threads the queued locale all the way through. The `ja` half of four templates is unreachable from the browser.
 
