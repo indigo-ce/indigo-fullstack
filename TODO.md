@@ -28,20 +28,19 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **31** — gate merges on a production build.
-3. **23** — send browser-initiated auth emails in the visitor's language.
-4. **24** — make the token lifetimes match what the emails promise.
-5. **26** — wire the D1 backup script into `package.json`.
-6. **29** — commit a component-registry config.
+2. **23** — send browser-initiated auth emails in the visitor's language.
+3. **24** — make the token lifetimes match what the emails promise.
+4. **26** — wire the D1 backup script into `package.json`.
+5. **29** — commit a component-registry config.
 
-**31 is second on purpose.** Nothing below it depends on it to compile. But 23 and 24 both change source that only `astro build` bundles end to end, and no job on `main` runs a build today — so landing the gate first means those two arrive against a real build signal in CI rather than only on the author's machine. It costs the config-only items after them nothing.
+**The build gate they land against is in place.** Item 31 shipped, so `.github/workflows/test.yml` now runs `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request. 23 and 24 both change source that only `astro build` bundles end to end, and that signal now exists in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it to compile, so the order is by value, not by prerequisite — 6 is first because a config that cannot parse is silently withholding every dependency update this template would otherwise receive.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
 - **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. The committed `pnpm-lock.yaml` still resolves the pool at 0.22.0 as of 2026-09-10, so nothing has moved in the tree; that is the floor, not the check — the registry read is what decides.
+Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. The committed `pnpm-lock.yaml` still resolves the pool at 0.22.0 as of 2026-09-11, so nothing has moved in the tree; that is the floor, not the check — the registry read is what decides.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -323,7 +322,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-**Parked (re-confirmed against the committed `pnpm-lock.yaml` on 2026-09-10), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree already carries `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`, and `pnpm-workspace.yaml` even exempts that miniflare from the minimum-release-age gate, but that copy belongs to the root `wrangler@4.129.0` rather than to the pool, so it does nothing for `pnpm test:run`.
+**Parked (re-confirmed against the committed `pnpm-lock.yaml` on 2026-09-11), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree already carries `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`, and `pnpm-workspace.yaml` even exempts that miniflare from the minimum-release-age gate, but that copy belongs to the root `wrangler@4.129.0` rather than to the pool, so it does nothing for `pnpm test:run`.
 
 Item 27 is what moves the pool onto the runtime line the rest of the repository already resolves. Do not attempt this item before that one has landed; confirm the pool's `workerd` accepts `2026-09-03` first, and treat a run that fails on the date as evidence 27 is not done rather than as something to work around. Do not settle for a partial date — a value chosen to satisfy the pool rather than to mirror `wrangler.jsonc` recreates the drift this item exists to close, one shorter interval later — and do not override the pool's `miniflare` in `pnpm-workspace.yaml` to force the newer date through.
 
@@ -508,7 +507,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Unblocks:** item 17.
 
-**Parked, and the check that unparks it.** As of 2026-09-10 the committed `pnpm-lock.yaml` still resolves `@cloudflare/vitest-pool-workers@0.22.0`, whose entry pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0` — so nothing in the tree has moved. When it was last checked against the registry (2026-09-09) 0.22.0 was also the newest published release, which is why moving the pool today changes nothing — it resolves the older runtime line either way, while the root `wrangler@^4.129.0` resolves `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`. Attribution out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` + `workerd@1.20260903.1` / `miniflare@5.20260903.0-alpha` belong to the root pin, `wrangler@4.124.0` + `workerd@1.20260815.1` / `miniflare@5.20260815.0-alpha` belong to the pool's hard dependency, and `workerd@1.20260831.1` / `miniflare@5.20260831.0-alpha` arrive via `@astrojs/cloudflare` → `@cloudflare/vite-plugin` → `@cloudflare/unenv-preset` (out of scope, moves only with the adapter).
+**Parked, and the check that unparks it.** As of 2026-09-11 the committed `pnpm-lock.yaml` still resolves `@cloudflare/vitest-pool-workers@0.22.0`, whose entry pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0`, and the lockfile still carries all three `miniflare`/`workerd` lines (`5.20260815.0-alpha` / `1.20260815.1`, `5.20260831.0-alpha` / `1.20260831.1`, `5.20260903.0-alpha` / `1.20260903.1`) alongside `wrangler@4.124.0` and `wrangler@4.129.0` — so nothing in the tree has moved. When it was last checked against the registry (2026-09-09) 0.22.0 was also the newest published release, which is why moving the pool today changes nothing — it resolves the older runtime line either way, while the root `wrangler@^4.129.0` resolves `miniflare@5.20260903.0-alpha` / `workerd@1.20260903.1`. Attribution out of the committed `pnpm-lock.yaml`: `wrangler@4.129.0` + `workerd@1.20260903.1` / `miniflare@5.20260903.0-alpha` belong to the root pin, `wrangler@4.124.0` + `workerd@1.20260815.1` / `miniflare@5.20260815.0-alpha` belong to the pool's hard dependency, and `workerd@1.20260831.1` / `miniflare@5.20260831.0-alpha` arrive via `@astrojs/cloudflare` → `@cloudflare/vite-plugin` → `@cloudflare/unenv-preset` (out of scope, moves only with the adapter).
 
 The one thing to check before picking this up: read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked and there is nothing to land — record the version you read and stop, rather than shipping a pool bump that collapses nothing. Do not attempt item 17 until this one has actually landed.
 
