@@ -28,12 +28,11 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **23** — send browser-initiated auth emails in the visitor's language.
-3. **24** — make the token lifetimes match what the emails promise.
-4. **26** — wire the D1 backup script into `package.json`.
-5. **29** — commit a component-registry config.
+2. **24** — make the token lifetimes match what the emails promise.
+3. **26** — wire the D1 backup script into `package.json`.
+4. **29** — commit a component-registry config.
 
-**The build gate they land against is in place.** Item 31 shipped, so `.github/workflows/test.yml` now runs `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request. 23 and 24 both change source that only `astro build` bundles end to end, and that signal now exists in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it to compile, so the order is by value, not by prerequisite — 6 is first because a config that cannot parse is silently withholding every dependency update this template would otherwise receive.
+**The build gate they land against is in place.** Item 31 shipped, so `.github/workflows/test.yml` now runs `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request. 24 changes source that only `astro build` bundles end to end, and that signal now exists in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it to compile, so the order is by value, not by prerequisite — 6 is first because a config that cannot parse is silently withholding every dependency update this template would otherwise receive.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
