@@ -289,4 +289,34 @@ describe("JWT Middleware Unit Tests", () => {
       code: "UNAUTHORIZED"
     });
   });
+
+  it("lets a user-lookup failure propagate instead of answering 401", async () => {
+    const {jwtVerify, createLocalJWKSet} = await import("jose");
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {}
+    );
+    (createLocalJWKSet as ReturnType<typeof vi.fn>).mockReturnValue({});
+    (jwtVerify as ReturnType<typeof vi.fn>).mockResolvedValue({
+      payload: {sub: "user-123", email: "test@example.com"}
+    });
+
+    const app = buildApp({
+      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env,
+      db: {
+        query: {
+          user: {findFirst: vi.fn().mockRejectedValue(new Error("D1 down"))}
+        }
+      } as unknown as APIRouteContext["Variables"]["db"]
+    });
+    const response = await app.request("/", {
+      headers: {Authorization: "Bearer valid-token"}
+    });
+
+    // Hono's default error handler answers 500 here; in the real app the
+    // shared handleAPIError renders the JSON 500. Either way it must not
+    // be the middleware's 401 UNAUTHORIZED.
+    expect(response.status).toBe(500);
+  });
 });

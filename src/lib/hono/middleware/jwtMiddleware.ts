@@ -74,27 +74,6 @@ export const jwtMiddleware = async (
         401
       );
     }
-
-    // Serve the user from the database so a deleted account stops being
-    // authorized the moment its row is gone and profile reads never go stale.
-    const db = c.get("db");
-    const row = await db.query.user.findFirst({
-      where: eq(user.id, payload.sub)
-    });
-
-    if (!row) {
-      return c.json(
-        {
-          error: "You are not authorized to access this resource",
-          code: "UNAUTHORIZED"
-        },
-        401
-      );
-    }
-
-    c.set("user", row);
-
-    await next();
   } catch (error) {
     if (error instanceof JOSEError && error.code === "ERR_JWT_EXPIRED") {
       return c.json(
@@ -112,4 +91,26 @@ export const jwtMiddleware = async (
       );
     }
   }
+
+  // Serve the user from the database outside the JWT-error catch, so only
+  // an absent row answers 401 here. A lookup failure propagates to the
+  // shared error handler instead of being misreported as an auth failure.
+  const db = c.get("db");
+  const row = await db.query.user.findFirst({
+    where: eq(user.id, payload.sub)
+  });
+
+  if (!row) {
+    return c.json(
+      {
+        error: "You are not authorized to access this resource",
+        code: "UNAUTHORIZED"
+      },
+      401
+    );
+  }
+
+  c.set("user", row);
+
+  await next();
 };
