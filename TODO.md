@@ -28,18 +28,19 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **24** — make the token lifetimes match what the emails promise.
+2. **33** — serve the API user from the database instead of from the access token's claims.
 3. **26** — wire the D1 backup script into `package.json`.
-4. **29** — commit a component-registry config.
+4. **32** — put the email consumer worker on the app's compatibility date.
+5. **29** — commit a component-registry config.
 
-**The build gate they land against is in place.** Item 31 shipped, so `.github/workflows/test.yml` now runs `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request. 24 changes source that only `astro build` bundles end to end, and that signal now exists in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it to compile, so the order is by value, not by prerequisite — 6 is first because a config that cannot parse is silently withholding every dependency update this template would otherwise receive.
+**The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request — type errors, formatting drift, and build-only failures are all caught in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it, so the order is by value, not by prerequisite: 6 is first because a config that cannot parse is silently withholding every dependency update this template would otherwise receive, and 33 is second because it is the only open item that changes what an authenticated request is allowed to do.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
 - **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. The committed `pnpm-lock.yaml` still resolves the pool at 0.22.0 as of 2026-09-11, so nothing has moved in the tree; that is the floor, not the check — the registry read is what decides.
+Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. The committed `pnpm-lock.yaml` still resolves the pool at 0.22.0 as of 2026-09-12, and still carries all three `miniflare`/`workerd` lines alongside `wrangler@4.124.0` and `wrangler@4.129.0`, so nothing has moved in the tree. That is the floor, not the check — the registry read is what decides, and it has not been performed since 2026-09-09.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -315,7 +316,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 - Set `compatibilityDate` to `2026-09-03` and keep the comment accurate about what it mirrors.
 - **Do the reading first, and put it in the PR description.** List the compatibility flags that become default between `2025-04-30` and `2026-09-03`, read out of the installed `wrangler`/`workerd` flag table rather than from memory, and say for each whether anything under `src/`, `tests/`, or `workers/` depends on the old behaviour. That list is the evidence for this item; a bump merged without it is a guess. If one of them does change behaviour this repository relies on, pin that single flag in `compatibilityFlags` alongside the new date and explain it, rather than abandoning the change.
 - `compatibilityFlags: ["nodejs_compat"]` stays exactly as written. `src/plugins/better-auth/refresh-access/index.ts` calls `Buffer.from(...)` on the sign-in path and `tests/integration/auth-routes.test.ts` exercises it, so the flag is load-bearing; confirm it still resolves at the newer date rather than assuming it.
-- **Out of scope, deliberately.** `workers/indigo-email-queue-consumer/wrangler.jsonc` declares `2026-01-14`, a third date. That is a separately deployed Worker with its own `wrangler dev`/`deploy` path and no coverage under `tests/`, so moving its runtime date has its own blast radius and belongs in its own PR. Do not touch it here, and do not change the root `wrangler.jsonc` — it is the value being mirrored _to_. Do not add or remove a binding, and do not upgrade `wrangler`, `@cloudflare/vitest-pool-workers`, or `@astrojs/cloudflare`.
+- **Out of scope, deliberately.** `workers/indigo-email-queue-consumer/wrangler.jsonc` declares `2026-01-14`, a third date. That is a separately deployed Worker with its own `wrangler dev`/`deploy` path and no coverage under `tests/`, so moving its runtime date has its own blast radius and belongs in its own PR — item 32, which is not parked and can land before this one. Do not touch it here, and do not change the root `wrangler.jsonc` — it is the value being mirrored _to_. Do not add or remove a binding, and do not upgrade `wrangler`, `@cloudflare/vitest-pool-workers`, or `@astrojs/cloudflare`.
 
 **Acceptance.** `pnpm test:run` reports the same file and test counts as before, with `tests/integration/auth-routes.test.ts` and `tests/integration/env-bindings.test.ts` passing unchanged — between them they exercise `Buffer`, D1, KV, and the queue producer under the test runtime. A search of `vitest.config.ts` for `2025-04-30` returns nothing.
 
@@ -583,3 +584,39 @@ Two things follow, and both belong in the PR. The re-add diff below cannot be fo
 **Acceptance.** The gate is real, not decorative: introduce a deliberate build-only failure — a page importing a module that does not exist is the cheapest — confirm `pnpm check` still passes while `pnpm build` fails, then revert. Quote both outcomes in the PR. The workflow is green on the branch with the step added.
 
 **Validation.** `pnpm build` locally, and a green `Test` workflow with the added step.
+
+### 32. Put the email consumer worker on the app's compatibility date
+
+**Gap.** The repository declares two runtime dates. The root `wrangler.jsonc` — the Worker serving every page and the whole `/api/v1` surface — runs on `compatibility_date: "2026-09-03"`. `workers/indigo-email-queue-consumer/wrangler.jsonc` still declares `2026-01-14`, roughly eight months of older `workerd` defaults, for code that renders the app's own `src/components/email/*` templates through the app's own `@react-email/render` (its `render-template.ts` reaches both through the `@app` alias). Both Workers are run by the same binary: `pnpm email-worker:dev` and `pnpm email-worker:deploy` invoke the root `wrangler` with `--config`, and the root pin is `^4.129.0`. So the consumer is the one thing in the repository asking that binary for an older runtime than everything else it runs, and nothing records a reason. Item 17 deliberately left this file alone because it is a separately deployed Worker with its own blast radius; this is that separate PR.
+
+**Not blocked by the parked pair.** Items 17 and 27 are stuck behind `@cloudflare/vitest-pool-workers`, whose `workerd` refuses any compatibility date after `2026-08-22`. That constraint does not reach here: nothing under `tests/` boots the consumer's runtime — `tests/unit/email-worker-render.test.ts` imports `renderEmailTemplate` into the _app's_ pool and never starts the worker — so this date is validated by `wrangler` alone, and the root pin already resolves a `workerd` that accepts `2026-09-03`.
+
+**Scope.**
+
+- Set `compatibility_date` to `2026-09-03` in `workers/indigo-email-queue-consumer/wrangler.jsonc`, matching the root.
+- **Do the reading first, and put it in the PR description.** List the compatibility flags that become default between `2026-01-14` and `2026-09-03`, read out of the installed `wrangler`/`workerd` flag table rather than from memory, and say for each whether the worker's `src/index.ts`, `src/send-email.ts`, `src/render-template.ts`, or the templates they reach through `@app` depend on the old behaviour. That list is the evidence for this item; a bump merged without it is a guess. If one flag does change behaviour the worker relies on, pin that single flag in `compatibility_flags` beside the new date and explain it rather than abandoning the change.
+- `compatibility_flags: ["nodejs_compat"]` stays exactly as written — `send-email.ts` and the React Email render path are what need it. Confirm it still resolves at the newer date rather than assuming it.
+- **Out of scope, deliberately.** The root `wrangler.jsonc` is the value being matched _to_ and does not move. `compatibilityDate` in `vitest.config.ts` is item 17 and stays parked. Do not add, remove, or retune a binding, the `queues.consumers` block, `observability`, or any dependency version.
+
+**Acceptance.** `wrangler deploy --dry-run --config workers/indigo-email-queue-consumer/wrangler.jsonc` bundles the worker against the new date and exits 0 without publishing — quote the output, including the compatibility date it reports. `pnpm email-worker:dev` still starts. `pnpm email-worker:check` exits 0 and `pnpm test:run` reports the same file and test counts, with `tests/unit/email-worker-render.test.ts` passing unchanged — it is what proves the templates the worker renders still render. A search of the worker's config for `2026-01-14` returns nothing.
+
+**Validation.** `pnpm email-worker:check`, `pnpm email-worker:dev`, `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
+
+### 33. Serve the API user from the database instead of from the access token's claims
+
+**Gap.** `src/lib/hono/middleware/jwtMiddleware.ts` assembles the value it puts on the context out of the verified JWT payload: `id` from `payload.sub`, `name` from `payload.name` or `""`, `emailVerified` from the claim or `false`, `image` from the claim or `null`, and `createdAt`/`updatedAt` from claim strings or, when either is absent, `new Date()`. The literal is annotated `typeof user.$inferSelect`, so `APIRouteContext` promises a `user` row while holding a reconstruction of one, and `accountRoutes.get("/profile")` returns that object verbatim — `GET /api/v1/account/profile` answers with whatever the token carried when it was minted.
+
+**What that costs.** `createAuth()` enables both `user.deleteUser` and `user.changeEmail` (`src/lib/auth.ts`), and `src/components/DeleteConfirmation.tsx` calls `authClient.deleteUser()`. Deleting an account removes the `user` row and cascades its `session` rows, which ends the browser session and invalidates the refresh token — but an access token already issued is a signed JWT that this middleware verifies without ever reading the database, so every route under `/api/v1/account/*` keeps answering 200 for a deleted account until that token expires. A changed name or email is the milder version of the same defect: the profile endpoint serves the stale value for the life of the token. The middleware has `c.get("db")` available and does not use it.
+
+**Scope.**
+
+- After the `payload.sub` guard passes, select the `user` row by primary key through `c.get("db")` and `c.set("user", row)`. `d1Middleware` runs on the `/api/v1` chain ahead of `accountRoutes` (`src/pages/api/[...path].ts`), so the binding is there; confirm that ordering rather than assuming it.
+- When no row matches, return the existing 401 `{error: "You are not authorized to access this resource", code: "UNAUTHORIZED"}`. Reuse the shape the catch block already returns instead of inventing a status or a code — no client-visible contract moves in this item.
+- Delete only the hand-assembled `userData` literal. Keep the `!token` 401, the `BETTER_AUTH_BASE_URL` 500, the `!payload.sub` and `!payload.email` guards, both `ERR_JWT_EXPIRED` branches, and the forced-refresh retry item 20 added.
+- Do not change `accountRoutes`, `APIRouteContext`, the middleware order in `createHonoApp`, or any success payload. Do not add filtering, caching, or a second lookup anywhere else.
+
+**Accepted cost.** One primary-key D1 read per authenticated request under `/api/v1/account/*` — two routes today. State it in the PR rather than leaving it implicit.
+
+**Acceptance.** Prove the gap before fixing it. In `tests/integration/api-surface.test.ts`: sign in, delete that `user` row through Drizzle, then call `/account/profile` with the access token the sign-in returned — it answers 200 today and must answer 401 after the change; the observed pre-change body belongs in the PR description. Add a second case that updates the row's `name` through Drizzle after sign-in and asserts the profile response carries the stored name, not the claim. In `tests/unit/middleware/jwt-middleware.test.ts`, whose Hono harness already accepts a `db` fixture, add a case for a verified token whose row is absent returning 401 without reaching the terminal handler; every existing case there keeps its name and its meaning.
+
+**Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`, `pnpm build`.
