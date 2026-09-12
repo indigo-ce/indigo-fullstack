@@ -43,6 +43,7 @@ export function createAuth(env: Env, locale: string = "en") {
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: false, // Set to true to require email verification to sign in
+      resetPasswordTokenExpiresIn: 86400, // 24 hours to match email copy
       sendResetPassword: async ({user, url}) => {
         await queueEmail(
           user.email,
@@ -58,6 +59,7 @@ export function createAuth(env: Env, locale: string = "en") {
     emailVerification: {
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
+      expiresIn: 86400, // 24 hours to match email copy
       sendVerificationEmail: async ({user, url}) => {
         // Replace the API endpoint with our custom verification redirect page
         const customUrl = url.replace(

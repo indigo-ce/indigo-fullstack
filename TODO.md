@@ -437,7 +437,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`.
 
-### 24. Make the verification and reset token lifetimes match what the emails promise
+### 24. [x] Make the verification and reset token lifetimes match what the emails promise
 
 **Gap.** `src/components/email/EmailVerification.tsx` and `src/components/email/PasswordReset.tsx` both promise a 24-hour window, in both locales — `"This link will expire in 24 hours."` and `"このリンクは24時間で期限切れになります。"`. `createAuth()` in `src/lib/auth.ts` sets neither `emailVerification.expiresIn` nor `emailAndPassword.resetPasswordTokenExpiresIn`, so the auth library's much shorter defaults apply. A user who follows the stated window gets a dead link, and for verification the resend flow is the only recovery path; for password reset there is no in-page recovery at all, only starting over.
 
