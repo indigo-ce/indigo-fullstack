@@ -30,6 +30,12 @@ type ContextFixture = {
   db?: APIRouteContext["Variables"]["db"];
 };
 
+function mockDb(row: unknown) {
+  return {
+    query: {user: {findFirst: vi.fn().mockResolvedValue(row)}}
+  } as unknown as APIRouteContext["Variables"]["db"];
+}
+
 function buildApp(fixture: ContextFixture = {}) {
   const app = new Hono<APIRouteContext>();
   app.use("*", async (c, next) => {
@@ -140,7 +146,16 @@ describe("JWT Middleware Unit Tests", () => {
     });
 
     const app = buildApp({
-      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env
+      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env,
+      db: mockDb({
+        id: mockPayload.sub,
+        name: "Stored Name",
+        email: mockPayload.email,
+        emailVerified: true,
+        image: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
     });
     const response = await app.request("/", {
       headers: {Authorization: "Bearer valid-token"}
@@ -151,7 +166,7 @@ describe("JWT Middleware Unit Tests", () => {
     expect(body).toEqual({
       user: expect.objectContaining({
         id: mockPayload.sub,
-        name: mockPayload.name,
+        name: "Stored Name",
         email: mockPayload.email
       })
     });
@@ -182,7 +197,16 @@ describe("JWT Middleware Unit Tests", () => {
       .mockResolvedValueOnce({payload: retryPayload});
 
     const app = buildApp({
-      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env
+      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env,
+      db: mockDb({
+        id: retryPayload.sub,
+        name: retryPayload.name,
+        email: retryPayload.email,
+        emailVerified: true,
+        image: null,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
     });
     const response = await app.request("/", {
       headers: {Authorization: "Bearer valid-token"}
@@ -236,5 +260,63 @@ describe("JWT Middleware Unit Tests", () => {
       code: "UNAUTHORIZED"
     });
     expect(jwksCache.default.getKeys).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a verified token whose user row is absent", async () => {
+    const {jwtVerify, createLocalJWKSet} = await import("jose");
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {}
+    );
+    (createLocalJWKSet as ReturnType<typeof vi.fn>).mockReturnValue({});
+    (jwtVerify as ReturnType<typeof vi.fn>).mockResolvedValue({
+      payload: {sub: "deleted-user", email: "deleted@example.com"}
+    });
+
+    const app = buildApp({
+      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env,
+      db: mockDb(null)
+    });
+    const response = await app.request("/", {
+      headers: {Authorization: "Bearer valid-token"}
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body).toEqual({
+      error: "You are not authorized to access this resource",
+      code: "UNAUTHORIZED"
+    });
+  });
+
+  it("lets a user-lookup failure propagate instead of answering 401", async () => {
+    const {jwtVerify, createLocalJWKSet} = await import("jose");
+
+    const jwksCache = await import("@/lib/jwks-cache");
+    (jwksCache.default.getKeys as ReturnType<typeof vi.fn>).mockResolvedValue(
+      {}
+    );
+    (createLocalJWKSet as ReturnType<typeof vi.fn>).mockReturnValue({});
+    (jwtVerify as ReturnType<typeof vi.fn>).mockResolvedValue({
+      payload: {sub: "user-123", email: "test@example.com"}
+    });
+
+    const app = buildApp({
+      env: {BETTER_AUTH_BASE_URL: "http://localhost:3000"} as unknown as Env,
+      db: {
+        query: {
+          user: {findFirst: vi.fn().mockRejectedValue(new Error("D1 down"))}
+        }
+      } as unknown as APIRouteContext["Variables"]["db"]
+    });
+    const response = await app.request("/", {
+      headers: {Authorization: "Bearer valid-token"}
+    });
+
+    // Hono's default error handler answers 500 here; in the real app the
+    // shared handleAPIError renders the JSON 500. Either way it must not
+    // be the middleware's 401 UNAUTHORIZED.
+    expect(response.status).toBe(500);
   });
 });

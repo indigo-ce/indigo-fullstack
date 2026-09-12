@@ -602,7 +602,7 @@ Two things follow, and both belong in the PR. The re-add diff below cannot be fo
 
 **Validation.** `pnpm email-worker:check`, `pnpm email-worker:dev`, `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
 
-### 33. Serve the API user from the database instead of from the access token's claims
+### 33. [x] Serve the API user from the database instead of from the access token's claims
 
 **Gap.** `src/lib/hono/middleware/jwtMiddleware.ts` assembles the value it puts on the context out of the verified JWT payload: `id` from `payload.sub`, `name` from `payload.name` or `""`, `emailVerified` from the claim or `false`, `image` from the claim or `null`, and `createdAt`/`updatedAt` from claim strings or, when either is absent, `new Date()`. The literal is annotated `typeof user.$inferSelect`, so `APIRouteContext` promises a `user` row while holding a reconstruction of one, and `accountRoutes.get("/profile")` returns that object verbatim — `GET /api/v1/account/profile` answers with whatever the token carried when it was minted.
 
