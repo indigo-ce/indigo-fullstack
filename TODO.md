@@ -28,12 +28,12 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
 1. **6** — make the Dependabot config parse.
-2. **33** — serve the API user from the database instead of from the access token's claims.
+2. **34** — publish a machine-readable description of the `/api/v1` surface.
 3. **26** — wire the D1 backup script into `package.json`.
 4. **32** — put the email consumer worker on the app's compatibility date.
 5. **29** — commit a component-registry config.
 
-**The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request — type errors, formatting drift, and build-only failures are all caught in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it, so the order is by value, not by prerequisite: 6 is first because a config that cannot parse is silently withholding every dependency update this template would otherwise receive, and 33 is second because it is the only open item that changes what an authenticated request is allowed to do.
+**The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request — type errors, formatting drift, and build-only failures are all caught in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it, so the order is by value, not by prerequisite: 6 is first because a config that cannot parse is silently withholding every dependency update this template would otherwise receive, and 34 is second because it is the only open item closing a contract that outside clients build against, and the one whose drift compounds the longer it sits.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
@@ -618,5 +618,38 @@ Two things follow, and both belong in the PR. The re-add diff below cannot be fo
 **Accepted cost.** One primary-key D1 read per authenticated request under `/api/v1/account/*` — two routes today. State it in the PR rather than leaving it implicit.
 
 **Acceptance.** Prove the gap before fixing it. In `tests/integration/api-surface.test.ts`: sign in, delete that `user` row through Drizzle, then call `/account/profile` with the access token the sign-in returned — it answers 200 today and must answer 401 after the change; the observed pre-change body belongs in the PR description. Add a second case that updates the row's `name` through Drizzle after sign-in and asserts the profile response carries the stored name, not the claim. In `tests/unit/middleware/jwt-middleware.test.ts`, whose Hono harness already accepts a `db` fixture, add a case for a verified token whose row is absent returning 401 without reaching the terminal handler; every existing case there keeps its name and its meaning.
+
+**Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`, `pnpm build`.
+
+**Landed as #71.** `src/lib/hono/middleware/jwtMiddleware.ts` now reads the `user` row through `c.get("db")`; the hand-assembled `userData` literal is gone.
+
+### 34. Publish a machine-readable description of the `/api/v1` surface
+
+**Gap.** The only description of the mobile API is prose in `CLAUDE.md`, and it has already drifted from the code in four ways a client author would act on.
+
+- It lists seven `/api/v1/auth/*` endpoints and nothing else. `createHonoApp` in `src/pages/api/[...path].ts` also registers `GET /api/v1/health`, `GET /api/v1/routes`, `GET /api/v1/account/profile`, and `GET /api/v1/account/posts` — the last two behind `jwtMiddleware`, which is the entire reason the auth endpoints mint an access token.
+- It documents `POST /api/v1/auth/sign-in` as returning `{accessToken, refreshToken}`. `signInTokens` in `src/plugins/better-auth/refresh-access/index.ts` returns `{user: {id, email, name, image}, accessToken, refreshToken, tokenType: "Bearer"}`.
+- `/auth/refresh-access` and `/auth/revoke-access` are two bare bullets carrying no request body, no response, and no status. Both require `{refreshToken}` (`refreshTokenSchema` in `src/lib/hono/routes/auth-routes.ts`) and return `{accessToken, refreshToken, tokenType}` and `{success: true}` respectively.
+- Nothing records the error contract. `handleAPIError` renders every failure as `{error}`, `app.notFound` returns 404 `{error: "Not found"}`, and the auth routes return 400 `{error: "Invalid JSON body"}` and `{error: "Missing required fields: …"}`. A client sees one body shape across every failure and the documentation never says so.
+
+`README.md` does not mention `/api/v1` at all. This is a template, so every project generated from it inherits the prose and the drift.
+
+**Why a document rather than better prose.** Prose drifts silently — it already has, four times, across a surface of eleven operations. `GET /api/v1/routes` already enumerates the registered routes at run time, so a served document can be cross-checked against the app in both directions by a test. That is what makes the contract unable to drift again without CI going red, and it is the whole value of this item.
+
+**Scope.**
+
+- Add `src/lib/hono/routes/openapi.ts` exporting one OpenAPI 3.1 document object, and register it in `createHonoApp` as `v1.get("/openapi.json", (c) => c.json(openapiDocument))`, ahead of `v1.get("/routes", …)`. Serve it from the Hono app rather than as an Astro page under `src/pages/api/v1/`: `/routes` builds its list from `v1.routes`, so a Hono-registered path lands there automatically and the cross-check below needs no build-time route discovery.
+- Cover exactly the eleven operations the app registers once this one is added — `/health`, `/routes`, `/openapi.json`, the seven `/auth/*` posts, and `/account/profile` and `/account/posts`. Read each request shape off the zod schemas in `src/lib/hono/routes/auth-routes.ts` and each response shape off the handler that produces it. Do not document a field no handler returns.
+- Declare two security schemes: `basicAuth` (`type: http`, `scheme: basic`) on `/auth/sign-in`, which reads an `Authorization: Basic` header rather than a body, and `bearerAuth` (`type: http`, `scheme: bearer`, `bearerFormat: JWT`) on the two `/account/*` routes. Every other operation carries `security: []`.
+- Declare a shared `Error` schema (`{error: string}`) plus reusable `BadRequest`, `Unauthorized`, and `NotFound` responses under `components`, and `$ref` them rather than repeating the body eleven times. Give every operation a unique camelCase `operationId` — that is the identifier a client generator names its emitted method after, and adding it later means renaming every generated method.
+- Replace the endpoint list in `CLAUDE.md`'s "Mobile Authentication API" section with a pointer to `GET /api/v1/openapi.json` as the contract, and correct the sign-in return line to the shape the plugin actually returns. Keep the locale-handling prose and the `Accept-Language` guidance exactly as they are — that is behaviour the document does not capture.
+
+**The API does not move in this item.** No path, method, status, request field, or response field changes. If writing the document surfaces a handler whose real shape you would rather change, record it in the PR and document what ships today; correcting it is a separate item with its own acceptance.
+
+**Out of scope, deliberately.** Do not add a spec-generation library, a zod-to-OpenAPI bridge, or a documentation UI — the document is a hand-written object held honest by a test, and a generator is a dependency decision with its own blast radius. Do not describe `/api/auth/*`: that is Better Auth's own handler surface forwarded by `src/pages/api/auth/[...all].ts`, not this router's, and its shape is upstream's to change.
+
+**Acceptance.** A new `tests/integration/openapi.test.ts` asserts four things. `GET /api/v1/openapi.json` answers 200 with `openapi` matching `^3\.1\.`. The set of `METHOD /api/v1<path>` keys derived from `paths` equals the array `GET /api/v1/routes` returns — compared as sets in both directions, so an added route with no documentation and a documented path with no route each fail. `/auth/sign-in` carries `security: [{basicAuth: []}]` and `/account/profile` carries `security: [{bearerAuth: []}]`. Every operation has a non-empty, unique `operationId`.
+
+Prove the cross-check bites rather than assuming it: register a throwaway `v1.get("/scratch", …)`, confirm the suite goes red, remove it, and quote both outcomes in the PR. `tests/integration/api-surface.test.ts` needs exactly one edit — `"GET /api/v1/openapi.json"` added to its `expectedRoutes` array, which it compares as an exact set with a length check. Any other edit to that file means the change has overshot.
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`, `pnpm build`.
