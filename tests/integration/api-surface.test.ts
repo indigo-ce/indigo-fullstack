@@ -31,9 +31,12 @@ async function responseBody(response: Response): Promise<unknown> {
   return response.json();
 }
 
-async function signIn(): Promise<string> {
+async function signInAs(
+  signInEmail: string,
+  signInPassword: string
+): Promise<string> {
   const response = await request("/auth/sign-in", "POST", {
-    Authorization: `Basic ${btoa(`${email}:${password}`)}`
+    Authorization: `Basic ${btoa(`${signInEmail}:${signInPassword}`)}`
   });
 
   expect(response.status).toBe(200);
@@ -41,6 +44,10 @@ async function signIn(): Promise<string> {
   expect(body.accessToken).toEqual(expect.any(String));
 
   return body.accessToken as string;
+}
+
+async function signIn(): Promise<string> {
+  return signInAs(email, password);
 }
 
 describe("API surface integration", () => {
@@ -127,6 +134,43 @@ describe("API surface integration", () => {
       emailVerified: createdUser.emailVerified,
       createdAt: createdUser.createdAt.toISOString(),
       updatedAt: createdUser.updatedAt.toISOString()
+    });
+  });
+
+  it("serves the stored name instead of the token claim", async () => {
+    const database = createDrizzle(env.DB);
+    await database
+      .update(user)
+      .set({name: "Stored Name"})
+      .where(eq(user.id, createdUser.id));
+
+    const response = await request("/account/profile", "GET", {
+      Authorization: `Bearer ${accessToken}`
+    });
+
+    expect(response.status).toBe(200);
+    const body = (await responseBody(response)) as Record<string, unknown>;
+    expect(body.name).toBe("Stored Name");
+  });
+
+  it("rejects a token whose user row was deleted", async () => {
+    const deletedEmail = "api-surface-deleted@example.com";
+    await createAuth(env as Env).api.signUpEmail({
+      body: {email: deletedEmail, password, name: "Deleted User"}
+    });
+    const deletedToken = await signInAs(deletedEmail, password);
+
+    const database = createDrizzle(env.DB);
+    await database.delete(user).where(eq(user.email, deletedEmail));
+
+    const response = await request("/account/profile", "GET", {
+      Authorization: `Bearer ${deletedToken}`
+    });
+
+    expect(response.status).toBe(401);
+    await expect(responseBody(response)).resolves.toEqual({
+      error: "You are not authorized to access this resource",
+      code: "UNAUTHORIZED"
     });
   });
 });

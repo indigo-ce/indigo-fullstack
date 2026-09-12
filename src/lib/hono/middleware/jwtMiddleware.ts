@@ -1,5 +1,6 @@
 import {jwtVerify, createLocalJWKSet} from "jose";
 import {JOSEError} from "jose/errors";
+import {eq} from "drizzle-orm";
 import jwksCache from "@/lib/jwks-cache";
 import {user} from "@/db/schema";
 import type {APIRouteContext} from "@/pages/api/[...path]";
@@ -74,27 +75,24 @@ export const jwtMiddleware = async (
       );
     }
 
-    // Create user object with proper type checking
-    const userData: typeof user.$inferSelect = {
-      id: payload.sub,
-      name: typeof payload.name === "string" ? payload.name : "",
-      email: payload.email,
-      emailVerified:
-        typeof payload.emailVerified === "boolean"
-          ? payload.emailVerified
-          : false,
-      image: typeof payload.image === "string" ? payload.image : null,
-      createdAt:
-        typeof payload.createdAt === "string"
-          ? new Date(payload.createdAt)
-          : new Date(),
-      updatedAt:
-        typeof payload.updatedAt === "string"
-          ? new Date(payload.updatedAt)
-          : new Date()
-    };
+    // Serve the user from the database so a deleted account stops being
+    // authorized the moment its row is gone and profile reads never go stale.
+    const db = c.get("db");
+    const row = await db.query.user.findFirst({
+      where: eq(user.id, payload.sub)
+    });
 
-    c.set("user", userData);
+    if (!row) {
+      return c.json(
+        {
+          error: "You are not authorized to access this resource",
+          code: "UNAUTHORIZED"
+        },
+        401
+      );
+    }
+
+    c.set("user", row);
 
     await next();
   } catch (error) {
