@@ -31,36 +31,30 @@ const buttonClasses = buttonVariants({variant: "outline", size: "sm"});
 
 <Layout title={t.nav.dashboard}>
   <div class="dashboard mx-auto max-w-4xl p-6 pt-20">
-    <h1 class="text-foreground mb-4 text-2xl font-bold">
-      {t.nav.dashboard}
-    </h1>
+    <h1 class="text-foreground mb-4 text-2xl font-bold">{t.nav.dashboard}</h1>
 
-    {
-      verified === "true" && (
-        <div
-          class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950"
-          role="status"
-        >
-          <p class="text-sm text-green-800 dark:text-green-200">
-            {t.auth.emailVerified}
-          </p>
-        </div>
-      )
-    }
+    {verified === "true" && (
+      <div
+        class="mb-6 rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950"
+        role="status"
+      >
+        <p class="text-sm text-green-800 dark:text-green-200">
+          {t.auth.emailVerified}
+        </p>
+      </div>
+    )}
 
-    {
-      !user.emailVerified && (
-        <div class="mb-4 flex items-center justify-between rounded-lg bg-orange-100 px-2 py-2 dark:bg-yellow-900">
-          <p class="ml-2 text-sm text-orange-900 dark:text-yellow-100">
-            {locale === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
-            {locale === "ja" ? "は確認されていません" : "is not verified"}
-          </p>
-          <a href={verifyEmailUrl} class={buttonClasses}>
-            {t.dashboard.noEmailReceived}
-          </a>
-        </div>
-      )
-    }
+    {!user.emailVerified && (
+      <div class="mb-4 flex items-center justify-between rounded-lg bg-orange-100 px-2 py-2 dark:bg-yellow-900">
+        <p class="ml-2 text-sm text-orange-900 dark:text-yellow-100">
+          {locale === "ja" ? "メール" : "Email"} <strong>{user.email}</strong>{" "}
+          {locale === "ja" ? "は確認されていません" : "is not verified"}
+        </p>
+        <a href={verifyEmailUrl} class={buttonClasses}>
+          {t.dashboard.noEmailReceived}
+        </a>
+      </div>
+    )}
 
     <Welcome user={user} locale={locale} />
     <div class="flex flex-wrap items-center gap-4">

@@ -311,7 +311,6 @@ The application uses a unified error display system for consistent user feedback
 <!-- Astro Components -->import ErrorMessage from
 "@/components/ErrorMessage.astro"; import SuccessMessage from
 "@/components/SuccessMessage.astro";
-
 <form>
   <!-- Show ANY error at top - server, validation, or field errors -->
   <ErrorMessage message={errors.server || errors.email || errors.password} />
@@ -322,7 +321,6 @@ The application uses a unified error display system for consistent user feedback
 
   <Button type="submit">Submit</Button>
 </form>
-
 <!-- Success message -->
 <SuccessMessage message={successMessage} />
 ```
@@ -398,14 +396,18 @@ like.
   const buttonClasses = buttonVariants({variant: "outline", size: "sm"});
   ---
 
-  <a href="/path" class={buttonClasses}>Link Text</a>
+  <a href="/path" class={buttonClasses}>
+    Link Text
+  </a>
   ```
 
 - **Interactive functionality** → Keep React Button components with `client:load`
 
   ```astro
   <!-- Form submissions, click handlers, state management -->
-  <Button type="submit" onClick={handler} client:load>Submit</Button>
+  <Button type="submit" onClick={handler} client:load>
+    Submit
+  </Button>
   ```
 
 **Examples of compile-time candidates**: `<Button asChild>` wrapping simple `<a>` tags

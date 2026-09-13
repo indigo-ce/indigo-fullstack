@@ -11,8 +11,7 @@ const ICON_MAP = {
 
 type IconName = keyof typeof ICON_MAP;
 
-interface IconInputFieldProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+interface IconInputFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string;
   iconName?: IconName;
 }
