@@ -108,7 +108,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@cloudflare/vitest-pool-workers": "^0.22.0",
-    "@cloudflare/workers-types": "^4.20250921.0",
+    "@cloudflare/workers-types": "^5.20260903.1",
     "@cretezy/cloudflare-d1-backup": "^0.2.1",
     "@playwright/test": "^1.55.1",
     "@types/node": "^24.5.2",

@@ -5,10 +5,33 @@ updates:
     schedule:
       interval: "monthly"
     groups:
+      # Keep the Cloudflare toolchain atomic. wrangler is a devDependency while
+      # @cloudflare/vite-plugin and @astrojs/cloudflare are production ones, so
+      # without this group the peer-linked packages split across the two
+      # dependency-type PRs and desync by construction.
+      cloudflare:
+        patterns:
+          - "wrangler"
+          - "miniflare"
+          - "@cloudflare/*"
+          - "@astrojs/cloudflare"
       production-dependencies:
         dependency-type: "production"
       development-dependencies:
         dependency-type: "development"
+    ignore:
+      # TypeScript 7 drops the programmatic compiler API that `astro check`
+      # needs. Remove once @astrojs/language-server supports it:
+      # https://github.com/withastro/roadmap/discussions/1321
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # Vitest 5 pulls @cloudflare/vitest-pool-workers onto a miniflare alpha
+      # whose proxy worker fails to boot. Remove once the pool ships Vitest 5
+      # support: https://github.com/cloudflare/workers-sdk/issues
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@vitest/ui"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
