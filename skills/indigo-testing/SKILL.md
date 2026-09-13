@@ -130,7 +130,9 @@ Add `data-testid` to any component that tests need to target:
 
 ```astro
 <input type="email" name="email" data-testid="email-input" />
-<button type="submit" data-testid="submit-button">Sign In</button>
+<button type="submit" data-testid="submit-button">
+  Sign In
+</button>
 ```
 
 For third-party UI without `data-testid`, use semantic role selectors:

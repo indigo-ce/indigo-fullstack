@@ -133,13 +133,15 @@ const success = Astro.url.searchParams.get("success");
       <h1 class="mb-8 text-2xl font-bold">{t.account.title}</h1>
 
       <SuccessMessage
-        message={success === "profile-updated"
-          ? t.account.profileUpdated
-          : success === "email-verification-sent"
-            ? t.auth.checkEmail
-            : success === "password-changed"
-              ? t.auth.resetSuccess
-              : undefined}
+        message={
+          success === "profile-updated"
+            ? t.account.profileUpdated
+            : success === "email-verification-sent"
+              ? t.auth.checkEmail
+              : success === "password-changed"
+                ? t.auth.resetSuccess
+                : undefined
+        }
       />
 
       <div class="bg-card rounded-lg border p-6">
