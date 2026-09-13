@@ -89,9 +89,7 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
 ---
 
 <Layout title={t.auth.signin}>
-  <div
-    class="flex min-h-[70dvh] w-full flex-col items-center justify-center py-12"
-  >
+  <div class="flex min-h-[70dvh] w-full flex-col items-center justify-center py-12">
     <div class="w-full max-w-xs">
       <h1 class="mb-8 text-center text-2xl font-bold">{t.auth.signin}</h1>
 
@@ -133,8 +131,10 @@ const forgotPasswordUrl = localizeUrl("/forgot-password", locale);
         <Button
           type="submit"
           data-testid="submit-button"
-          className="mt-4 w-full">{t.auth.signin}</Button
+          className="mt-4 w-full"
         >
+          {t.auth.signin}
+        </Button>
 
         <p class="mt-4 text-center text-sm">
           {t.auth.dontHaveAccount}{" "}

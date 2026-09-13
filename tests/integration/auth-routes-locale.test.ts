@@ -42,9 +42,8 @@ describe("Auth Routes Locale Integration Tests", () => {
     });
 
     // Set up auth middleware for non-locale routes
-    const {authMiddleware} = await import(
-      "@/lib/hono/middleware/authMiddleware"
-    );
+    const {authMiddleware} =
+      await import("@/lib/hono/middleware/authMiddleware");
     app.use("*", authMiddleware(env as any));
 
     app.route("/auth", authRoutes);

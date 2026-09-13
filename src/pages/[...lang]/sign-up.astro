@@ -97,18 +97,15 @@ const signInUrl = localizeUrl("/sign-in", locale);
 ---
 
 <Layout title={t.auth.signup}>
-  <div
-    class="flex min-h-[70dvh] w-full flex-col items-center justify-center py-12"
-  >
+  <div class="flex min-h-[70dvh] w-full flex-col items-center justify-center py-12">
     <div class="w-full max-w-xs">
       <h1 class="mb-8 text-center text-2xl font-bold">{t.auth.signup}</h1>
 
       <form method="POST">
         <ErrorMessage
-          message={errors.server ||
-            errors.name ||
-            errors.email ||
-            errors.password}
+          message={
+            errors.server || errors.name || errors.email || errors.password
+          }
         />
 
         <IconInputField
@@ -148,8 +145,10 @@ const signInUrl = localizeUrl("/sign-in", locale);
         <Button
           type="submit"
           data-testid="submit-button"
-          className="mt-4 w-full">{t.auth.signup}</Button
+          className="mt-4 w-full"
         >
+          {t.auth.signup}
+        </Button>
 
         <p class="mt-4 text-center text-sm">
           {t.auth.alreadyHaveAccount}{" "}

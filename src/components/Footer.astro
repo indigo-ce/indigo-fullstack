@@ -4,16 +4,12 @@ import {LanguageSelect} from "@/components/LanguageSelect.tsx";
 ---
 
 <footer class="border-seagull-200/30 dark:border-seagull-700/30 border-t">
-  <div
-    class="mx-auto max-w-7xl px-6 py-4 md:flex md:items-center md:justify-between lg:px-8"
-  >
+  <div class="mx-auto max-w-7xl px-6 py-4 md:flex md:items-center md:justify-between lg:px-8">
     <div class="flex justify-center gap-x-2 md:order-2">
       <LanguageSelect client:load />
       <ThemeSelect client:load />
     </div>
-    <p
-      class="text-muted-foreground mt-8 text-center text-sm/6 md:order-1 md:mt-0"
-    >
+    <p class="text-muted-foreground mt-8 text-center text-sm/6 md:order-1 md:mt-0">
       &copy; {new Date().getFullYear()} Your Company, Inc.
     </p>
   </div>
