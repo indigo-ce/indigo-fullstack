@@ -81,6 +81,7 @@ describe("API surface integration", () => {
     const routes = (await responseBody(response)) as string[];
     const expectedRoutes = [
       "GET /api/v1/health",
+      "GET /api/v1/openapi.json",
       "GET /api/v1/routes",
       "POST /api/v1/auth/sign-up",
       "POST /api/v1/auth/send-verification-email",

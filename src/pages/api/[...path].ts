@@ -8,6 +8,7 @@ import {Hono} from "hono";
 import {user} from "@/db/schema";
 import accountRoutes from "@/lib/hono/routes/account-routes";
 import authRoutes from "@/lib/hono/routes/auth-routes";
+import {openapiDocument} from "@/lib/hono/routes/openapi";
 import responseTimeMiddleware from "@/lib/hono/middleware/response-time";
 import type {APIRoute} from "astro";
 import {env} from "cloudflare:workers";
@@ -37,6 +38,8 @@ export const createHonoApp = (env: Env) => {
 
   v1.route("/auth", authRoutes);
   v1.route("/account", accountRoutes);
+
+  v1.get("/openapi.json", (c) => c.json(openapiDocument));
 
   v1.get("/routes", (c) => {
     // Validators register as separate route records, so de-duplicate.

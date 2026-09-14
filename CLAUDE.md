@@ -140,50 +140,12 @@ Mobile apps use the Hono API (`/api/v1/auth/*`) instead of calling Better Auth e
 
 **Available Endpoints:**
 
-1. **POST `/api/v1/auth/sign-up`** - Register new user + send verification email
+The machine-readable contract for the whole `/api/v1` surface, including request and response shapes and the unified `{error}` error body, is served at **`GET /api/v1/openapi.json`** (OpenAPI 3.1) and cross-checked against the running router in CI, so it cannot drift from the code. `GET /api/v1/routes` lists every registered route at run time. Two endpoint notes the document captures but prose would flatten:
 
-   ```json
-   {
-     "email": "user@example.com",
-     "password": "password123",
-     "name": "John Doe",
-     "callbackURL": "/dashboard" // optional
-   }
-   ```
-
-2. **POST `/api/v1/auth/sign-in`** - Exchange credentials for JWT tokens
-   - Headers: `Authorization: Basic <base64(email:password)>`
-   - Returns: `{accessToken, refreshToken}`
-
-3. **POST `/api/v1/auth/send-verification-email`** - Resend verification email
-
-   ```json
-   {
-     "email": "user@example.com",
-     "callbackURL": "/dashboard" // optional
-   }
-   ```
-
-4. **POST `/api/v1/auth/forgot-password`** - Send password reset email
-
-   ```json
-   {
-     "email": "user@example.com",
-     "redirectTo": "/reset-password" // optional
-   }
-   ```
-
-5. **POST `/api/v1/auth/reset-password`** - Reset password with token
-
-   ```json
-   {
-     "newPassword": "newPassword123",
-     "token": "token-from-email"
-   }
-   ```
-
-6. **POST `/api/v1/auth/refresh-access`** - Refresh JWT tokens
-7. **POST `/api/v1/auth/revoke-access`** - Revoke JWT tokens
+- **POST `/api/v1/auth/sign-in`** - Exchange credentials for JWT tokens
+  - Headers: `Authorization: Basic <base64(email:password)>`
+  - Returns: `{user: {id, email, name, image}, accessToken, refreshToken, tokenType: "Bearer"}`
+- **POST `/api/v1/auth/refresh-access`** and **POST `/api/v1/auth/revoke-access`** - Both require a `{refreshToken}` body, returning `{accessToken, refreshToken, tokenType}` and `{success: true}` respectively
 
 **Locale Handling for Mobile:**
 
