@@ -216,6 +216,7 @@ React Email templates with Plunk API:
 - **Web Auth**: `src/lib/auth.ts` - Runtime Better Auth instance
 - **Schema Gen**: `src/lib/auth-config.ts` - Config for CLI schema generation
 - **Plugins**: Custom refresh access token plugin in `src/plugins/better-auth/`
+- **Password hashing**: `src/lib/password.ts` - PBKDF2-SHA256 through Web Crypto; new accounts store a `$pbkdf2$…` hash. A project already generated from this template that carries live credential accounts needs the legacy delegation branch in `verifyPassword` before adopting this change
 
 ## Development Patterns
 
