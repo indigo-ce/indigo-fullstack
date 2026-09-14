@@ -4,6 +4,7 @@ import {drizzleAdapter} from "better-auth/adapters/drizzle";
 import {jwt} from "better-auth/plugins/jwt";
 import {refreshAccessToken} from "@/plugins/better-auth/refresh-access";
 import {queueEmail} from "./email";
+import {hashPassword, verifyPassword} from "./password";
 
 export function createAuth(env: Env, locale: string = "en") {
   if (!env.BETTER_AUTH_SECRET) {
@@ -42,6 +43,10 @@ export function createAuth(env: Env, locale: string = "en") {
     },
     emailAndPassword: {
       enabled: true,
+      password: {
+        hash: hashPassword,
+        verify: verifyPassword
+      },
       requireEmailVerification: false, // Set to true to require email verification to sign in
       resetPasswordTokenExpiresIn: 86400, // 24 hours to match email copy
       sendResetPassword: async ({user, url}) => {

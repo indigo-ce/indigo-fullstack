@@ -85,6 +85,9 @@ This template uses Better Auth for authentication. And supports these features o
 > [!IMPORTANT]
 > By default, email verification is not required to sign in. You may want to change this behavior in `src/lib/auth.ts`.
 
+> [!NOTE]
+> New accounts store their password as a `$pbkdf2$…` PBKDF2-SHA256 hash derived through Web Crypto in `src/lib/password.ts`. A project already generated from this template that carries live credential accounts needs the legacy delegation branch in `src/lib/password.ts`'s `verifyPassword` before adopting this change, so those accounts keep signing in.
+
 ### Test Credentials (Development)
 
 For local development and testing, you can use these
