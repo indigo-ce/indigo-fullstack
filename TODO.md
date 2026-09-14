@@ -684,7 +684,7 @@ Item 10 last made those ranges honest. The dependency bump that merged as #83 mo
 
 - Do not add the worker under `packages:` in `pnpm-workspace.yaml`. That is a standing exclusion from items 6, 10, and 27: a second importer resolves a second `wrangler` and `workerd` for every install, which is its own decision with its own blast radius.
 - Do not add a Dependabot entry for this manifest — item 6's standing exclusion, for the same reason: Dependabot would open PRs against versions nothing resolves.
-- Do not touch `workers/indigo-email-queue-consumer/wrangler.jsonc` (that is item 32), the worker's `tsconfig.json`, its sources, or any template. Do not change the root `package.json` — it is the value being matched *to*.
+- Do not touch `workers/indigo-email-queue-consumer/wrangler.jsonc` (that is item 32), the worker's `tsconfig.json`, its sources, or any template. Do not change the root `package.json` — it is the value being matched _to_.
 
 **Acceptance.** `pnpm-lock.yaml` is byte-identical after the manifest edit; that is the proof the worker's dependencies were never installed, and a lockfile diff means the exclusion above was breached and the change must be reverted rather than committed with the diff. `pnpm install --frozen-lockfile` exits 0, `pnpm email-worker:check` exits 0, and `pnpm email-worker:dev` still starts. `tests/unit/email-worker-render.test.ts` passes unchanged — it renders every template through the worker's `renderEmailTemplate`, so it is what proves the libraries the worker actually resolves still render the templates. `pnpm test:run` reports the same counts plus the one new file, if the guard shipped.
 
