@@ -660,7 +660,7 @@ Prove the cross-check bites rather than assuming it: register a throwaway `v1.ge
 
 **Landed as #85.** `src/lib/hono/routes/openapi.ts` holds the document, `createHonoApp` serves it at `GET /api/v1/openapi.json`, and `tests/integration/openapi.test.ts` cross-checks its path set against `GET /api/v1/routes` in both directions.
 
-### 35. Re-sync the email worker manifest with the versions that actually build it
+### 35. [x] Re-sync the email worker manifest with the versions that actually build it
 
 **Gap.** `workers/indigo-email-queue-consumer/package.json` declares a dependency set that nothing installs and nothing resolves. `pnpm-workspace.yaml` lists only `"."` under `packages:`, so that manifest has no importer in `pnpm-lock.yaml`. What actually builds and checks the worker is the root install: `pnpm email-worker:dev` and `pnpm email-worker:deploy` run the root `wrangler` with `--config`, `pnpm email-worker:check` runs `tsc` against a config whose `types: ["@cloudflare/workers-types"]` and whose bare `@react-email/render` import both resolve out of the root `node_modules`, and `src/render-template.ts` reaches the app's own templates through the `@app/*` mapping at `../../src/*`.
 
