@@ -8,11 +8,12 @@ import {verifyPassword as verifyLegacyPassword} from "better-auth/crypto";
  * Format: $pbkdf2$<iterations>$<saltHex>$<hashHex>
  */
 
-// 50,000 PBKDF2 iterations is a deliberate offline-cracking cost, not a
-// value to trim for CPU: sign-up and sign-in both run this derivation on the
-// request path, so the count is a balance between that per-request cost and
-// the time it takes an attacker to brute-force a stored hash.
-const ITERATIONS = 50000;
+// 600,000 PBKDF2 iterations is the OWASP-recommended work factor for
+// PBKDF2-HMAC-SHA256 and is deliberate: Web Crypto runs it natively, so the
+// per-request cost is on the order of tens of milliseconds rather than a
+// CPU-budget problem, and the value must not be reduced merely to trim that
+// cost — it is the offline-cracking resistance of every stored hash.
+const ITERATIONS = 600000;
 const HASH_LENGTH = 32;
 const SALT_LENGTH = 16;
 
