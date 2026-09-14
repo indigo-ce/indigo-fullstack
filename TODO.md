@@ -27,20 +27,20 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
-1. **34** — publish a machine-readable description of the `/api/v1` surface.
-2. **35** — re-sync the email worker manifest with the versions that actually build it.
-3. **26** — wire the D1 backup script into `package.json`.
-4. **32** — put the email consumer worker on the app's compatibility date.
+1. **35** — re-sync the email worker manifest with the versions that actually build it.
+2. **36** — hash passwords through Web Crypto instead of the auth library's default.
+3. **32** — put the email consumer worker on the app's compatibility date.
+4. **26** — wire the D1 backup script into `package.json`.
 5. **29** — commit a component-registry config.
 
-**The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it, so the order is by value, not by prerequisite: 34 is first because it is the only open item closing a contract that outside clients build against, and the one whose drift compounds the longer it sits; 35 is second because it is the only open item whose gap was opened by merged history rather than by long-standing omission, and it is cheapest to close while the bump that caused it is still the most recent commit on `main`.
+**The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine. Nothing in the list above depends on anything else in it, so the order is by value, not by prerequisite: 35 is first because it is the only open item whose gap was opened by merged history rather than by long-standing omission, and it is cheapest to close while the dependency bump that caused it (#83) is still the newest one on `main`; 36 is second because it is the only open item sitting on a request path that every sign-up and sign-in traverses.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
 - **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. As of 2026-09-13 the committed `pnpm-lock.yaml` still resolves the pool at 0.22.0, whose entry pins `wrangler@4.124.0` and `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1` — unchanged by the dependency bump that landed as #83, which moved the root `wrangler` to `^4.131.0` (resolving `4.131.1` with `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`) and left the pool's line where it was. The tree therefore still carries three `miniflare`/`workerd` lines. That is the floor, not the check — the registry read is what decides, and it has not been performed since 2026-09-09.
+Re-check the parked pair on each planning pass by reading the pool's newest published release and the `miniflare`/`workerd` it pins: the moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. As of 2026-09-14 the committed `pnpm-lock.yaml` still resolves the pool at 0.22.0, whose entry pins `wrangler@4.124.0` and `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1` — unchanged by the dependency bump that landed as #83, which moved the root `wrangler` to `^4.131.0` (resolving `4.131.1` with `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`) and left the pool's line where it was. The tree therefore still carries three `miniflare`/`workerd` lines. That is the floor, not the check — the registry read is what decides, and it has still not been performed since 2026-09-09, so whoever picks up 27 does that read first and records the version they saw.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -322,7 +322,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-**Parked (re-confirmed against the committed `pnpm-lock.yaml` on 2026-09-13), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree carries a much newer runtime, `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`, but that copy belongs to the root `wrangler@4.131.1` rather than to the pool, so it does nothing for `pnpm test:run`. The gap widened rather than closed when the root moved: the pool's runtime line has not shifted since 2026-08-15.
+**Parked (re-confirmed against the committed `pnpm-lock.yaml` on 2026-09-14), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree carries a much newer runtime, `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`, but that copy belongs to the root `wrangler@4.131.1` rather than to the pool, so it does nothing for `pnpm test:run`. The gap widened rather than closed when the root moved: the pool's runtime line has not shifted since 2026-08-15.
 
 Item 27 is what moves the pool onto the runtime line the rest of the repository already resolves. Do not attempt this item before that one has landed; confirm the pool's `workerd` accepts `2026-09-03` first, and treat a run that fails on the date as evidence 27 is not done rather than as something to work around. Do not settle for a partial date — a value chosen to satisfy the pool rather than to mirror `wrangler.jsonc` recreates the drift this item exists to close, one shorter interval later — and do not override the pool's `miniflare` in `pnpm-workspace.yaml` to force the newer date through.
 
@@ -507,7 +507,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Unblocks:** item 17.
 
-**Parked, and the check that unparks it.** As of 2026-09-13 the committed `pnpm-lock.yaml` still resolves `@cloudflare/vitest-pool-workers@0.22.0`, whose entry pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0` — unchanged through the dependency bump that landed as #83. When the registry was last checked (2026-09-09) 0.22.0 was also the newest published release, which is why moving the pool today changes nothing: it resolves the 2026-08-15 runtime line either way. Attribution out of the committed lockfile, and note that it shifted with #83 — re-derive it rather than copying this forward:
+**Parked, and the check that unparks it.** As of 2026-09-14 the committed `pnpm-lock.yaml` still resolves `@cloudflare/vitest-pool-workers@0.22.0`, whose entry pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0` — unchanged through the dependency bump that landed as #83. When the registry was last checked (2026-09-09) 0.22.0 was also the newest published release, which is why moving the pool today changes nothing: it resolves the 2026-08-15 runtime line either way. Attribution out of the committed lockfile, and note that it shifted with #83 — re-derive it rather than copying this forward:
 
 - `wrangler@4.131.1` + `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1` — the root pin (`^4.131.0`).
 - `wrangler@4.124.0` + `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1` — the pool's hard dependency. This is the copy this item moves.
@@ -658,11 +658,13 @@ Prove the cross-check bites rather than assuming it: register a throwaway `v1.ge
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`, `pnpm build`.
 
+**Landed as #85.** `src/lib/hono/routes/openapi.ts` holds the document, `createHonoApp` serves it at `GET /api/v1/openapi.json`, and `tests/integration/openapi.test.ts` cross-checks its path set against `GET /api/v1/routes` in both directions.
+
 ### 35. Re-sync the email worker manifest with the versions that actually build it
 
 **Gap.** `workers/indigo-email-queue-consumer/package.json` declares a dependency set that nothing installs and nothing resolves. `pnpm-workspace.yaml` lists only `"."` under `packages:`, so that manifest has no importer in `pnpm-lock.yaml`. What actually builds and checks the worker is the root install: `pnpm email-worker:dev` and `pnpm email-worker:deploy` run the root `wrangler` with `--config`, `pnpm email-worker:check` runs `tsc` against a config whose `types: ["@cloudflare/workers-types"]` and whose bare `@react-email/render` import both resolve out of the root `node_modules`, and `src/render-template.ts` reaches the app's own templates through the `@app/*` mapping at `../../src/*`.
 
-Item 10 last made those ranges honest. The dependency bump that merged as #83 moved the root and left the worker behind, so the manifest misstates the toolchain again — this time across a major on two entries. Worker range first, root range second:
+Item 10 last made those ranges honest. The dependency bump that merged as #83 moved the root and left the worker behind, so the manifest misstates the toolchain again — this time across a major on two entries. Worker range first, root range second, both re-read out of the two manifests on 2026-09-14:
 
 - `@react-email/components`: `^0.5.3` vs `^1.0.12`
 - `@react-email/render`: `^1.2.3` vs `^2.1.0`
@@ -689,3 +691,23 @@ Item 10 last made those ranges honest. The dependency bump that merged as #83 mo
 **Acceptance.** `pnpm-lock.yaml` is byte-identical after the manifest edit; that is the proof the worker's dependencies were never installed, and a lockfile diff means the exclusion above was breached and the change must be reverted rather than committed with the diff. `pnpm install --frozen-lockfile` exits 0, `pnpm email-worker:check` exits 0, and `pnpm email-worker:dev` still starts. `tests/unit/email-worker-render.test.ts` passes unchanged — it renders every template through the worker's `renderEmailTemplate`, so it is what proves the libraries the worker actually resolves still render the templates. `pnpm test:run` reports the same counts plus the one new file, if the guard shipped.
 
 **Validation.** `pnpm install --frozen-lockfile`, `pnpm email-worker:check`, `pnpm check`, `pnpm test:run`, `pnpm format:check`, `pnpm build`.
+
+### 36. Hash passwords through Web Crypto instead of the auth library's default
+
+**Gap.** `createAuth()` in `src/lib/auth.ts` enables `emailAndPassword` and never sets its `password` option, so every sign-up and every sign-in hashes through the auth library's built-in memory-hard default. That default is pure JavaScript running inside the Worker: it is the most expensive operation on either request path, it gets no hardware acceleration in the Workers runtime, and it is the usual cause of a CPU-time error on auth endpoints under load. The runtime ships PBKDF2 in `crypto.subtle`, which does run natively, and nothing here uses it — a search of `src/` for `hashPassword`, `verifyPassword`, and `crypto.subtle` returns nothing, and there is no password module under `src/lib/`.
+
+**Measure first, and put both numbers in the PR.** Time a sign-up and a sign-in before and after the change — the integration suite already drives both through the real auth stack, so the per-test durations `pnpm test:run` prints for `tests/integration/auth-routes.test.ts` are enough. That measurement is the evidence for this item. If the default does not in fact dominate those paths, record the numbers and close the item rather than shipping the swap on the strength of this description.
+
+**Scope.**
+
+- Add `src/lib/password.ts` exporting `hashPassword(password)` and `verifyPassword({password, hash})`, backed by PBKDF2-SHA256 through `crypto.subtle.importKey` and `crypto.subtle.deriveBits`: a 32-byte derived key, a 16-byte salt from `crypto.getRandomValues`, serialised as `$pbkdf2$<iterations>$<saltHex>$<hashHex>`.
+- Hold the iteration count in one named constant with a comment recording that it is a deliberate offline-cracking cost and not a value to trim for CPU. `verifyPassword` reads the count out of the stored string rather than from the constant, so the number can be raised later without invalidating a single existing hash.
+- Compare the derived and stored bytes with a constant-time XOR accumulation over the full length, not with `===` on the hex strings.
+- Wire both into `createAuth()` through `emailAndPassword.password`. Confirm the option name and the verify callback's argument shape against the installed `better-auth` rather than trusting this description; if either differs, adapt and say so in the PR.
+- **Settle the legacy-hash question with a read, not a guess.** Check whether the installed `better-auth` exports its own password verifier (`better-auth/crypto` is the likely entry point). If it does, have `verifyPassword` delegate any hash that does not begin with `$pbkdf2$` to it, so an account created before this change still signs in. If it does not, return `false` for an unrecognised hash and state that in the PR. Either way `verifyPassword` returns `false` on malformed input and never throws.
+- Add one line each to the auth section of `README.md` and `CLAUDE.md`: new accounts store a `$pbkdf2$…` hash, and a project already generated from this template that carries live credential accounts needs the delegation branch above before adopting the change.
+- Do not change `createAuth`'s signature, its two throw guards, `generateId`, the trusted-origins parsing, the token-lifetime options, or the plugins list. No schema, migration, or route change — `account.password` in `src/db/schema.ts` already stores an opaque string — and nothing under `src/lib/hono/` moves.
+
+**Acceptance.** A new `tests/unit/password.test.ts` asserts: `hashPassword` returns the `$pbkdf2$<iterations>$<salt>$<hash>` shape; two hashes of the same password differ, so the salt is random; `verifyPassword` accepts the right password and rejects a wrong one; it returns `false` rather than throwing for `""`, `"not-a-hash"`, `"$pbkdf2$abc$xx$yy"`, and a truncated hex field; and a hash written at a _different_ iteration count still verifies — that last case is what proves the parser rather than the constant governs verification. `tests/integration/auth-routes.test.ts` passes unchanged: it signs a user up and signs them back in through the real auth stack, so it is what proves both callbacks are actually reached. Before changing anything, sign a user up on the current config and record the stored `account.password` prefix; quote it beside the new one in the PR.
+
+**Validation.** `pnpm test:run`, `pnpm check`, `pnpm format:check`, `pnpm build`.
