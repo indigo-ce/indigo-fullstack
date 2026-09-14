@@ -627,7 +627,7 @@ Two things follow, and both belong in the PR. The re-add diff below cannot be fo
 
 **Landed as #71.** `src/lib/hono/middleware/jwtMiddleware.ts` now reads the `user` row through `c.get("db")`; the hand-assembled `userData` literal is gone.
 
-### 34. Publish a machine-readable description of the `/api/v1` surface
+### 34. [x] Publish a machine-readable description of the `/api/v1` surface
 
 **Gap.** The only description of the mobile API is prose in `CLAUDE.md`, and it has already drifted from the code in four ways a client author would act on.
 
