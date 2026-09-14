@@ -3,7 +3,7 @@
   "name": "indigo-email-queue-consumer",
   "main": "src/index.ts",
   "workers_dev": false,
-  "compatibility_date": "2026-01-14",
+  "compatibility_date": "2026-09-03",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true
