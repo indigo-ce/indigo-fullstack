@@ -391,7 +391,8 @@ export const openapiDocument = {
             }
           },
           "400": {$ref: "#/components/responses/BadRequest"},
-          "401": {$ref: "#/components/responses/Unauthorized"}
+          "401": {$ref: "#/components/responses/Unauthorized"},
+          "404": {$ref: "#/components/responses/NotFound"}
         },
         security: []
       }

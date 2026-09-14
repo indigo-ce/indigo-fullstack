@@ -140,7 +140,7 @@ Mobile apps use the Hono API (`/api/v1/auth/*`) instead of calling Better Auth e
 
 **Available Endpoints:**
 
-The machine-readable contract for the whole `/api/v1` surface, including request and response shapes and the unified `{error}` error body, is served at **`GET /api/v1/openapi.json`** (OpenAPI 3.1) and cross-checked against the running router in CI, so it cannot drift from the code. `GET /api/v1/routes` lists every registered route at run time. Two endpoint notes the document captures but prose would flatten:
+The machine-readable contract for the whole `/api/v1` surface, including request and response shapes and the unified `{error}` error body, is served at **`GET /api/v1/openapi.json`**. Its set of registered routes is cross-checked against the running router in CI, so a documented method/path pair cannot silently drift out of the document; the request and response shapes are hand-maintained beside the handlers that produce them. `GET /api/v1/routes` lists every registered route at run time. Two endpoint notes the document captures but prose would flatten:
 
 - **POST `/api/v1/auth/sign-in`** - Exchange credentials for JWT tokens
   - Headers: `Authorization: Basic <base64(email:password)>`
