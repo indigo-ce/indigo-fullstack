@@ -27,7 +27,7 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
-1. **38** — point the Plunk key documentation at the Worker that reads it.
+1. [x] **38** — point the Plunk key documentation at the Worker that reads it.
 2. **37** — repair the new-project checklist and the bootstrap file lists.
 3. **29** — commit a component-registry config.
 
