@@ -97,7 +97,7 @@ For local development and testing, you can use these
 
 > [!NOTE]
 > No test user is created by default. You'll need to sign up through the `/sign-up` page to create your first account. Feel free to use different credentials if preferred.
-> If you're using the placeholder `PLUNK_API_KEY=test-key` in `.dev.vars`, email verification emails will not be sent during sign-up. The auth configuration automatically detects this and disables email sending to prevent errors. Users created this way will need their email manually verified in the database for testing purposes (e.g., `UPDATE user SET emailVerified = 1 WHERE email = 'your@email.com'`).
+> During local development and CI, emails are logged to the console rather than sent (see [Email Behavior in Different Environments](#email-behavior-in-different-environments)), so the verification email never arrives. Users created this way will need their email manually verified in the database for testing purposes (e.g., `UPDATE user SET emailVerified = 1 WHERE email = 'your@email.com'`).
 
 ### Better Auth
 
@@ -123,14 +123,16 @@ Also configure `BETTER_AUTH_BASE_URL` in your `wrangler.jsonc` file under the `v
 
 This template uses [Plunk](https://useplunk.com) for email functionality.
 
-To set up Plunk for production, create an account and set the `PLUNK_API_KEY` secret using wrangler CLI:
+`PLUNK_API_KEY` is read by the email consumer worker (`workers/indigo-email-queue-consumer/`), not by the app Worker. The app only queues messages to the `EMAIL_QUEUE` binding; the consumer worker sends them to Plunk.
+
+To set up Plunk for production, create an account and set the `PLUNK_API_KEY` secret on the consumer worker:
 
 ```bash
-pnpm wrangler secret put PLUNK_API_KEY
+pnpm wrangler secret put PLUNK_API_KEY --config workers/indigo-email-queue-consumer/wrangler.jsonc
 ```
 
-For local development, add `PLUNK_API_KEY` to your `.dev.vars` file.
-The sender email address (`SEND_EMAIL_FROM`) should be configured in your `wrangler.jsonc` file under the `vars` section for production.
+For local development, `wrangler dev` loads a Worker's local variables from the `.dev.vars` file next to its config, so a real key goes in `workers/indigo-email-queue-consumer/.dev.vars` (already gitignored there). Note the consumer only sends when the app has actually enqueued a message, and the app never enqueues while `BETTER_AUTH_BASE_URL` is a localhost address.
+The sender email address (`SEND_EMAIL_FROM`) should be configured in the worker's `wrangler.jsonc` file under the `vars` section for production.
 
 ### Astro Session
 
@@ -302,7 +304,7 @@ This creates:
 The email worker needs the Plunk API key:
 
 ```bash
-npx wrangler secret put PLUNK_API_KEY --config indigo-email-queue-consumer/wrangler.jsonc
+npx wrangler secret put PLUNK_API_KEY --config workers/indigo-email-queue-consumer/wrangler.jsonc
 ```
 
 #### 3. Deploy Worker
@@ -330,7 +332,7 @@ The main app configuration in `wrangler.jsonc` includes:
 
 - In dev mode, emails are logged to console (not actually queued)
 - Optional: Run `pnpm email-worker:dev` in separate terminal to process queued emails locally
-- Add `PLUNK_API_KEY` to `.dev.vars` if testing actual email delivery
+- Optionally add `PLUNK_API_KEY` to `workers/indigo-email-queue-consumer/.dev.vars` if testing actual email delivery
 
 ### Email Templates
 
@@ -469,7 +471,7 @@ To deploy to Cloudflare Workers with static assets:
 1. Create a new Workers project in the Cloudflare dashboard
 2. Link it to your GitHub repository
 3. Configure the build command: `pnpm build`
-4. Configure production environment variables and secrets (like `BETTER_AUTH_SECRET`, `PLUNK_API_KEY`) in the Pages dashboard settings.
+4. Configure production environment variables and secrets (like `BETTER_AUTH_SECRET`) in the Pages dashboard settings. The email consumer worker's `PLUNK_API_KEY` secret is set separately with wrangler (see the Plunk section above).
 5. Migrate the production database.
 6. Deploy!
 
@@ -514,64 +516,18 @@ This project includes comprehensive test coverage with both unit tests (Vitest) 
 
 ### Email Behavior in Different Environments
 
-Understanding how emails work across different scenarios:
+Email sending is decided by one rule in `queueEmail()` (`src/lib/email.ts`): when
+`BETTER_AUTH_BASE_URL` contains `localhost` or `127.0.0.1`, the message is logged to
+the console; otherwise it is queued to Cloudflare Queues, where the consumer worker
+renders it and sends it via Plunk. The Plunk API key plays no part in that decision.
 
-#### 🧪 **Automated Testing (CI/E2E tests)**
+- **Local development** — `BETTER_AUTH_BASE_URL=http://localhost:4321` from `.dev.vars` puts the app in console-logging mode, so nothing is ever enqueued. No queue or Plunk setup is needed.
+- **CI / E2E tests** — the Test workflow sets `BETTER_AUTH_BASE_URL=http://127.0.0.1:8787`, so emails are logged and never sent; no Plunk key is configured anywhere in CI.
+- **Production** — a real hostname queues every email. Set `PLUNK_API_KEY` on the consumer worker (see the Plunk section above) or delivery fails when the worker processes the queue.
 
-- **API Key Pattern**: `ci-test-key` or any key containing `ci-test`
-- **Behavior**: Emails are **mocked** (not sent)
-- **Why**: Fast, reliable tests without API calls or rate limits
-- **Setup**: Automatically configured in CI workflow
-- **Example**: `PLUNK_API_KEY=ci-test-key` in `.github/workflows/test.yml`
-
-```bash
-# E2E tests automatically use mocked emails
-pnpm test:e2e
-```
-
-#### 🏠 **Local Development (with real Plunk API key)**
-
-- **API Key Pattern**: Any valid Plunk API key
-- **Behavior**: Emails sent to actual user email addresses via Plunk
-- **Why**: Test actual email delivery
-- **Setup**: Add real Plunk API key to `.dev.vars`
-- **Dashboard**: View emails in your [Plunk dashboard](https://app.useplunk.com)
-
-```bash
-# .dev.vars
-PLUNK_API_KEY=your-plunk-api-key
-```
-
-When you sign up locally, the verification email is sent to the actual email address you used.
-
-#### 🧪 **Local Development (testing without emails)**
-
-- **API Key Pattern**: Set to `ci-test-key` or leave empty
-- **Behavior**: Emails are **mocked** (not sent)
-- **Why**: Quick testing without needing a Plunk account
-- **Setup**: Use `ci-test-key` in `.dev.vars`
-- **Note**: Manual email verification needed in database
-
-```bash
-# .dev.vars - for testing without actual emails
-PLUNK_API_KEY=ci-test-key
-
-# Then manually verify users in database if needed
-pnpm db:studio:local
-# Run: UPDATE user SET emailVerified = 1 WHERE email = 'test@example.com'
-```
-
-#### 🚀 **Production**
-
-- **API Key Pattern**: Your production Plunk API key
-- **Behavior**: Emails sent to actual user email addresses
-- **Setup**: Set via Wrangler secrets
-- **Domain**: Configure verified domain in Plunk dashboard
-
-```bash
-# Set production secret
-pnpm wrangler secret put PLUNK_API_KEY
-```
+Users created against a local or CI base URL never receive a verification email, so
+they need their `emailVerified` flag set manually (e.g., `UPDATE user SET
+emailVerified = 1 WHERE email = 'test@example.com'`).
 
 ### Summary: Email Sending Decision Tree
 
