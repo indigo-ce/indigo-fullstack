@@ -17,6 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `pnpm db:generate` - Generate Drizzle migrations from schema changes
 - `pnpm db:migrate:local` - Apply migrations to local D1 database
 - `pnpm db:migrate:prod` - Apply migrations to production D1 database
+- `pnpm db:backup` - Write a SQL dump of the production D1 database to `drizzle/backup.sql`; reads `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE_ID`, and `CLOUDFLARE_TOKEN` from the process environment, not `.dev.vars`
 - `pnpm db:studio:local` - Open Drizzle Studio for local database inspection
 - `pnpm db:init:local` - Initialize local D1 database
 - `pnpm db:init:prod` - Create production D1 database

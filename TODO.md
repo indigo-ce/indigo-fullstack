@@ -474,7 +474,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Validation.** `pnpm install --frozen-lockfile`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm preview-email` still renders every template.
 
-### 26. Wire the D1 backup script into `package.json`
+### 26. [x] Wire the D1 backup script into `package.json`
 
 **Gap.** `scripts/backup.js` imports `@cretezy/cloudflare-d1-backup`, validates `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE_ID`, and `CLOUDFLARE_TOKEN`, and writes a SQL dump. The dependency is in `devDependencies` and the script was clearly written to be run — but no `package.json` script invokes it, and neither `README.md` nor `CLAUDE.md` mentions it. Every other file under `scripts/` has an entry point: `test:e2e:codegen` runs `scripts/codegen.sh`, and `README.md` documents `node scripts/bootstrap.js`. This one is reachable only by someone who happens to open the directory. The net effect is that the `db:*` family covers generate, migrate, and studio against production but offers no way to take a copy of the database first, while a dependency ships in every install for code nothing runs.
 
