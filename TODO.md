@@ -27,16 +27,15 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
 
-1. **26** — wire the D1 backup script into `package.json`.
-2. **38** — point the Plunk key documentation at the Worker that reads it.
-3. **37** — repair the new-project checklist and the bootstrap file lists.
-4. **29** — commit a component-registry config.
+1. **38** — point the Plunk key documentation at the Worker that reads it.
+2. **37** — repair the new-project checklist and the bootstrap file lists.
+3. **29** — commit a component-registry config.
 
 **The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
-Only one ordering constraint binds: 38 settles which Worker holds `PLUNK_API_KEY`, and 37 rewrites a checklist that has to name the same Worker, so 38 lands first. Everything else is ordered by value. 26 comes first as a small, self-contained change to the operator toolchain that touches no file the other three do. 38 and 37 are documentation-only and cheap, and they come ahead of 29 because a generated project inherits both files verbatim — today it inherits instructions that cannot produce working email. 29 is last because it is the largest of the unblocked items and the only one whose acceptance depends on what an external CLI emits on the day it runs.
+Only one ordering constraint binds: 38 settles which Worker holds `PLUNK_API_KEY`, and 37 rewrites a checklist that has to name the same Worker, so 38 lands first. 38 and 37 are documentation-only and cheap, and they come ahead of 29 because a generated project inherits both files verbatim — today it inherits instructions that cannot produce working email. 29 is last because it is the largest of the three and the only one whose acceptance depends on what an external CLI emits on the day it runs.
 
-Nothing on this list now sits on a request path: 36 was the last of those and it landed as #89, and 32 took the last runtime change with it as #91, so every remaining unparked item changes a config file, a script entry, or documentation. That is the shape of a backlog approaching done, not a gap in the review — the runtime, API-contract, and test-infrastructure work items 1 through 25 covered is checked off against current code.
+Nothing on this list now sits on a request path: 36 was the last of those and it landed as #89, and 32 took the last runtime change with it as #91. With 26 landed as #93, the three remaining unparked items touch documentation and one new config file and nothing else. That is the shape of a backlog approaching done, not a gap in the review — the runtime, API-contract, and test-infrastructure work items 1 through 25 covered is checked off against current code.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
@@ -489,6 +488,8 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Validation.** `pnpm db:backup` with no credentials set, `pnpm check`, `pnpm format:check`.
 
+**Landed as #93.** `package.json` defines `db:backup` beside `db:migrate:prod`, and both `CLAUDE.md` and `README.md` document it along with the three environment variables it reads from the process environment rather than from `.dev.vars`.
+
 ### 27. Resolve one Cloudflare runtime toolchain instead of three
 
 **Gap.** One `pnpm install` resolves two `wrangler` versions, three `workerd` builds, and three `miniflare` copies. Read out of the committed `pnpm-lock.yaml`: `wrangler@4.124.0` and `wrangler@4.131.1` both appear, alongside `workerd@1.20260815.1`, `workerd@1.20260910.1`, and `workerd@1.20260911.1`, and `miniflare@5.20260815.0-alpha`, `5.20260910.0-alpha`, and `5.20260911.0-alpha`. Attribute each one to the package that owns it before changing anything and put that table in the PR description — the root `wrangler` pin, `@cloudflare/vitest-pool-workers@0.22.0`, and `@astrojs/cloudflare` are the three candidates, and which owns which decides how much of this is movable. The attribution as of the current lockfile is recorded under **Parked** below; confirm it still holds rather than copying it forward.
@@ -750,8 +751,11 @@ Item 10 last made those ranges honest. The dependency bump that merged as #83 mo
 
 - The "Plunk" section says to run `pnpm wrangler secret put PLUNK_API_KEY`, which sets the secret on the app Worker, and to add it to the root `.dev.vars`, which the app also never reads.
 - The email-worker setup step has the right idea and a broken path: `--config indigo-email-queue-consumer/wrangler.jsonc`, missing the `workers/` prefix, so the command fails. `skills/indigo-email/SKILL.md` carries the correct path.
+- The "Local Development" bullet under the email **Configuration** heading says to add `PLUNK_API_KEY` to `.dev.vars` if testing actual email delivery — the same wrong file as the Plunk section, one screen below the correct instruction.
 - The production-deployment list names `PLUNK_API_KEY` among the app's dashboard secrets.
 - The production block of the email-behavior section repeats the app-level `secret put`.
+
+One nearby mention is already right and stays: the "Production" bullet in that same **Configuration** block says to set the secret _on the worker_ and points at the setup step above it. Fix the path in that step rather than rewriting the bullet.
 
 `.dev.vars.example` carries a `PLUNK_API_KEY=` line for the same non-reader.
 
@@ -759,11 +763,11 @@ Item 10 last made those ranges honest. The dependency bump that merged as #83 mo
 
 **Scope.**
 
-- Rewrite the four app-level `PLUNK_API_KEY` mentions to name the consumer worker, and fix the broken `--config` path to `workers/indigo-email-queue-consumer/wrangler.jsonc`. Read `skills/indigo-email/SKILL.md` first and make `README.md` agree with it rather than the reverse — that file is already correct and stays unchanged.
+- Rewrite the five app-level `PLUNK_API_KEY` mentions to name the consumer worker, and fix the broken `--config` path to `workers/indigo-email-queue-consumer/wrangler.jsonc`. Read `skills/indigo-email/SKILL.md` first and make `README.md` agree with it rather than the reverse — that file is already correct and stays unchanged.
 - Replace the four-scenario email-behavior section with the rule the code implements: the app logs the message to the console when `BETTER_AUTH_BASE_URL` contains `localhost` or `127.0.0.1`, and queues it otherwise; the key plays no part in that decision. Keep the decision tree as it stands. Correct the Test Credentials note the same way.
 - Remove the `PLUNK_API_KEY=` line from `.dev.vars.example`. Establish where `wrangler dev --config workers/indigo-email-queue-consumer/wrangler.jsonc` looks for that worker's local vars rather than assuming it, and document the answer in the Plunk section, so someone exercising real delivery through `pnpm email-worker:dev` knows where the key goes.
 - Do not change `src/lib/email.ts`, the consumer worker, `wrangler.jsonc`, `.github/workflows/test.yml`, or any test. This item corrects documentation to match behaviour; if the behaviour itself looks wrong while writing it, record that in the PR and leave it.
 
-**Acceptance.** A repository-wide search for `PLUNK_API_KEY` returns only the consumer worker's two sources, `skills/indigo-email/SKILL.md`, and README passages that name the consumer worker — no surviving instruction sets it on the app Worker or in the root `.dev.vars`. A search for `ci-test` matches nothing outside `pnpm-lock.yaml`. Every `--config` path quoted in `README.md` resolves to a file that exists. With no `PLUNK_API_KEY` in `.dev.vars`, `pnpm dev` starts and a sign-up still logs the queued email to the console — that is the proof the removed line was inert.
+**Acceptance.** A repository-wide search for `PLUNK_API_KEY` returns only the two lines in `workers/indigo-email-queue-consumer/src/index.ts` that declare and read it (`send-email.ts` takes it as a parameter and never names it), the two lines in `skills/indigo-email/SKILL.md`, and README passages that name the consumer worker — no surviving instruction sets it on the app Worker or in the root `.dev.vars`. A search for `ci-test` matches nothing outside `pnpm-lock.yaml`. Every `--config` path quoted in `README.md` resolves to a file that exists. With no `PLUNK_API_KEY` in `.dev.vars`, `pnpm dev` starts and a sign-up still logs the queued email to the console — that is the proof the removed line was inert.
 
 **Validation.** `pnpm format:check`, `pnpm check`, `pnpm test:run`, `pnpm build`.
