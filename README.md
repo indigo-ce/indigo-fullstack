@@ -131,7 +131,7 @@ To set up Plunk for production, create an account and set the `PLUNK_API_KEY` se
 pnpm wrangler secret put PLUNK_API_KEY --config workers/indigo-email-queue-consumer/wrangler.jsonc
 ```
 
-For local development, `wrangler dev` loads a Worker's local variables from the `.dev.vars` file next to its config, so put the key in `workers/indigo-email-queue-consumer/.dev.vars` (already gitignored there) if you want to exercise real delivery through `pnpm email-worker:dev`.
+For local development, `wrangler dev` loads a Worker's local variables from the `.dev.vars` file next to its config, so a real key goes in `workers/indigo-email-queue-consumer/.dev.vars` (already gitignored there). Note the consumer only sends when the app has actually enqueued a message, and the app never enqueues while `BETTER_AUTH_BASE_URL` is a localhost address.
 The sender email address (`SEND_EMAIL_FROM`) should be configured in the worker's `wrangler.jsonc` file under the `vars` section for production.
 
 ### Astro Session
@@ -521,7 +521,7 @@ Email sending is decided by one rule in `queueEmail()` (`src/lib/email.ts`): whe
 the console; otherwise it is queued to Cloudflare Queues, where the consumer worker
 renders it and sends it via Plunk. The Plunk API key plays no part in that decision.
 
-- **Local development** — `BETTER_AUTH_BASE_URL=http://localhost:4321` from `.dev.vars` puts the app in console-logging mode. No queue or Plunk setup is needed. Run `pnpm email-worker:dev` in a second terminal to consume the queue locally.
+- **Local development** — `BETTER_AUTH_BASE_URL=http://localhost:4321` from `.dev.vars` puts the app in console-logging mode, so nothing is ever enqueued. No queue or Plunk setup is needed.
 - **CI / E2E tests** — the Test workflow sets `BETTER_AUTH_BASE_URL=http://127.0.0.1:8787`, so emails are logged and never sent; no Plunk key is configured anywhere in CI.
 - **Production** — a real hostname queues every email. Set `PLUNK_API_KEY` on the consumer worker (see the Plunk section above) or delivery fails when the worker processes the queue.
 
