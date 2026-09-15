@@ -212,6 +212,16 @@ See the checklist above for more details.
 
 > **Note:** You need to manually apply the migrations to your production database after every schema change.
 
+### Backups
+
+Run `pnpm db:backup` to write a SQL dump of the production D1 database to
+`drizzle/backup.sql` (already gitignored). The script reads `CLOUDFLARE_ACCOUNT_ID`,
+`CLOUDFLARE_DATABASE_ID`, and `CLOUDFLARE_TOKEN` from the process environment —
+`.dev.vars` is a Wrangler file and Node does not load it, so export the variables in
+your shell. `CLOUDFLARE_DATABASE_ID` is the `database_id` already recorded in
+`wrangler.jsonc`. Run it from the repository root, since the dump path resolves
+against the working directory.
+
 ### Studio
 
 You can use the Drizzle Studio to view and edit your local database data.
