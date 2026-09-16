@@ -10,8 +10,10 @@
 - [ ] Apply migrations to local database using `pnpm db:migrate:local`.
 - [ ] Apply migrations to production database using `pnpm db:migrate:prod`.
 - [ ] Ensure all bundled tests pass using `pnpm test`.
-- [ ] Deploy the app using `pnpm deploy` before setting production secrets.
+- [ ] Create the email queues using `pnpm queue:create`.
+- [ ] Set the `PLUNK_API_KEY` secret on the email consumer worker using `pnpm wrangler secret put PLUNK_API_KEY --config workers/indigo-email-queue-consumer/wrangler.jsonc`.
+- [ ] Deploy the email consumer worker using `pnpm email-worker:deploy` before the main app.
+- [ ] Deploy the app from the Git-linked Workers project (build command `pnpm build`) before setting production secrets.
 - [ ] Set `BETTER_AUTH_SECRET` secret using `pnpm wrangler secret put BETTER_AUTH_SECRET` for production.
-- [ ] Set `RESEND_API_KEY` secret using `pnpm wrangler secret put RESEND_API_KEY` for production.
 - [ ] (Optional) Turn on require email verification on sign up.
 - [ ] Update logo and landing page copy.

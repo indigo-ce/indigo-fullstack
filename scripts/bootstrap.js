@@ -33,21 +33,19 @@ try {
 }
 
 const filesToUpdate = [
-  "src/pages/email-demo.astro",
-  "src/pages/index.astro",
+  "src/pages/[...lang]/index.astro",
   "src/layouts/Layout.astro",
   "src/lib/email.ts",
-  "src/actions/email.ts",
   "src/components/email/WelcomeEmail.tsx",
   "src/components/email/CustomEmail.tsx",
   "src/components/email/BaseLayout.tsx",
   "src/components/Header.astro",
   "src/components/Footer.astro",
   "README.md",
-  ".cursor/rules/project.mdc",
   "package.json",
   ".dev.vars.example",
   "wrangler.jsonc",
+  "workers/indigo-email-queue-consumer/wrangler.jsonc",
   "CLAUDE.md"
 ];
 
@@ -55,7 +53,6 @@ const filesToDelete = [
   "scripts/bootstrap.js",
   "drizzle/migrations/*.sql",
   "drizzle/migrations/meta",
-  "drizzle/meta",
   "src/styles.css"
 ];
 
@@ -66,8 +63,7 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
 - Delete the following files: ${filesToDelete.join(", ")}
 - Rename 'src/_styles.css' to 'src/styles.css' (replacing the deleted brand colors with neutral colors)
 - Remove the pre-existing TODO.md and rename _TODO.md to TODO.md.
-- Copy '.devvars.example' into '.dev.vars' for local development.
-- Remove the email testing page and the link to it from the dashboard.
+- Copy '.dev.vars.example' into '.dev.vars' for local development.
 - Remove all mentions of "template" in the README and project as a whole.
 - Update CLAUDE.md with project-specific architecture details and remove generic "Indigo Stack CE" references.
 `;
