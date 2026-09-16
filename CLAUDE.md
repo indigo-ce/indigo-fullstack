@@ -340,7 +340,7 @@ the upstream `shadcn` CLI against the registry config in the root
 
 `pnpm add-component` also handles blocks, so run it for those the same way.
 
-**Registry output needs a two-step fix before it compiles here.** The
+**Registry output needs a post-add fix before it compiles here.** The
 registry's current Tailwind 4 output imports `cn` from the `cn` package and
 Radix primitives from the unified `radix-ui` package, and the CLI adds both
 to `package.json` when a generated file needs them. This repository follows
@@ -352,6 +352,14 @@ package, remove the `cn` and `radix-ui` entries the CLI appended to
 `package.json`, and run `pnpm install` to prune them. Do not keep the `cn`
 or `radix-ui` packages to make a generated file resolve — that is a
 dependency-swap decision for its own PR.
+
+A bare import swap is not enough for the namespace usages the unified output
+emits — `Slot.Root`, `Dialog.Root`, `Dialog.Trigger` — because the individual
+packages expose parts as separate named exports, not as statics on the main
+component. Adapt those usages to the tree's idioms: `@radix-ui/react-slot`'s
+`Slot` is used directly (as in `button.tsx`), while multi-part primitives use
+the `import * as DialogPrimitive from "@radix-ui/react-dialog"` form with
+`DialogPrimitive.Root`/`Trigger` (as in `dialog.tsx` and `dropdown-menu.tsx`).
 
 Use BrowserMCP to preview both the old and new designs. If you get connection
 errors, ask the developer to ensure the browser extension is installed and is
