@@ -27,16 +27,21 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-**There is nothing available to pick up, and that is the finding rather than a gap in the review.** Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. Two entries remain unchecked, both parked behind an upstream release, in this order:
+**Item 27 is the entry to pick up, and its first step is a read that has to happen outside this file.** Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. Two entries remain unchecked, in this order:
 
 - **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-No change available inside this repository closes either one, and no other ordering constraint binds. Do not manufacture a substitute: nothing on this list sits on a request path any more (36 was the last of those, as #89) and nothing changes a runtime (32 took the last of those, as #91). If the release below still has not shipped, the correct outcome for the turn is no work.
+No other ordering constraint binds. Do not manufacture a substitute for either: nothing on this list sits on a request path any more (36 was the last of those, as #89) and nothing changes a runtime (32 took the last of those, as #91).
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
-**The check that unparks both, to be re-run on each planning pass.** Read the newest published `@cloudflare/vitest-pool-workers` release and the `miniflare`/`workerd` its manifest pins. The moment one ships on the line the root `wrangler` already resolves, 27 becomes the first item to pick up and 17 follows it. The committed `pnpm-lock.yaml` is the floor, not the check: re-confirmed on 2026-09-16, it still resolves the pool at 0.22.0, whose entry pins `wrangler@4.124.0` and `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, and carries two `wrangler` keys against three each of `miniflare` and `workerd`. The registry read is what decides, and it has still not been performed since 2026-09-09, so whoever picks up 27 does that read first and records the version they saw. Item 27 carries the full per-package attribution of those keys.
+**Start 27 with the registry read, and let that read decide the turn.** Read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`workerd` its manifest pins. Two outcomes, both a complete turn:
+
+- That `miniflare` is on the line the root `wrangler` already resolves — land 27 against the evidence its own section asks for. 17 then follows on its own evidence, once 27 has merged.
+- It is still behind — record the version and the pins you read, stop, and leave both entries unchecked. A recorded negative read is the deliverable in that case; do not ship a pool bump that collapses nothing.
+
+Record the version you saw either way. Nothing inside this repository substitutes for that read, and it has not been performed since 2026-09-09. The committed `pnpm-lock.yaml` is the floor, not the check: re-confirmed on 2026-09-17, it still resolves the pool at 0.22.0, and the copy installed under `node_modules` carries the same manifest — `miniflare: 5.20260815.0-alpha`, `wrangler: 4.124.0` — against a root `wrangler@4.131.1` resolving `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`. The lockfile still carries two `wrangler` keys against three each of `miniflare` and `workerd`. Item 27 carries the full per-package attribution of those keys.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -318,7 +323,7 @@ Nothing under `tests/integration/` exercises an unmatched route, a middleware fa
 
 **Validation.** `pnpm test:run`, `pnpm check`, `pnpm build`.
 
-**Parked (re-confirmed against the committed `pnpm-lock.yaml` on 2026-09-16), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree carries a much newer runtime, `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`, but that copy belongs to the root `wrangler@4.131.1` rather than to the pool, so it does nothing for `pnpm test:run`. The gap widened rather than closed when the root moved: the pool's runtime line has not shifted since 2026-08-15.
+**Parked (re-confirmed against the committed `pnpm-lock.yaml` on 2026-09-17), behind item 27.** The lockfile says why precisely. `@cloudflare/vitest-pool-workers@0.22.0` resolves `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1`, which refuses any compatibility date newer than `2026-08-22` — so setting `2026-09-03` here fails the whole run rather than moving the date. The tree carries a much newer runtime, `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`, but that copy belongs to the root `wrangler@4.131.1` rather than to the pool, so it does nothing for `pnpm test:run`. The gap widened rather than closed when the root moved: the pool's runtime line has not shifted since 2026-08-15.
 
 Item 27 is what moves the pool onto the runtime line the rest of the repository already resolves. Do not attempt this item before that one has landed; confirm the pool's `workerd` accepts `2026-09-03` first, and treat a run that fails on the date as evidence 27 is not done rather than as something to work around. Do not settle for a partial date — a value chosen to satisfy the pool rather than to mirror `wrangler.jsonc` recreates the drift this item exists to close, one shorter interval later — and do not override the pool's `miniflare` in `pnpm-workspace.yaml` to force the newer date through.
 
@@ -506,7 +511,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **Unblocks:** item 17.
 
-**Parked, and the check that unparks it.** As of 2026-09-16 the committed `pnpm-lock.yaml` still resolves `@cloudflare/vitest-pool-workers@0.22.0`, whose entry pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0` — unchanged through the dependency bump that landed as #83. When the registry was last checked (2026-09-09) 0.22.0 was also the newest published release, which is why moving the pool today changes nothing: it resolves the 2026-08-15 runtime line either way. Attribution out of the committed lockfile, and note that it shifted with #83 — re-derive it rather than copying this forward:
+**Parked, and the check that unparks it.** As of 2026-09-17 the committed `pnpm-lock.yaml` still resolves `@cloudflare/vitest-pool-workers@0.22.0`, and the installed copy's own `package.json` under `node_modules` pins `miniflare: 5.20260815.0-alpha` and `wrangler: 4.124.0` — unchanged through the dependency bump that landed as #83. When the registry was last checked (2026-09-09) 0.22.0 was also the newest published release, which is why moving the pool today changes nothing: it resolves the 2026-08-15 runtime line either way. That is the state of the tree, not of the registry; the read below is still what decides. Attribution out of the committed lockfile, and note that it shifted with #83 — re-derive it rather than copying this forward:
 
 - `wrangler@4.131.1` + `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1` — the root pin (`^4.131.0`).
 - `wrangler@4.124.0` + `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1` — the pool's hard dependency. This is the copy this item moves.
