@@ -25,15 +25,13 @@
 
 Backlog for architecture and test-infrastructure alignment. Each item is scoped to a single focused PR, and every item states its own dependencies.
 
-The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. One unparked item remains:
+The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. **Every unparked item is now checked off.** 29 was the last of them and landed as #99, after 37 landed as #97 and 38 as #95. The only unchecked entries left in this section are 17 and 27, and both are parked behind an upstream release.
 
-1. **29** — commit a component-registry config.
+**The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
-**The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
+**There is no item available to pick up right now, and that is the finding rather than a gap in the review.** Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. The parked pair is all that remains, and no change available inside this repository closes either one. Do not manufacture a substitute for them: read the unparking condition below, and if the release still has not shipped, the correct outcome for the turn is no work.
 
-No ordering constraint binds any more, and nothing blocks 29. It is the last unparked item: 37 landed as #97, which was the other half of the generation path, after 38 landed as #95 and gave that checklist a correct `README.md` to copy from. 29 is the item whose acceptance depends on what an external CLI emits on the day it runs, so read the CLI's actual output before writing the acceptance rather than after.
-
-Nothing on this list now sits on a request path: 36 was the last of those and it landed as #89, and 32 took the last runtime change with it as #91. The one remaining unparked item adds a single new config file at the repository root, one `package.json` script, and two `CLAUDE.md` paragraphs, and touches nothing else. That is the shape of a backlog approaching done, not a gap in the review — the runtime, API-contract, and test-infrastructure work items 1 through 25 covered is checked off against current code, and 26, 28, and 33 through 38 are checked off against merged history.
+Nothing on this list sits on a request path any more: 36 was the last of those and it landed as #89, and 32 took the last runtime change with it as #91. When the release does ship, 27 is the first item to pick up and 17 follows it — no other ordering constraint binds.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
@@ -556,6 +554,8 @@ Two things follow, and both belong in the PR. The re-add diff below cannot be fo
 **Acceptance.** Re-add an _existing_ primitive to a throwaway path and diff it against the committed copy. The diff must be confined to formatting and, if the CLI emits them, the two import specifiers established above; anything else — a changed variant, class string, or exported symbol — means the `style` or `baseColor` value is wrong and must be fixed before merging. Then run the script for a primitive not currently in `src/components/ui/`: it writes exactly one new file there and nothing else, and `src/styles.css`, `src/_styles.css`, and `src/lib/utils.ts` are byte-identical afterwards. Revert both scratch files — this PR ships the config, not a new component — and confirm `git status` is clean apart from the intended changes.
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
+
+**Landed as #99.** The root `components.json` declares `style: "new-york"`, `baseColor: "gray"`, `tailwind.config: ""` with `css: "src/styles.css"`, `cssVariables: true`, `rsc: false`, `tsx: true`, `iconLibrary: "lucide"`, and the five `@/`-prefixed aliases; `package.json` defines `add-component` as `pnpm dlx shadcn@latest add`. The import caveat held: `CLAUDE.md` now documents the required post-add rewrite — generated files import `cn` from the `cn` package and primitives from `radix-ui`, so each added file's imports go to `@/lib/utils` and the matching `@radix-ui/react-*` package, and the `cn` and `radix-ui` entries the CLI appends to `package.json` are removed and pruned with `pnpm install`. No existing primitive was regenerated.
 
 ### 30. [x] Let the dev server answer on a tunnel hostname
 
