@@ -533,7 +533,7 @@ The one thing to check before picking this up: read the newest published `@cloud
 
 **Validation.** `pnpm db:migrate-dry:local`, `pnpm db:generate`, `pnpm check`, `pnpm test:run`, `pnpm format:check`, `pnpm build`.
 
-### 29. Commit a component-registry config so UI primitives can be added by CLI
+### 29. [x] Commit a component-registry config so UI primitives can be added by CLI
 
 **Gap.** `src/components/ui/` carries 46 vendored shadcn primitives — `button.tsx`, `dialog.tsx`, `sidebar.tsx`, `calendar.tsx`, `chart.tsx`, `resizable.tsx`, and the rest — every one importing `cn` from `@/lib/utils` and styled off the CSS variables in `src/styles.css`. There is no `components.json` at the repository root. Without it the shadcn CLI cannot resolve where components, the `cn` helper, and the stylesheet live, so it refuses to run and each new primitive has to be transplanted by hand.
 
