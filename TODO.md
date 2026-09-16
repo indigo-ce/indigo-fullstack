@@ -490,7 +490,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 **What it costs.** `pnpm build` runs through the adapter's runtime, `pnpm test:run` through the pool's, and `pnpm email-worker:dev`/`pnpm email-worker:deploy` through the root's. Every install downloads three platform-specific `workerd` binaries. And the spread is what blocks item 17: the pool's `miniflare@5.20260815.0-alpha` refuses any compatibility date after `2026-08-22`, so `vitest.config.ts` is stuck on a runtime date sixteen months behind `wrangler.jsonc` while a newer `workerd` sits in the same `node_modules` serving a different consumer.
 
-**The worker-manifest half is closed and stays out of this item.** `workers/indigo-email-queue-consumer/package.json` declares the root's exact ranges again as of #87 (item 35) — re-read on 2026-09-16 and still matching across all eight keys, including `wrangler@^4.131.0` and `@cloudflare/workers-types@^5.20260911.1`. If it drifts again it is a repeat of item 35, not of this one: that manifest has no importer in `pnpm-lock.yaml` and editing it cannot change what resolves, while this item changes exactly that. The runtime half below is all that remains here, and it is not movable from inside this repository today.
+**The worker-manifest half is closed and stays out of this item.** `workers/indigo-email-queue-consumer/package.json` declares the root's exact ranges as of #87 (item 35), and `tests/unit/email-worker-manifest.test.ts` now asserts all eight of those ranges against the root manifest on every `pnpm test:run` — so that half cannot silently reopen, and it needs no manual re-reading before picking this up. If that guard ever goes red it is a repeat of item 35, not of this one: that manifest has no importer in `pnpm-lock.yaml` and editing it cannot change what resolves, while this item changes exactly that. The runtime half below is all that remains here, and it is not movable from inside this repository today.
 
 **Remaining scope — one change, and only when it is available.**
 
@@ -510,7 +510,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 
 - `wrangler@4.131.1` + `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1` — the root pin (`^4.131.0`).
 - `wrangler@4.124.0` + `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1` — the pool's hard dependency. This is the copy this item moves.
-- `miniflare@5.20260910.0-alpha` / `workerd@1.20260911.1`'s sibling `1.20260910.1` — `@astrojs/cloudflare` → `@cloudflare/vite-plugin@1.54.7` → `@cloudflare/unenv-preset`. Out of scope; it moves only with the adapter. That plugin now peer-links the root's `wrangler@4.131.1` rather than carrying its own, which is why two `wrangler` versions resolve while three `workerd` builds do.
+- `miniflare@5.20260910.0-alpha` / `workerd@1.20260910.1` — `@astrojs/cloudflare` → `@cloudflare/vite-plugin@1.54.7`, which depends on that `miniflare` directly and reaches that `workerd` through `@cloudflare/unenv-preset@2.16.1`. Out of scope; it moves only with the adapter. That plugin peer-links the root's `wrangler@4.131.1` rather than carrying its own, which is why two `wrangler` versions resolve while three `workerd` builds do.
 
 The one thing to check before picking this up: read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked and there is nothing to land — record the version you read and stop, rather than shipping a pool bump that collapses nothing. Do not attempt item 17 until this one has actually landed.
 
@@ -695,7 +695,7 @@ Item 10 last made those ranges honest. The dependency bump that merged as #83 mo
 
 **Validation.** `pnpm install --frozen-lockfile`, `pnpm email-worker:check`, `pnpm check`, `pnpm test:run`, `pnpm format:check`, `pnpm build`.
 
-**Landed as #87.** `workers/indigo-email-queue-consumer/package.json` now declares the root's exact ranges for all eight keys (`@react-email/components@^1.0.12`, `@react-email/render@^2.1.0`, `react`/`react-dom@^19.3.0`, `@types/react`/`@types/react-dom@^19.3.0`, `@cloudflare/workers-types@^5.20260911.1`, `wrangler@^4.131.0`), and `typescript@^6.0.3` was already aligned.
+**Landed as #87.** `workers/indigo-email-queue-consumer/package.json` now declares the root's exact ranges for all eight keys (`@react-email/components@^1.0.12`, `@react-email/render@^2.1.0`, `react`/`react-dom@^19.3.0`, `@types/react`/`@types/react-dom@^19.3.0`, `@cloudflare/workers-types@^5.20260911.1`, `wrangler@^4.131.0`), and `typescript@^6.0.3` was already aligned. The guard shipped with it: `tests/unit/email-worker-manifest.test.ts` imports both manifests as JSON modules and asserts each of those eight ranges equals the root's, so `pnpm test:run` — and therefore CI — goes red if either manifest moves without the other.
 
 ### 36. [x] Hash passwords through Web Crypto instead of the auth library's default
 
