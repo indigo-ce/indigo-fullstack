@@ -25,16 +25,15 @@
 
 Backlog for architecture and test-infrastructure alignment. Each item is scoped to a single focused PR, and every item states its own dependencies.
 
-The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. The open items, in the order they should be picked up:
+The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed. One unparked item remains:
 
-1. [x] **37** — repair the new-project checklist and the bootstrap file lists.
-2. **29** — commit a component-registry config.
+1. **29** — commit a component-registry config.
 
 **The gate they land against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
-No ordering constraint binds any more. 38 settled which Worker holds `PLUNK_API_KEY` when it landed as #95, so 37 — the checklist that has to name the same Worker — is unblocked and now has a correct `README.md` to copy from. 37 comes first because it is documentation-only, cheap, and inherited verbatim by every generated project, which today reads instructions that cannot produce working email. 29 is second because it is the larger of the two and the only one whose acceptance depends on what an external CLI emits on the day it runs.
+No ordering constraint binds any more, and nothing blocks 29. It is the last unparked item: 37 landed as #97, which was the other half of the generation path, after 38 landed as #95 and gave that checklist a correct `README.md` to copy from. 29 is the item whose acceptance depends on what an external CLI emits on the day it runs, so read the CLI's actual output before writing the acceptance rather than after.
 
-Nothing on this list now sits on a request path: 36 was the last of those and it landed as #89, and 32 took the last runtime change with it as #91. With 26 landed as #93 and 38 as #95, the two remaining unparked items touch two generation-path files and one new config file and nothing else. That is the shape of a backlog approaching done, not a gap in the review — the runtime, API-contract, and test-infrastructure work items 1 through 25 covered is checked off against current code.
+Nothing on this list now sits on a request path: 36 was the last of those and it landed as #89, and 32 took the last runtime change with it as #91. The one remaining unparked item adds a single new config file at the repository root, one `package.json` script, and two `CLAUDE.md` paragraphs, and touches nothing else. That is the shape of a backlog approaching done, not a gap in the review — the runtime, API-contract, and test-infrastructure work items 1 through 25 covered is checked off against current code, and 26, 28, and 33 through 38 are checked off against merged history.
 
 **Parked, in this order, behind a `@cloudflare/vitest-pool-workers` release that carries a newer runtime.** Do not pick either up before that release exists; there is no code change available in this repository that closes them.
 
@@ -721,7 +720,7 @@ Item 10 last made those ranges honest. The dependency bump that merged as #83 mo
 
 **Landed as #89.** `src/lib/password.ts` holds the PBKDF2 implementation and `createAuth()` wires it in as `emailAndPassword.password.hash`/`.verify`. The legacy-hash question resolved in favour of delegation: `verifyPassword` imports `verifyPassword as verifyLegacyPassword` from `better-auth/crypto` and hands it any hash not beginning with `$pbkdf2$`, so accounts created before the change still sign in.
 
-### 37. Repair the new-project checklist and the bootstrap file lists
+### 37. [x] Repair the new-project checklist and the bootstrap file lists
 
 **Gap.** `scripts/bootstrap.js` is the documented way to start a project from this template — `README.md` names `node scripts/bootstrap.js <project-name>`. It assembles a Claude prompt out of two hardcoded path lists, and five of those paths no longer exist: `src/pages/email-demo.astro` and `src/actions/email.ts` in `filesToUpdate` (the email demo page and its action are gone; `src/actions/` holds only `auth.ts` and `index.ts`), `.cursor/rules/project.mdc` in `filesToUpdate` (there is no `.cursor/` directory), `src/pages/index.astro` in `filesToUpdate` (the home page moved under the locale route and is now `src/pages/[...lang]/index.astro`; `src/pages/` holds only `email-verification-redirect.astro`, `api/`, and `[...lang]/`), and `drizzle/meta` in `filesToDelete` (item 28 deleted it). The prompt body carries two more dead paths of its own: it instructs "Remove the email testing page and the link to it from the dashboard", for a page that is not in `src/pages/`, and it says to copy `.devvars.example` into `.dev.vars` — a filename with no such file behind it, since the committed one is `.dev.vars.example`. A rename prompt naming files that do not exist spends its budget hunting for them, and gives the agent running it no way to tell a stale entry from one it failed to find. Re-verified against the tree on 2026-09-16: all seven are still wrong, and the surviving `filesToUpdate` entries (`src/layouts/Layout.astro`, `src/lib/email.ts`, the three `src/components/email/*` templates it names, `src/components/Header.astro`, `src/components/Footer.astro`, `README.md`, `package.json`, `.dev.vars.example`, `wrangler.jsonc`, `CLAUDE.md`) all resolve, as do both surviving `filesToDelete` entries (`drizzle/migrations/*.sql`, `drizzle/migrations/meta`) and `src/_styles.css`.
 
@@ -743,6 +742,8 @@ Item 10 last made those ranges honest. The dependency bump that merged as #83 mo
 **Acceptance.** Every path in both `bootstrap.js` lists resolves in the tree, and so does every path named in the prompt body — that is where `.devvars.example` hides, outside both arrays. Quote the checked list in the PR. `_TODO.md` names no variable, script, or command that does not exist — confirm `RESEND_API_KEY` matches nothing repository-wide, and that every `pnpm <script>` it names appears in `package.json`'s `scripts`. `node scripts/bootstrap.js scratch-name --prompt-only` prints the prompt and exits 0 without invoking Claude; quote that output and confirm no dead path appears in it. Note the `--prompt-only` branch sits _after_ the `which claude` guard at the top of the script, so that command exits 1 on a machine without the CLI installed — that is pre-existing behaviour and not this item's to change, but it is worth knowing before reading an exit code as a failure of the edit.
 
 **Validation.** `pnpm format:check` (Prettier formats both files), `pnpm check`, `pnpm test:run`.
+
+**Landed as #97.** `scripts/bootstrap.js` now lists `src/pages/[...lang]/index.astro` and `workers/indigo-email-queue-consumer/wrangler.jsonc` in `filesToUpdate`, the three dead entries and `drizzle/meta` are gone, and the prompt body copies `.dev.vars.example` with no email-testing-page sentence. `_TODO.md` sets `PLUNK_API_KEY` on the consumer worker with the full `--config workers/indigo-email-queue-consumer/wrangler.jsonc` path and orders the email steps as queue creation → secret → `pnpm email-worker:deploy` → app deploy from the Git-linked Workers project; no `RESEND_API_KEY` or `pnpm deploy` line survives.
 
 ### 38. [x] Point the Plunk key documentation at the Worker that reads it
 
