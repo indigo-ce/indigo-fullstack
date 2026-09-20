@@ -27,7 +27,7 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-**Item 27 is the entry to pick up, and its first step is a read that has to happen outside this file.** Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. Two entries remain unchecked, in this order:
+**Items 27 and 17 are both parked; neither is eligible until the release gate below opens.** Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. Two entries remain unchecked, in this order:
 
 - **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
@@ -36,12 +36,12 @@ No other ordering constraint binds. Do not manufacture a substitute for either: 
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
-**Start 27 with the registry read, and let that read decide the turn.** Read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`workerd` its manifest pins. Two outcomes, both a complete turn:
+**The registry read is planning input, not a standalone PR.** Read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`workerd` its manifest pins. It has only one landing condition:
 
-- That `miniflare` is on the line the root `wrangler` already resolves — land 27 against the evidence its own section asks for. 17 then follows on its own evidence, once 27 has merged.
-- It is still behind — record the version and the pins you read, stop, and leave both entries unchecked. A recorded negative read is the deliverable in that case; do not ship a pool bump that collapses nothing.
+- That `miniflare` is on the line the root `wrangler` already resolves — item 27 becomes eligible; land it against the evidence its own section asks for. Item 17 then follows on its own evidence, once 27 has merged.
+- It is still behind — both items remain parked. Return `[SILENT]`; do not edit `TODO.md`, open a PR, or re-read the registry until a later planning pass. A negative registry read is not a deliverable.
 
-Record the version you saw either way. Nothing inside this repository substitutes for that read, and it has not been performed since 2026-09-17; the 2026-09-20 run performed it and found `@cloudflare/vitest-pool-workers@0.22.0` still the newest published release (dist-tags `latest`, unchanged across all 321 published versions), still pinning `miniflare: 5.20260815.0-alpha` / `wrangler: 4.124.0`. Re-read on 2026-09-20 after #107 merged: identical result — 0.22.0, the same 321 published versions, the same `miniflare: 5.20260815.0-alpha` / `wrangler: 4.124.0` pins. The committed `pnpm-lock.yaml` is the floor, not the check: re-confirmed on 2026-09-20 after that read, it still resolves the pool at 0.22.0, and the copy installed under `node_modules` carries the same manifest — `miniflare: 5.20260815.0-alpha`, `wrangler: 4.124.0` — against a root `wrangler@4.131.1` resolving `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`. The lockfile still carries two `wrangler` keys against three each of `miniflare` and `workerd`. Item 27 carries the full per-package attribution of those keys.
+The latest read was 2026-09-20: `@cloudflare/vitest-pool-workers@0.22.0` remained `latest` (321 published versions) and still pins `miniflare: 5.20260815.0-alpha` / `wrangler: 4.124.0`, behind root `wrangler@4.131.1`'s `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -517,7 +517,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 - `wrangler@4.124.0` + `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1` — the pool's hard dependency. This is the copy this item moves.
 - `miniflare@5.20260910.0-alpha` / `workerd@1.20260910.1` — `@astrojs/cloudflare` → `@cloudflare/vite-plugin@1.54.7`, which depends on that `miniflare` directly and reaches that `workerd` through `@cloudflare/unenv-preset@2.16.1`. Out of scope; it moves only with the adapter. That plugin peer-links the root's `wrangler@4.131.1` rather than carrying its own, which is why two `wrangler` versions resolve while three `workerd` builds do.
 
-The one thing to check before picking this up: read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked and there is nothing to land — record the version you read and stop, rather than shipping a pool bump that collapses nothing. Do not attempt item 17 until this one has actually landed.
+The one thing to check before picking this up is the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked: return `[SILENT]` without editing `TODO.md` or opening a PR. Do not attempt item 17 until this one has actually landed.
 
 **Validation.** `pnpm install`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm email-worker:dev` still starts.
 
