@@ -48,7 +48,10 @@ if (Astro.request.method === "POST") {
       body: {
         name,
         email,
-        password
+        password,
+        // Only read after email verification — the link the sign-up email
+        // carries redirects there, so it must be set here and nowhere else.
+        callbackURL: localizeUrl("/dashboard", locale)
       },
       asResponse: true
     });
