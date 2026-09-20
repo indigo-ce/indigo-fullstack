@@ -35,7 +35,13 @@ export function DeleteConfirmation({locale = "en"}: DeleteConfirmationProps) {
     try {
       setError(null);
       setIsDeleting(true);
-      await authClient.deleteUser();
+      // The client returns {data, error} instead of throwing, so a failed
+      // deletion surfaces through the error field, not through the catch.
+      const {error} = await authClient.deleteUser();
+      if (error) {
+        setError(t.account.deleteFailed);
+        return;
+      }
       const signInUrl = localizeUrl("/sign-in", locale);
       window.location.href = signInUrl;
     } catch (err) {
