@@ -27,14 +27,13 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. Four entries remain unchecked, in pick-up order:
+Items 1 through 16, 18 through 26, 28 through 38, and 40 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, and 26, 28, and 33 through 38 against merged history. Three entries remain unchecked, in pick-up order:
 
 - **39** — wire a self-hosted font pipeline through Astro's fonts API. Ready.
-- **40** — let workerd pick the dev inspector port. Ready, and small.
 - **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-39 and 40 are independent of each other and of the parked pair; either can be picked up today. No other ordering constraint binds. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91).
+39 is independent of the parked pair and can be picked up today. No other ordering constraint binds. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91).
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
@@ -812,7 +811,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Validation.** `pnpm install`, `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, `pnpm test:e2e`.
 
-### 40. Stop the dev server reserving the inspector port
+### 40. [x] Stop the dev server reserving the inspector port
 
 **Gap.** `astro.config.mjs` configures the adapter as `cloudflare({imageService: "cloudflare"})` and sets no `inspectorPort`. `pnpm dev` runs the app through the adapter's workerd, which binds a devtools inspector on a fixed default port. A second dev server on the same machine — another git worktree, a second checkout, a `pnpm email-worker:dev` alongside `pnpm dev` — finds that port taken and warns, and the inspector ends up belonging to whichever process started first. No script, test, or documented workflow in this repository attaches to the inspector, so a fixed port is being reserved for something nothing here uses, at the cost of a warning every developer has to learn to ignore.
 
