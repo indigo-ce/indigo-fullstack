@@ -209,7 +209,7 @@ React Email templates delivered asynchronously through Cloudflare Queues:
 - **Public vars**: Configured in `wrangler.jsonc` under `vars` section
 - **Optional trusted origins**: `BETTER_AUTH_TRUSTED_ORIGINS` is a comma-separated list appended after `BETTER_AUTH_BASE_URL`
 - **Optional dev server hosts**: `ASTRO_DEV_ALLOWED_HOSTS` is a comma-separated list read from `process.env` in `astro.config.mjs` and passed to `vite.server.allowedHosts` (dev-time only, not a Worker binding). A tunnel hostname usually has to be named here and in `BETTER_AUTH_TRUSTED_ORIGINS` — this var so the dev server answers it, and the trusted origins so auth accepts the origin
-- **Schema validation**: none — `astro.config.mjs` declares no `env` key; the generated `Env` from `wrangler types` (driven by `wrangler.jsonc`) is the only environment declaration
+- **Schema validation**: none — `astro.config.mjs` declares no `env` key; the environment declarations are the generated `Env` from `wrangler types` (driven by `wrangler.jsonc`) plus the handwritten secret entries in `src/env.d.ts` — `wrangler types` never generates secrets, so each one declared for runtime access must be added there by hand
 
 ### Database Configuration
 
@@ -254,7 +254,7 @@ React Email templates delivered asynchronously through Cloudflare Queues:
 1. Create React component in `src/components/email/`
 2. Use BaseLayout for consistent styling
 3. Test with `pnpm preview-email`
-4. Send via `queueEmail(to, template, env, options)` from `src/lib/email.ts`, which puts a message on the `EMAIL_QUEUE` binding for `workers/indigo-email-queue-consumer` to render and send
+4. Send via `queueEmail(to, template, env, options)` from `src/lib/email.ts`: outside local development it puts a message on the `EMAIL_QUEUE` binding for `workers/indigo-email-queue-consumer` to render and send, while a `BETTER_AUTH_BASE_URL` containing `localhost` or `127.0.0.1` makes it log the message to the console instead (see Email System Architecture)
 
 ### Component Development
 
