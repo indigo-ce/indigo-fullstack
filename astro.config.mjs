@@ -1,5 +1,5 @@
 // @ts-check
-import {defineConfig} from "astro/config";
+import {defineConfig, fontProviders} from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@astrojs/react";
 import cloudflare from "@astrojs/cloudflare";
@@ -37,5 +37,27 @@ export default defineConfig({
           .filter(Boolean) ?? []
     }
   },
+  // Self-hosted webfont, read from @fontsource-variable/inter at build time and
+  // emitted into dist/. The local provider keeps the build free of network
+  // calls to font CDNs. Layout.astro renders <Font cssVariable="--font-inter" />
+  // to emit the @font-face rules; --font-sans points at the variable in the
+  // stylesheets.
+  fonts: [
+    {
+      name: "Inter",
+      cssVariable: "--font-inter",
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          {
+            // Weight range inferred from the variable font file itself.
+            src: [
+              "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2"
+            ]
+          }
+        ]
+      }
+    }
+  ],
   integrations: [react()]
 });

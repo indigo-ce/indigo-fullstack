@@ -120,6 +120,49 @@ The template ships with four palettes: `seagull` (neutral), `hyacinth` (primary 
 
 Modify `--radius` in `:root`. Variants (`--radius-sm`, `--radius-md`, `--radius-lg`, `--radius-xl`) are computed from this base value automatically.
 
+## Typography
+
+Type is self-hosted through [Astro's fonts API](https://docs.astro.build/en/guides/fonts/): font files are read from an `@fontsource-variable/*` package at build time and emitted into `dist/` — no font CDN, no runtime dependency. The shipped face is Inter (variable, weights 100–900, latin subset); Japanese text deliberately stays on the platform gothic stack, since Inter has no CJK coverage.
+
+Four places are involved:
+
+1. The `fonts` entry in `astro.config.mjs` — declares the family, its CSS variable (`--font-inter`), and the font file(s) it reads:
+
+   ```js
+   fonts: [
+     {
+       name: "Inter",
+       cssVariable: "--font-inter",
+       provider: fontProviders.local(),
+       options: {
+         variants: [
+           {
+             src: [
+               "@fontsource-variable/inter/files/inter-latin-wght-normal.woff2"
+             ]
+           }
+         ]
+       }
+     }
+   ];
+   ```
+
+   `src` paths resolve as package imports; a variable font's weight range is inferred from the file unless you pass `weight` (e.g. `"100 900"`). Keep the local provider: the Google provider fetches from `fonts.googleapis.com` at build time, which would put a third-party network call on the merge gate.
+
+2. `<Font cssVariable="--font-inter" preload />` in the `<head>` of `src/layouts/Layout.astro` — the config alone emits nothing; this component produces the `@font-face` rules and the preload link.
+
+3. `--font-sans: var(--font-inter);` in `:root` of `src/styles.css` — points the semantic font token at the generated variable.
+
+4. `--font-sans: var(--font-sans);` in the `@theme inline` block of `src/styles.css` — re-exports it so Tailwind's `font-sans` utility (and the body's default stack) resolve through it.
+
+### Swap in a different face
+
+1. Add the matching `@fontsource-variable/<face>` dev dependency and point the `fonts` entry's `src` at one of its files (list them with `ls node_modules/@fontsource-variable/<face>/files`).
+2. Update `name` and, if you want a different variable name, `cssVariable` — keep the `<Font>` tag, the `:root` mapping, and the skill's references in sync with it.
+3. Leave `fallbacks` at their defaults and `optimizedFallbacks` on, so Astro emits a metric-matched system fallback and text doesn't reflow when the webfont arrives.
+
+Both `src/styles.css` and `src/_styles.css` carry the `--font-sans` mappings — `_styles.css` is the neutral starter that `scripts/bootstrap.js` renames over `styles.css` for new projects, so a pipeline wired only into the brand stylesheet would disappear on bootstrap.
+
 ## Using Tokens in Components
 
 ```html
