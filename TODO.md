@@ -27,12 +27,14 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-Items 1 through 16, 18 through 26, 28 through 38, and 40 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, and 26, 28, and 33 through 38 against merged history. Two entries remain, both parked:
+Items 1 through 16, 18 through 26, and 28 through 40 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, and 26, 28, and 33 through 39 against merged history. Four entries remain:
 
+- **41** — correct the claims in `CLAUDE.md` that the code no longer supports. Ready.
+- **42** — publish the agent guide as `AGENTS.md` and leave one copy of it. Depends on 41.
 - **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Nothing is currently pickable. No other ordering constraint binds. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91).
+Pick up 41, then 42. No other ordering constraint binds. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91), and neither 41 nor 42 touches either.
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
@@ -810,6 +812,8 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Validation.** `pnpm install`, `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, `pnpm test:e2e`.
 
+**Landed as #113.** `astro.config.mjs` declares one `fonts` entry — `Inter`, `--font-inter`, `fontProviders.local()`, sourced from `@fontsource-variable/inter/files/inter-latin-wght-normal.woff2` with the weight range left to be read off the file — `src/layouts/Layout.astro` renders `<Font cssVariable="--font-inter" preload />`, and both `src/styles.css` and `src/_styles.css` map `--font-sans` onto it in `:root` and re-export it from `@theme inline`. `tests/e2e/typography.spec.ts` is the guard.
+
 ### 40. [x] Stop the dev server reserving the inspector port
 
 **Gap.** `astro.config.mjs` configures the adapter as `cloudflare({imageService: "cloudflare"})` and sets no `inspectorPort`. `pnpm dev` runs the app through the adapter's workerd, which binds a devtools inspector on a fixed default port. A second dev server on the same machine — another git worktree, a second checkout, a `pnpm email-worker:dev` alongside `pnpm dev` — finds that port taken and warns, and the inspector ends up belonging to whichever process started first. No script, test, or documented workflow in this repository attaches to the inspector, so a fixed port is being reserved for something nothing here uses, at the cost of a warning every developer has to learn to ignore.
@@ -819,3 +823,48 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 **Acceptance.** Start two dev servers at once and compare. On the current config, the second one warns about the inspector port; with the change, neither does and both serve a page. Quote both startup banners in the PR, including the pre-change warning — that warning is the evidence this item exists to remove, so capture it before editing rather than describing it.
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm dev` starts.
+
+### 41. Correct the `CLAUDE.md` claims the code no longer supports
+
+**Gap.** `CLAUDE.md` is what an agent or a new contributor reads before touching anything, and six of its claims have been overtaken by work that already merged. Each is wrong in a direction that costs the reader time or leads them to change working code. Re-verify each against the file named beside it before editing — the point of this item is that the document stopped matching the tree, so confirming it still does not match is the first step.
+
+- **"Schema validation: Defined in `astro.config.mjs` env schema"** (Key Configuration Files → Environment Configuration). Item 21 removed that block. `astro.config.mjs` imports `defineConfig` and `fontProviders` from `astro/config`, imports no `envField`, and declares no `env` key. The generated `Env` from `wrangler.jsonc` is the only environment declaration left, which is exactly what item 21 set out to make true.
+- **"Send via `sendEmail()` from `@/actions/email`"** (Development Patterns → Email Template Development). Neither the function nor the module exists. `src/actions/` holds `auth.ts` and `index.ts`, and a search of `src/` for `sendEmail` matches only the unrelated `SEND_EMAIL_FROM` read in `src/pages/[...lang]/status.astro`. The live path is `queueEmail(to, template, env, options)` from `src/lib/email.ts`, which puts a message on `EMAIL_QUEUE` for `workers/indigo-email-queue-consumer` to render and send.
+- **"Development: Plunk API with resend.dev testing domains"** (Email System Architecture) and **"Email: Plunk API with resend.dev testing (dev) vs Plunk API (prod)"** (Development vs Production). Both are the Resend-era rule; this repository has no resend.dev domains and no key-based short-circuit. `queueEmail` branches on `isLocalDev` — `env.BETTER_AUTH_BASE_URL` containing `localhost` or `127.0.0.1` — and logs the message to the console instead of queueing it. Item 38 corrected this exact claim in `README.md` as #95 and left `CLAUDE.md` carrying it, so the two documents now contradict each other about when real email is sent. That is the same misreading item 38 called out as the expensive one: someone who believes a placeholder key is the safety mechanism, and who points `BETTER_AUTH_BASE_URL` at a real hostname, queues real email to a real address.
+- **"No Node.js built-ins in production runtime"** (Important Constraints → Cloudflare Workers Limitations). `wrangler.jsonc` declares `compatibility_flags: ["nodejs_compat"]`, and `src/plugins/better-auth/refresh-access/index.ts` decodes the sign-in `Authorization` header with `Buffer.from(...)` on a request path `tests/integration/auth-routes.test.ts` exercises on every run. A reader who believes this bullet removes a working call, or declines the flag on the next Worker this template grows.
+- **"Adding New API Endpoints"** is a three-step recipe that stops before the step CI enforces. Item 34 shipped `src/lib/hono/routes/openapi.ts` and `tests/integration/openapi.test.ts`, which compares the document's path set against what `GET /api/v1/routes` reports, as sets, in both directions. A route added by following this recipe as written turns the suite red with no hint in the recipe as to why.
+- **Essential Commands** lists `pnpm dev`, `pnpm build`, `pnpm preview`, `pnpm format`, and a bare `astro check`. It names none of the commands `.github/workflows/test.yml` gates a pull request on — `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run` — and `pnpm build`, which is also gated, is listed without saying so. The bare `astro check` is the form item 9 established fails on a fresh clone, because `worker-configuration.d.ts` has not been generated yet; `pnpm check` is the composed form that works.
+
+**Second gap, same file.** The five skills under `skills/` — `astro-upgrade`, `indigo-email`, `indigo-i18n`, `indigo-testing`, `indigo-theming` — are named in no document in this repository. A search of `CLAUDE.md` and `README.md` for `skills/` and `SKILL.md` matches nothing, and `.claude/` carries only `commands/`. Nothing points a reader at them, so the procedures they hold are found only by listing the directory. The Theming section of `CLAUDE.md` is the sharpest case: it restates a thinner version of what `skills/indigo-theming/SKILL.md` covers — and which item 39 extended with the typography procedure — without mentioning that the skill exists.
+
+**Scope.** `CLAUDE.md` only.
+
+- Fix the six claims above, each against the file that decides it, and say in the PR which file you read for each.
+- Add the OpenAPI step to the "Adding New API Endpoints" recipe, naming `src/lib/hono/routes/openapi.ts` and the cross-check in `tests/integration/openapi.test.ts` so the reason is on the page.
+- Replace the bare `astro check` with `pnpm check` in Essential Commands and add the remaining gated commands, each with one line saying CI runs it on every pull request.
+- Add a short section listing the five `skills/*/SKILL.md` files and what each covers. Then read `skills/indigo-theming/SKILL.md` and trim the Theming section to what the skill does not already carry, pointing at it for the rest — delete only material the skill genuinely duplicates, and say in the PR what stayed and why.
+- Do not restructure the document, rename its headings, or move it to another path. Relocating the guide is item 42; a rewrite and a rename in one diff is unreviewable.
+- Do not change any file under `src/`, `workers/`, `tests/`, `.github/`, or `skills/`. If a claim turns out to be right and the code wrong, record that in the PR and leave the code alone — this item moves documentation to match behaviour, not the reverse.
+
+**Acceptance.** Every command named in `CLAUDE.md` resolves: it appears in `package.json`'s `scripts`, or it is a `pnpm`/`wrangler` subcommand that runs. Every repository path it names exists in the tree. Quote both checked lists in the PR — that verification is the item. A search of `CLAUDE.md` for `resend`, `sendEmail`, `@/actions/email`, and `env schema` returns nothing, and `README.md` and `CLAUDE.md` describe the same local-email rule.
+
+**Validation.** `pnpm format:check` (Prettier formats Markdown), `pnpm check`, `pnpm test:run`.
+
+### 42. Publish the agent guide as `AGENTS.md` and leave one copy of it
+
+**Gap.** Every instruction this repository gives a coding agent lives in `CLAUDE.md`, whose opening line addresses one tool by name. `AGENTS.md` is the filename the other agents and editors look for, and there is none — so anything driven by a different tool starts with no architecture overview, none of the Better Auth rules (the "never `fetch()` the auth endpoints, never `auth.handler()`" pair in particular), no post-`pnpm add-component` import-rewrite procedure, and no database or email steps. Nothing in the repository is Claude-specific: the guide describes Astro, Hono, Drizzle, Better Auth, and the Cloudflare toolchain. This is a template, so every project generated from it inherits a guide only one tool reads.
+
+**Depends on:** item 41. Correct the content first, then move it — relocating a file that still carries six stale claims just moves the staleness to a new path, and the two diffs are far easier to read apart than together.
+
+**Scope.**
+
+- `git mv CLAUDE.md AGENTS.md`, so the history follows the content rather than reading as a delete plus an add.
+- Leave a short `CLAUDE.md` behind whose whole body names `AGENTS.md` as the guide and says the content lives there. Do not copy the guide into both files: two copies drift, and the reason this item exists is that one file is the source of truth for all agents.
+- Do not make `CLAUDE.md` a symlink. It would survive fewer checkouts and tools than a two-line pointer buys, and Prettier and `git` both treat it differently.
+- Update the two references in `scripts/bootstrap.js`: `CLAUDE.md` in `filesToUpdate` becomes `AGENTS.md`, and the prompt line telling the agent to update `CLAUDE.md` names `AGENTS.md` instead. Item 37 made every path in that script resolve; this item must leave it that way.
+- Change no prose beyond the file's own name: this item relocates the guide, it does not edit it. A content change that rides along here belongs in item 41 or a later one.
+- Leave `TODO.md` alone. Its `CLAUDE.md` mentions are the record of items that shipped against that filename and are accurate as history.
+
+**Acceptance.** `AGENTS.md` holds the full guide and `CLAUDE.md` is a pointer of a few lines naming it. A repository-wide search for `CLAUDE.md` outside `TODO.md` and `pnpm-lock.yaml` returns only the pointer file itself. `git log --follow AGENTS.md` shows the commits from before the rename — quote the first few lines in the PR, since that is the whole reason for using `git mv`. `node scripts/bootstrap.js scratch-name --prompt-only` prints a prompt that names `AGENTS.md` and no path that fails to resolve; note that the `--prompt-only` branch sits after the `which claude` guard, so that command exits 1 on a machine without the CLI installed, which is pre-existing and not this item's to change.
+
+**Validation.** `pnpm format:check`, `pnpm check`, `pnpm test:run`.
