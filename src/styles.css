@@ -5,6 +5,7 @@
 
 :root {
   --radius: 0.625rem;
+  --font-sans: var(--font-inter);
   --background: var(--color-seagull-10);
   --foreground: var(--color-seagull-900);
   --card: var(--color-seagull-20);
@@ -75,6 +76,9 @@
 }
 
 @theme inline {
+  /* Typography */
+  --font-sans: var(--font-sans);
+
   /* Color Palette */
   --color-seagull-10: oklch(0.9965 0.0182 225.69);
   --color-seagull-20: oklch(0.9844 0.0213 225.69);

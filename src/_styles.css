@@ -5,6 +5,7 @@
 
 :root {
   --radius: 0.625rem;
+  --font-sans: var(--font-inter);
   --background: oklch(1 0 0);
   --foreground: oklch(0.13 0.028 261.692);
   --card: oklch(1 0 0);
@@ -75,6 +76,7 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-sans);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
