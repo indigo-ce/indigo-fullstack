@@ -6,11 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Essential Commands
 
+Commands marked with **(CI)** run in the `Test` workflow on every pull request.
+
 - `pnpm dev` - Start development server (includes Astro type checking and Cloudflare Workers emulation)
-- `pnpm build` - Build production (includes Cloudflare types generation and Astro build)
-- `pnpm preview` - Preview production build locally with Wrangler
+- `pnpm peers check` - Check for unmet or missing peer dependency issues (CI)
 - `pnpm format` - Format all files with Prettier
-- `astro check` - Run TypeScript and Astro diagnostics
+- `pnpm format:check` - Verify Prettier formatting without writing (CI)
+- `pnpm check` - Generate Cloudflare types, then run TypeScript and Astro diagnostics. Use this composed form, not a bare `astro check`: on a fresh clone the generated `worker-configuration.d.ts` does not exist yet, so a bare run fails with "Cannot find name 'Env'" (CI)
+- `pnpm email-worker:check` - Type-check the email queue consumer worker (CI)
+- `pnpm test:run` - Run the unit and integration tests once (CI)
+- `pnpm build` - Build production (Cloudflare types generation, then the Astro build) (CI)
+- `pnpm preview` - Preview production build locally with Wrangler
 
 ### Database Operations
 
@@ -187,10 +193,10 @@ Type-safe i18n with locale-aware routing:
 
 ### Email System Architecture
 
-React Email templates with Plunk API:
+React Email templates delivered asynchronously through Cloudflare Queues:
 
-- **Production**: Plunk API with custom domain
-- **Development**: Plunk API with resend.dev testing domains
+- **Production**: a real `BETTER_AUTH_BASE_URL` makes `queueEmail()` enqueue to the `EMAIL_QUEUE` binding; `workers/indigo-email-queue-consumer` renders the template and sends via the Plunk API with a custom domain
+- **Development and CI**: `BETTER_AUTH_BASE_URL` containing `localhost` or `127.0.0.1` makes `queueEmail()` log the message to the console instead of queueing — the Plunk API key plays no part in that decision, and no email is ever sent
 - Template organization in `src/components/email/` with shared BaseLayout
 - Preview server available via `pnpm preview-email`
 
@@ -203,7 +209,7 @@ React Email templates with Plunk API:
 - **Public vars**: Configured in `wrangler.jsonc` under `vars` section
 - **Optional trusted origins**: `BETTER_AUTH_TRUSTED_ORIGINS` is a comma-separated list appended after `BETTER_AUTH_BASE_URL`
 - **Optional dev server hosts**: `ASTRO_DEV_ALLOWED_HOSTS` is a comma-separated list read from `process.env` in `astro.config.mjs` and passed to `vite.server.allowedHosts` (dev-time only, not a Worker binding). A tunnel hostname usually has to be named here and in `BETTER_AUTH_TRUSTED_ORIGINS` — this var so the dev server answers it, and the trusted origins so auth accepts the origin
-- **Schema validation**: Defined in `astro.config.mjs` env schema
+- **Schema validation**: none — `astro.config.mjs` declares no `env` key; the generated `Env` from `wrangler types` (driven by `wrangler.jsonc`) is the only environment declaration
 
 ### Database Configuration
 
@@ -227,6 +233,7 @@ React Email templates with Plunk API:
 2. Import and mount in `src/pages/api/[...path].ts`
 3. Authentication handled automatically by middleware
 4. Database available via `c.get("db")`
+5. Register the new route in `src/lib/hono/routes/openapi.ts`, which serves `GET /api/v1/openapi.json`. `tests/integration/openapi.test.ts` cross-checks the document's path set against what `GET /api/v1/routes` reports in both directions, so an unregistered route turns the test suite red
 
 ### Database Schema Changes
 
@@ -247,7 +254,7 @@ React Email templates with Plunk API:
 1. Create React component in `src/components/email/`
 2. Use BaseLayout for consistent styling
 3. Test with `pnpm preview-email`
-4. Send via `sendEmail()` from `@/actions/email`
+4. Send via `queueEmail(to, template, env, options)` from `src/lib/email.ts`, which puts a message on the `EMAIL_QUEUE` binding for `workers/indigo-email-queue-consumer` to render and send
 
 ### Component Development
 
@@ -400,7 +407,7 @@ like.
 
 ### Cloudflare Workers Limitations
 
-- No Node.js built-ins in production runtime
+- Node.js built-ins are available: `wrangler.jsonc` declares `compatibility_flags: ["nodejs_compat"]`, and code on request paths relies on it (e.g. `Buffer.from(...)` in `src/plugins/better-auth/refresh-access/index.ts`)
 - React 19 requires `react-dom/server.edge` in production (configured in Astro config)
 
 ### Better Auth Configuration
@@ -417,7 +424,7 @@ like.
 
 ### Development vs Production
 
-- Email: Plunk API with resend.dev testing (dev) vs Plunk API (prod)
+- Email: logged to the console while `BETTER_AUTH_BASE_URL` is a localhost address (dev and CI) vs queued to Cloudflare Queues and sent via Plunk (prod)
 - Database: Local D1 file vs remote Cloudflare D1
 - Secrets: `.dev.vars` file vs Wrangler secrets
 - Assets: Dev server vs Cloudflare Workers static assets
@@ -427,19 +434,14 @@ like.
 This project uses TailwindCSS for styling.
 The shadcn theme is defined in `src/styles.css`.
 
-You can generate a new theme using your favorite tool ([example](https://themecn.dev/))
-then copy-paste the variables.
+The `skills/indigo-theming/SKILL.md` guide covers everything beyond those two lines: the `styles.css` sections and semantic tokens, changing or adding palettes, renaming the shipped ones, border radius, typography, using tokens in components, theme switching, and the CSS file setup for new projects. Follow it for any theming work.
 
-### CSS File Setup for New Projects
+## Repository Skills
 
-The template includes two CSS files in `src/`:
+Procedural guides live in `skills/` as `SKILL.md` files. They are named in no other document, so check them before improvising a procedure:
 
-- `styles.css` - Contains Indigo brand colors (seagull, hyacinth, asparagus, earth palettes)
-- `_styles.css` - Contains neutral colors that most projects would want to start with
-
-When starting a new project, you should:
-
-1. Delete `src/styles.css` (contains Indigo template branding)
-2. Rename `src/_styles.css` to `src/styles.css` (neutral starter colors)
-
-**Automated via Bootstrap Script**: This is handled automatically by the `scripts/bootstrap.js` script when setting up a new project.
+- `skills/astro-upgrade/SKILL.md` - Upgrading Astro across a major: branch and baseline rules, the guide → pin → migrate → validate loop, troubleshooting
+- `skills/indigo-email/SKILL.md` - The email queue architecture, queuing emails, the available templates, adding a new one, Plunk and queue setup, local development with the full queue
+- `skills/indigo-i18n/SKILL.md` - Translation file structure, using translations in pages and React components, locale-aware URLs, adding keys or a new language
+- `skills/indigo-testing/SKILL.md` - The test directory layout, running tests, how the Workers test server works, auth helpers, selector strategy, common patterns
+- `skills/indigo-theming/SKILL.md` - The theming system described in the Theming section above, in full

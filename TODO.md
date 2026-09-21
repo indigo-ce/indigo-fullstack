@@ -29,7 +29,7 @@ The sections below are in stable numeric order, not pick-up order — numbers ar
 
 Items 1 through 16, 18 through 26, and 28 through 40 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, and 26, 28, and 33 through 39 against merged history. Four entries remain:
 
-- **41** — correct the claims in `CLAUDE.md` that the code no longer supports. Ready.
+- **41** — correct the claims in `CLAUDE.md` that the code no longer supports. Done as #115.
 - **42** — publish the agent guide as `AGENTS.md` and leave one copy of it. Depends on 41.
 - **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
