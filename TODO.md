@@ -27,21 +27,23 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-**Items 27 and 17 are both parked; neither is eligible until the release gate below opens.** Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. Two entries remain unchecked, in this order:
+Items 1 through 16, 18 through 26, and 28 through 38 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 against current code, and 26, 28, and 33 through 38 against merged history. Four entries remain unchecked, in pick-up order:
 
-- **27** — collapse the Cloudflare runtime toolchain. Unblocks 17.
+- **39** — wire a self-hosted font pipeline through Astro's fonts API. Ready.
+- **40** — let workerd pick the dev inspector port. Ready, and small.
+- **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-No other ordering constraint binds. Do not manufacture a substitute for either: nothing on this list sits on a request path any more (36 was the last of those, as #89) and nothing changes a runtime (32 took the last of those, as #91).
+39 and 40 are independent of each other and of the parked pair; either can be picked up today. No other ordering constraint binds. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91).
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
-**The registry read is planning input, not a standalone PR.** Read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`workerd` its manifest pins. It has only one landing condition:
+**The registry read gates items 27 and 17, and nothing else.** Before picking up 27, read the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. There are two outcomes:
 
 - That `miniflare` is on the line the root `wrangler` already resolves — item 27 becomes eligible; land it against the evidence its own section asks for. Item 17 then follows on its own evidence, once 27 has merged.
-- It is still behind — both items remain parked. Return `[SILENT]`; do not edit `TODO.md`, open a PR, or re-read the registry until a later planning pass. A negative registry read is not a deliverable.
+- It is still behind — both items stay parked. A negative read is never a standalone PR, and it is a finding about those two items only: it does not block 39, 40, or anything else added later.
 
-The latest read was 2026-09-20: `@cloudflare/vitest-pool-workers@0.22.0` remained `latest` (321 published versions) and still pins `miniflare: 5.20260815.0-alpha` / `wrangler: 4.124.0`, behind root `wrangler@4.131.1`'s `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`.
+The last registry read was 2026-09-20: `@cloudflare/vitest-pool-workers@0.22.0` was still `latest` (321 published versions), pinning `miniflare: 5.20260815.0-alpha` / `wrangler: 4.124.0`. The installed tree still agrees as of 2026-09-21 — `node_modules/@cloudflare/vitest-pool-workers/package.json` reports `0.22.0` with those same two pins, while the root `wrangler@4.131.1` resolves `miniflare@5.20260911.0-alpha` / `workerd@1.20260911.1`. That is the tree, not the registry; re-read the registry rather than treating this line as current.
 
 ### 1. [x] Make the Workers test environment run against a real migrated D1
 
@@ -517,7 +519,7 @@ A repository-wide search for `astro:env` and `import.meta.env` across `src/`, `t
 - `wrangler@4.124.0` + `miniflare@5.20260815.0-alpha` / `workerd@1.20260815.1` — the pool's hard dependency. This is the copy this item moves.
 - `miniflare@5.20260910.0-alpha` / `workerd@1.20260910.1` — `@astrojs/cloudflare` → `@cloudflare/vite-plugin@1.54.7`, which depends on that `miniflare` directly and reaches that `workerd` through `@cloudflare/unenv-preset@2.16.1`. Out of scope; it moves only with the adapter. That plugin peer-links the root's `wrangler@4.131.1` rather than carrying its own, which is why two `wrangler` versions resolve while three `workerd` builds do.
 
-The one thing to check before picking this up is the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked: return `[SILENT]` without editing `TODO.md` or opening a PR. Do not attempt item 17 until this one has actually landed.
+The one thing to check before picking this up is the newest published `@cloudflare/vitest-pool-workers` version and the `miniflare`/`wrangler` its manifest pins. If that `miniflare` is still behind the root `wrangler`'s, this item stays parked and there is no PR to open for it — pick up ready work elsewhere on this list instead. Do not attempt item 17 until this one has actually landed.
 
 **Validation.** `pnpm install`, `pnpm cf-types && pnpm check`, `pnpm email-worker:check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm email-worker:dev` still starts.
 
@@ -777,3 +779,45 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 **Validation.** `pnpm format:check`, `pnpm check`, `pnpm test:run`, `pnpm build`.
 
 **Landed as #95.** Every `PLUNK_API_KEY` mention in `README.md` now names the consumer worker and carries the `--config workers/indigo-email-queue-consumer/wrangler.jsonc` path, the local-development bullet points at `workers/indigo-email-queue-consumer/.dev.vars`, the `PLUNK_API_KEY=` line is gone from `.dev.vars.example`, and the email-behavior section states the `BETTER_AUTH_BASE_URL` rule the code implements — a repository-wide search for `ci-test` now matches nothing outside this file.
+
+### 39. Ship a self-hosted font pipeline through Astro's fonts API
+
+**Gap.** Nothing in this repository declares a typeface. A search of `src/` for `font-family`, `--font-`, `@fontsource`, and `fonts.googleapis` matches exactly one line — `src/components/ui/chart.tsx`, which applies the `font-mono` utility. `astro.config.mjs` has no `fonts` block, `src/layouts/Layout.astro` imports nothing from `astro:assets`, and neither `src/styles.css` nor `src/_styles.css` sets `--font-sans`. Every page therefore renders in Tailwind's default `ui-sans-serif, system-ui, …` stack, so the UI is a different typeface on every operating system and the 46 vendored shadcn primitives are laid out against whatever the visitor's platform supplies.
+
+**What the absence costs a template.** A project generated from this one has no wiring to extend, so the cheapest way to get a brand face is a `<link rel="stylesheet" href="https://fonts.googleapis.com/…">` pasted into `Layout.astro` — a render-blocking third-party request on every page, no preload, no metric-matched fallback, and the layout shift that follows. Shipping the pipeline once means every downstream project changes one config block instead of inventing the mechanism.
+
+**The mechanism is already available here.** Astro's fonts API is stable from 6.0.0 — a top-level `fonts` config key, `fontProviders` exported from `astro/config`, and a `Font` component from `astro:assets` — and `package.json` declares `astro: ^7.3.2`. Confirm both the key and the component against the installed package before writing the config. `src/layouts/Layout.astro` holds the only `<html>` element in the repository and all twelve pages under `src/pages/` import it, so there is exactly one place to wire.
+
+**Second gap, same subject.** `skills/indigo-theming/SKILL.md` is the documented entry point for customising the theme and covers colours, the OKLCH palettes, `--radius`, the light/dark switch, and the `_styles.css` swap. It says nothing about type, so even after the pipeline exists nobody looking to change the face will find it.
+
+**Scope.**
+
+- Add `@fontsource-variable/inter` to `devDependencies` — its files are read at build time and emitted into `dist/`, and nothing imports the package at run time — and declare one `fonts` entry in `astro.config.mjs`: `name: "Inter"`, `cssVariable: "--font-inter"`, `provider: fontProviders.local()`, with a variable-weight `src` covering the weights the UI uses. **Read the shipped file names out of the installed package rather than writing a path from memory**; `@fontsource-variable` lays them out under `files/` and the exact name is what decides whether the build resolves.
+- Use the local provider, not `fontProviders.google()`. `.github/workflows/test.yml` runs `pnpm build` on every pull request, and the Google provider fetches metadata and font files from `fonts.googleapis.com` at build time — that would put a third-party network call on the merge gate. State the provider and this reason in the PR.
+- Leave `fallbacks` at its default and `optimizedFallbacks` on. That is what emits the metric-matched system fallback, so text renders at close to the right size before the webfont lands rather than reflowing when it does.
+- Render `<Font cssVariable="--font-inter" preload />` in the `<head>` of `src/layouts/Layout.astro`. The config alone emits nothing — the component is what produces the `@font-face` rules and the preload link.
+- Point `--font-sans` at the generated variable in the `@theme inline` block of **both** `src/styles.css` and `src/_styles.css`. `src/_styles.css` is the neutral starter theme that `scripts/bootstrap.js` renames over `src/styles.css` for a new project, so a pipeline wired only into the brand stylesheet disappears the moment anyone uses the template. Do not add a `--font-serif` or `--font-mono` entry: `chart.tsx` is the only `font-mono` consumer in the tree and the default stack serves it.
+- Add a Typography section to `skills/indigo-theming/SKILL.md` naming the four places involved — the `fonts` entry, the `<Font>` tag, and the two `--font-sans` mappings — and giving the procedure for swapping in a different face.
+- Do not touch the colour palettes, `--radius`, `SetTheme.astro`, `ThemeSelect.tsx`, or `src/lib/theme.ts`; do not add a second family; and do not change anything under `src/components/email/`, which sets its own inline `fontFamily` stacks because mail clients do not load webfonts.
+
+**Japanese copy is deliberately left on the platform gothic, and the PR must say so.** `src/i18n/` carries a full `ja` locale and Inter has no CJK coverage, so Japanese text falls through to Hiragino Sans, Yu Gothic, or Noto Sans CJK depending on the platform rather than to a webfont. That is the intended outcome, not an oversight: a CJK webfont runs to megabytes even subset, and choosing and subsetting one is a separate decision with its own weight budget. Load a `ja` page and confirm the Japanese glyphs still render — boxes or a fallback serif mean the `--font-sans` mapping has overridden the platform stack instead of leading it, and that has to be fixed before merging.
+
+**This changes how every page looks, and that is the point.** Capture one page before and after and put both in the PR. Do not also retune sizes, weights, line heights, or letter spacing — this item wires a pipeline and points `--font-sans` at it; restyling the UI on top of the new face is a separate change with a separate review.
+
+**Acceptance.**
+
+- `pnpm build` completes with no network access to a font CDN, and `dist/` contains the woff2 the config names. `wrangler.jsonc` serves `./dist` through the `ASSETS` binding and `public/.assetsignore` excludes only `_worker.js` and `_routes.json`, so no binding or ignore change should be needed — confirm the emitted file is actually reachable rather than assuming it, and if it is not, say what was required.
+- Against `pnpm preview`: the served HTML carries a `<link rel="preload" as="font">` for the face, and the URL it names returns 200.
+- A new `tests/e2e/typography.spec.ts` loads a page and asserts `getComputedStyle(document.body).fontFamily` contains `Inter`. Confirm it fails with the `<Font>` tag removed — otherwise it is pinning the Tailwind default rather than the wiring. The existing specs under `tests/e2e/auth/` and `tests/e2e/i18n/` pass unchanged.
+
+**Validation.** `pnpm install`, `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, `pnpm test:e2e`.
+
+### 40. Stop the dev server reserving the inspector port
+
+**Gap.** `astro.config.mjs` configures the adapter as `cloudflare({imageService: "cloudflare"})` and sets no `inspectorPort`. `pnpm dev` runs the app through the adapter's workerd, which binds a devtools inspector on a fixed default port. A second dev server on the same machine — another git worktree, a second checkout, a `pnpm email-worker:dev` alongside `pnpm dev` — finds that port taken and warns, and the inspector ends up belonging to whichever process started first. No script, test, or documented workflow in this repository attaches to the inspector, so a fixed port is being reserved for something nothing here uses, at the cost of a warning every developer has to learn to ignore.
+
+**Scope.** Pass `inspectorPort: 0` alongside the existing `imageService` option, with a one-line comment recording that `0` lets workerd pick a free port so two dev servers do not collide. Confirm `inspectorPort` is an accepted option on the installed `@astrojs/cloudflare` before writing it — the adapter forwards a subset of `@cloudflare/vite-plugin`'s config — and record in the PR where you read that. Do not change `imageService`, the `react-dom/server.edge` alias, `vite.server.allowedHosts`, or the integrations list. Do not add a `vite.preview` block: `pnpm preview` runs `wrangler dev`, not Vite's preview server, so a setting there configures a server this project never starts.
+
+**Acceptance.** Start two dev servers at once and compare. On the current config, the second one warns about the inspector port; with the change, neither does and both serve a page. Quote both startup banners in the PR, including the pre-change warning — that warning is the evidence this item exists to remove, so capture it before editing rather than describing it.
+
+**Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm dev` starts.
