@@ -27,14 +27,14 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-Items 1 through 16, 18 through 26, and 28 through 40 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, and 26, 28, and 33 through 39 against merged history. Four entries remain:
+Items 1 through 16, 18 through 26, and 28 through 41 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, 26, 28, and 33 through 39 against merged history, and 41 as #115. Four entries remain:
 
-- **41** — correct the claims in `CLAUDE.md` that the code no longer supports. Done as #115.
-- **42** — publish the agent guide as `AGENTS.md` and leave one copy of it. Depends on 41.
+- **42** — publish the agent guide as `AGENTS.md` and leave one copy of it. Its dependency, 41, has landed, so nothing blocks it.
+- **43** — let a page contribute to the shared layout's `<head>`.
 - **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Pick up 41, then 42. No other ordering constraint binds. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91), and neither 41 nor 42 touches either.
+Pick up 42, then 43. They touch disjoint files — 42 renames `CLAUDE.md` and edits `scripts/bootstrap.js`, 43 touches `src/layouts/`, `src/pages/`, and `tests/e2e/` — so neither depends on the other and either order works. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91), and neither 42 nor 43 touches either.
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
@@ -824,7 +824,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, and `pnpm dev` starts.
 
-### 41. Correct the `CLAUDE.md` claims the code no longer supports
+### 41. [x] Correct the `CLAUDE.md` claims the code no longer supports
 
 **Gap.** `CLAUDE.md` is what an agent or a new contributor reads before touching anything, and six of its claims have been overtaken by work that already merged. Each is wrong in a direction that costs the reader time or leads them to change working code. Re-verify each against the file named beside it before editing — the point of this item is that the document stopped matching the tree, so confirming it still does not match is the first step.
 
@@ -850,11 +850,13 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Validation.** `pnpm format:check` (Prettier formats Markdown), `pnpm check`, `pnpm test:run`.
 
+**Landed as #115.** `CLAUDE.md` now records that the only environment declaration is the generated `Env` (no `astro.config.mjs` env schema), names `queueEmail(to, template, env, options)` from `src/lib/email.ts` as the send path, states the `BETTER_AUTH_BASE_URL` localhost rule in both the Email System Architecture and Development vs Production sections with no `resend.dev` mention left, says Node.js built-ins _are_ available under `compatibility_flags: ["nodejs_compat"]`, adds the `src/lib/hono/routes/openapi.ts` registration step to "Adding New API Endpoints" with the `tests/integration/openapi.test.ts` cross-check as the reason, marks every CI-gated command in Essential Commands with the composed `pnpm check` rather than a bare `astro check`, and carries a Repository Skills section listing all five `skills/*/SKILL.md` files with the Theming section trimmed to a pointer.
+
 ### 42. Publish the agent guide as `AGENTS.md` and leave one copy of it
 
 **Gap.** Every instruction this repository gives a coding agent lives in `CLAUDE.md`, whose opening line addresses one tool by name. `AGENTS.md` is the filename the other agents and editors look for, and there is none — so anything driven by a different tool starts with no architecture overview, none of the Better Auth rules (the "never `fetch()` the auth endpoints, never `auth.handler()`" pair in particular), no post-`pnpm add-component` import-rewrite procedure, and no database or email steps. Nothing in the repository is Claude-specific: the guide describes Astro, Hono, Drizzle, Better Auth, and the Cloudflare toolchain. This is a template, so every project generated from it inherits a guide only one tool reads.
 
-**Depends on:** item 41. Correct the content first, then move it — relocating a file that still carries six stale claims just moves the staleness to a new path, and the two diffs are far easier to read apart than together.
+**Its prerequisite has landed.** Item 41 shipped as #115, so the six stale claims are corrected and the guide now names the five skills and the gated commands. Relocating it no longer moves staleness to a new path, and nothing blocks this item. Read `CLAUDE.md` as it stands before moving it rather than assuming the content above.
 
 **Scope.**
 
@@ -868,3 +870,21 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 **Acceptance.** `AGENTS.md` holds the full guide and `CLAUDE.md` is a pointer of a few lines naming it. A repository-wide search for `CLAUDE.md` outside `TODO.md` and `pnpm-lock.yaml` returns only the pointer file itself. `git log --follow AGENTS.md` shows the commits from before the rename — quote the first few lines in the PR, since that is the whole reason for using `git mv`. `node scripts/bootstrap.js scratch-name --prompt-only` prints a prompt that names `AGENTS.md` and no path that fails to resolve; note that the `--prompt-only` branch sits after the `which claude` guard, so that command exits 1 on a machine without the CLI installed, which is pre-existing and not this item's to change.
 
 **Validation.** `pnpm format:check`, `pnpm check`, `pnpm test:run`.
+
+### 43. Let a page contribute to the shared layout's `<head>`
+
+**Gap.** `src/layouts/Layout.astro` owns the only `<html>` and the only `<head>` in the repository, and all thirteen pages under `src/pages/` render through it. It takes exactly one prop, `title`, and its `<head>` is otherwise fixed: `SetTheme`, `charset`, `viewport`, four favicon links, the generator meta, `<Font cssVariable="--font-inter" preload />`, the title, and the language-detection script. There is no named slot, so a page has no way to add anything to the document head — no `<meta name="description">`, no `rel="canonical"`, no page-specific preload or stylesheet. Astro drops content addressed to a slot the layout does not declare, silently, so a page that tries gets no error and no output.
+
+**What the absence costs.** A repository-wide search of `src/` for `name="description"`, `og:`, `twitter:`, and `rel="canonical"` matches nothing, so every page this template serves ships with no description at all — and there is no mechanism to give one page its own without editing the shared layout and thereby changing all thirteen. Astro hoists `<style>` and `<script>` out of a page body but not `<meta>` or `<link>`, so writing the tag in the page body is not a workaround: it lands in `<body>`, where crawlers ignore it. This is a template, so every generated project starts by having to modify `Layout.astro` before it can vary head content per page.
+
+**Scope.**
+
+- Add `<slot name="head" />` to `src/layouts/Layout.astro`, inside `<head>` and after the existing entries, so a page's contributions come last and cannot displace the charset, viewport, or font tags.
+- Ship exactly one consumer, so the slot is covered rather than merely present: `src/pages/[...lang]/index.astro` passes `<Fragment slot="head"><meta name="description" content={t.home.description} /></Fragment>`. Use the existing translated string — `src/translations/en.json` and `src/translations/ja.json` both carry `home.description`, and the page already holds `t` from `useTranslations(lang)` — rather than writing new copy.
+- Do not add a `description` prop or any other prop to `Layout.astro`. The slot is the mechanism this item ships; a prop alongside it is a second one, and it would decide for every downstream project which tags are layout-owned.
+- Do not touch the other twelve pages, `Header.astro`, `Footer.astro`, `SetTheme.astro`, the `<Font>` tag, the favicon links, or the language-detection script tag.
+- **Out of scope, deliberately.** Six pages (`404`, `500`, `account`, `reset-password`, `status`, `verify-email`) call `<Layout>` with no `title` and therefore render the default `"Indigo Stack"`. Giving each a localized title is worth doing and is not this item: it is page copy across two locales, decided per page, and it would bury the one-line mechanism this PR exists to add. Likewise no canonical link, no Open Graph or Twitter tags, and no sitemap integration — each is its own decision about what a template should assert by default.
+
+**Acceptance.** Add `tests/e2e/metadata.spec.ts` asserting that `/` carries a `<meta name="description">` inside `document.head` whose content is the English string from `src/translations/en.json`, and that `/ja` carries the Japanese one — read both out of the translation files rather than retyping them. Assert on `document.head.querySelector('meta[name="description"]')` specifically, not on a bare page locator: an element found anywhere in the document would pass even if the tag rendered in `<body>`, which is the exact failure this item removes. Confirm the spec fails before the layout change — add the `<Fragment slot="head">` to the page first and observe that the tag does not render at all — and quote that pre-change result in the PR. `tests/e2e/typography.spec.ts` and the specs under `tests/e2e/auth/` and `tests/e2e/i18n/` pass unchanged; they are what prove the head the layout already emits did not move.
+
+**Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`, `pnpm test:e2e`.
