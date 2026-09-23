@@ -27,13 +27,12 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-Items 1 through 16, 18 through 26, and 28 through 42 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, 26, 28, and 33 through 39 against merged history, and 41 and 42 against merged history. Three entries remain:
+Items 1 through 16, 18 through 26, and 28 through 43 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, 26, 28, and 33 through 39 against merged history, and 41 through 43 against merged history. Two entries remain:
 
-- **43** — let a page contribute to the shared layout's `<head>`. Ready; `src/layouts/Layout.astro` still declares no named slot.
 - **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Pick up 43. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91), and 43 touches neither.
+Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91).
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
@@ -872,7 +871,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Landed as #117.** `AGENTS.md` now holds the full guide — moved with `git mv`, so `git log --follow` carries its history — while `CLAUDE.md` is a three-line pointer naming it, `scripts/bootstrap.js` lists and prompts for `AGENTS.md`, and a repo-wide search for `CLAUDE.md` outside `TODO.md` returns only the pointer file.
 
-### 43. Let a page contribute to the shared layout's `<head>`
+### 43. [x] Let a page contribute to the shared layout's `<head>`
 
 **Gap.** `src/layouts/Layout.astro` owns the only `<html>` and the only `<head>` in the repository, and all twelve `.astro` pages under `src/pages/` render through it. It takes exactly one prop, `title`, and its `<head>` is otherwise fixed: `SetTheme`, `charset`, `viewport`, four favicon links, the generator meta, `<Font cssVariable="--font-inter" preload />`, the title, and the language-detection script. There is no named slot, so a page has no way to add anything to the document head — no `<meta name="description">`, no `rel="canonical"`, no page-specific preload or stylesheet. Astro drops content addressed to a slot the layout does not declare, silently, so a page that tries gets no error and no output.
 
