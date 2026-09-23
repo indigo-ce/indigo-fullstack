@@ -46,7 +46,7 @@ const filesToUpdate = [
   ".dev.vars.example",
   "wrangler.jsonc",
   "workers/indigo-email-queue-consumer/wrangler.jsonc",
-  "CLAUDE.md"
+  "AGENTS.md"
 ];
 
 const filesToDelete = [
@@ -65,7 +65,7 @@ const prompt = `Rename the project to ${projectName} (or ${trainCaseProjectName}
 - Remove the pre-existing TODO.md and rename _TODO.md to TODO.md.
 - Copy '.dev.vars.example' into '.dev.vars' for local development.
 - Remove all mentions of "template" in the README and project as a whole.
-- Update CLAUDE.md with project-specific architecture details and remove generic "Indigo Stack CE" references.
+- Update AGENTS.md with project-specific architecture details and remove generic "Indigo Stack CE" references.
 `;
 
 const command = "claude";

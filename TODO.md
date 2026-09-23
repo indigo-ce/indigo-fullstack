@@ -27,14 +27,14 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-Items 1 through 16, 18 through 26, and 28 through 41 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, 26, 28, and 33 through 39 against merged history, and 41 as #115. Four entries remain:
+Items 1 through 16, 18 through 26, and 28 through 42 are checked off — the runtime, API-contract, and test-infrastructure work of 1 through 25 and 40 against current code, 26, 28, and 33 through 39 against merged history, and 41 and 42 against merged history. Three entries remain:
 
-- **42** — publish the agent guide as `AGENTS.md` and leave one copy of it. Its dependency, 41, has landed, so nothing blocks it.
+- **42** — publish the agent guide as `AGENTS.md` and leave one copy of it. Done as #117.
 - **43** — let a page contribute to the shared layout's `<head>`.
 - **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
 
-Pick up 42, then 43. They touch disjoint files — 42 renames `CLAUDE.md` and edits `scripts/bootstrap.js`, 43 touches `src/layouts/`, `src/pages/`, and `tests/e2e/` — so neither depends on the other and either order works. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91), and neither 42 nor 43 touches either.
+Pick up 43. Do not manufacture a substitute for 27 or 17 while they are parked: nothing else on this list sits on a request path (36 was the last of those, as #89) or changes a deployed runtime (32 took the last of those, as #91), and 43 touches neither.
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
@@ -852,7 +852,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Landed as #115.** `CLAUDE.md` now records that the only environment declaration is the generated `Env` (no `astro.config.mjs` env schema), names `queueEmail(to, template, env, options)` from `src/lib/email.ts` as the send path, states the `BETTER_AUTH_BASE_URL` localhost rule in both the Email System Architecture and Development vs Production sections with no `resend.dev` mention left, says Node.js built-ins _are_ available under `compatibility_flags: ["nodejs_compat"]`, adds the `src/lib/hono/routes/openapi.ts` registration step to "Adding New API Endpoints" with the `tests/integration/openapi.test.ts` cross-check as the reason, marks every CI-gated command in Essential Commands with the composed `pnpm check` rather than a bare `astro check`, and carries a Repository Skills section listing all five `skills/*/SKILL.md` files with the Theming section trimmed to a pointer.
 
-### 42. Publish the agent guide as `AGENTS.md` and leave one copy of it
+### 42. [x] Publish the agent guide as `AGENTS.md` and leave one copy of it
 
 **Gap.** Every instruction this repository gives a coding agent lives in `CLAUDE.md`, whose opening line addresses one tool by name. `AGENTS.md` is the filename the other agents and editors look for, and there is none — so anything driven by a different tool starts with no architecture overview, none of the Better Auth rules (the "never `fetch()` the auth endpoints, never `auth.handler()`" pair in particular), no post-`pnpm add-component` import-rewrite procedure, and no database or email steps. Nothing in the repository is Claude-specific: the guide describes Astro, Hono, Drizzle, Better Auth, and the Cloudflare toolchain. This is a template, so every project generated from it inherits a guide only one tool reads.
 
@@ -870,6 +870,8 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 **Acceptance.** `AGENTS.md` holds the full guide and `CLAUDE.md` is a pointer of a few lines naming it. A repository-wide search for `CLAUDE.md` outside `TODO.md` and `pnpm-lock.yaml` returns only the pointer file itself. `git log --follow AGENTS.md` shows the commits from before the rename — quote the first few lines in the PR, since that is the whole reason for using `git mv`. `node scripts/bootstrap.js scratch-name --prompt-only` prints a prompt that names `AGENTS.md` and no path that fails to resolve; note that the `--prompt-only` branch sits after the `which claude` guard, so that command exits 1 on a machine without the CLI installed, which is pre-existing and not this item's to change.
 
 **Validation.** `pnpm format:check`, `pnpm check`, `pnpm test:run`.
+
+**Landed as #117.** `AGENTS.md` now holds the full guide — moved with `git mv`, so `git log --follow` carries its history — while `CLAUDE.md` is a three-line pointer naming it, `scripts/bootstrap.js` lists and prompts for `AGENTS.md`, and a repo-wide search for `CLAUDE.md` outside `TODO.md` returns only the pointer file.
 
 ### 43. Let a page contribute to the shared layout's `<head>`
 
