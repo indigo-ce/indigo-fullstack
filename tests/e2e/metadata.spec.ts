@@ -1,6 +1,9 @@
 import {test, expect} from "@playwright/test";
-import en from "../../src/translations/en.json";
-import ja from "../../src/translations/ja.json";
+// The attribute is load-bearing: the project's module target is ESNext, so a
+// bare JSON import becomes a native ESM import that Node rejects unless it
+// carries { type: "json" }.
+import en from "../../src/translations/en.json" with {type: "json"};
+import ja from "../../src/translations/ja.json" with {type: "json"};
 
 /**
  * Metadata Tests
