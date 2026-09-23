@@ -8,8 +8,3 @@ allowBuilds:
   prisma: false
   sharp: true
   workerd: true
-
-minimumReleaseAgeExclude:
-  - miniflare@5.20260903.0-alpha
-  - wrangler@4.129.0
-  - astro@7.3.1
