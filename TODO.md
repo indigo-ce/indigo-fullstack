@@ -27,14 +27,15 @@ Backlog for architecture and test-infrastructure alignment. Each item is scoped 
 
 The sections below are in stable numeric order, not pick-up order — numbers are never reused, and a checked box means current code or merged history proves the work landed.
 
-Items 1 through 16, 18 through 26, 28 through 43, and 46 are checked off — 1 through 25, 40, and 46 against current code, and 26, 28, 33 through 39, and 41 through 43 against merged history. Four entries remain, two of them ready to pick up:
+Items 1 through 16, 18 through 26, 28 through 43, and 46 are checked off — 1 through 25, 40, and 46 against current code, and 26, 28, 33 through 39, and 41 through 43 against merged history. Five entries remain, three of them ready to pick up:
 
 - **44** — bind the typography plugin's `prose` tokens to the theme. Ready.
 - **45** — give the icon set a one-command regeneration path. Ready.
 - **27** — collapse the Cloudflare runtime toolchain. Parked upstream. Unblocks 17.
 - **17** — point the test runtime's compatibility date at the deployed one. Blocked until 27 lands.
+- **47** — make revoking a rotated-away refresh token revoke its successors. Ready; independent of the gate below.
 
-44 and 45 are independent of each other and of the parked pair: neither sits on a request path (36 was the last of those, as #89) nor changes a deployed runtime (32 took the last of those, as #91). Do not manufacture a further substitute for 27 or 17 while they are parked.
+44, 45, and 47 are independent of each other and of the parked pair. 44 and 45 neither sit on a request path (36 was the last of those, as #89) nor change a deployed runtime (32 took the last of those, as #91). 47 is on the auth request path by design. Do not manufacture a further substitute for 27 or 17 while they are parked.
 
 **The gate this work lands against is in place.** Items 9, 16, and 31 shipped, so `.github/workflows/test.yml` runs `pnpm peers check`, `pnpm format:check`, `pnpm check`, `pnpm email-worker:check`, `pnpm test:run`, and `pnpm build` on every pull request, each step carrying `if: ${{ !cancelled() }}` so one failure does not mask the rest — type errors, formatting drift, peer-dependency breaks, and build-only failures are all caught in CI rather than only on the author's machine.
 
@@ -953,3 +954,25 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 - [ ] Add `pnpm.overrides` for anything still vulnerable, each with a removal note
 - [ ] Re-check `http-cache-semantics` once a patched version ships
 - [ ] Consider a CI `pnpm audit --prod --audit-level high` step
+
+### 47. Make revoking a rotated-away refresh token revoke its successors
+
+**Gap.** Rotation in `refreshTokens` (`src/plugins/better-auth/refresh-access/index.ts`) claims the presented session, creates a brand-new `session` row for the successor token, and deletes the claimed row. Nothing records that the new row descends from the old one. `revokeTokens` looks up the single row whose `token` matches and deletes it, returning `{success: true}` when there is none. So revoking a token that has already been rotated away is a silent no-op, and every token issued after it stays live.
+
+That is exactly the state a mobile client reaches when sign-out races a refresh: the refresh has rotated `r` to `r2` server-side, sign-out revokes `r` (gone — no-op), and `r2` survives until its 30-day expiry with no copy left on the device to revoke. `indigo-swiftui` #52 works around this on the client by revoking any successor it refuses to store, but that only helps a client that happens to observe the successor; a lost response, a crash mid-refresh, or any other client stays exposed.
+
+**Second cost — no reuse detection.** Presenting a rotated-away token to `refresh-access` returns 401 and nothing else. The standard rotation defence treats that reuse as evidence of theft and revokes the whole chain; this backend cannot, because it has no chain.
+
+**Scope.**
+
+- Add a `familyId` (text, not null, indexed) to `session`, set to the new row's own `id` at sign-in in `signInTokens` and copied from the claimed row in `refreshTokens`. Declare it through Better Auth's `session.additionalFields` so the adapter writes it, and generate the Drizzle migration; backfill existing rows with their own `id`.
+- Keep rotated-away tokens resolvable: rather than deleting the claimed row outright, record its token against the family (a `revokedToken` table keyed by token with a `familyId` and `expiresAt`, or an equivalent) so `revokeTokens` and `refreshTokens` can map a stale token to its family. Establish which shape the adapter supports cleanly before choosing.
+- `revokeTokens`: resolve the presented token — live or rotated-away — to its family and delete every `session` row in it. Unknown tokens still return `{success: true}`.
+- `refreshTokens`: a rotated-away token presented for refresh deletes the whole family, then returns the same 401 as today. The concurrent-rotation case the claim marker guards must not trip this — the losing request of a legitimate race must not sign the user out.
+- Leave the response payloads, the `/api/v1` routes, and the refresh-token lifetime handling from item 12 unchanged. Other sessions of the same user (other devices) are unaffected.
+
+**Acceptance.** New cases in `tests/integration/auth-routes.test.ts`: rotate `r` → `r2`, revoke `r`, then refreshing with `r2` returns 401; rotate `r` → `r2`, present `r` to `refresh-access`, then `r2` is rejected too; a second session for the same user survives both. The existing concurrent-rotation case passes unchanged. Every other existing case passes unchanged.
+
+**Validation.** `pnpm format:check`, `pnpm check`, `pnpm test:run`, `pnpm build`. Apply the migration against a local D1 with existing sessions and confirm they still refresh.
+
+**Client follow-up.** Once this lands, `indigo-swiftui`'s `AuthSessionGate` no longer needs to revoke dropped successors — revoking the stored token kills them — and can be reconsidered as a whole.
