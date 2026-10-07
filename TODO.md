@@ -944,3 +944,12 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 **Acceptance.** `pnpm install` on the edited file exits 0 and leaves `pnpm-lock.yaml` unchanged — `git status` showing no lockfile diff is the proof the block was inert. `pnpm install --frozen-lockfile` also exits 0 on a clean `node_modules`, with the `allowBuilds` entries still suppressing the prisma build scripts.
 
 **Validation.** `pnpm install --frozen-lockfile`, `pnpm format:check` (Prettier formats YAML), `pnpm check`, `pnpm test:run`, `pnpm build`.
+
+## Security Alerts
+
+27 open Dependabot alerts, all transitive (mostly `undici`, `fast-uri`).
+
+- [ ] Refresh the lockfile with `pnpm update --recursive`
+- [ ] Add `pnpm.overrides` for anything still vulnerable, each with a removal note
+- [ ] Re-check `http-cache-semantics` once a patched version ships
+- [ ] Consider a CI `pnpm audit --prod --audit-level high` step
