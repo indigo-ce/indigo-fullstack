@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    # Version-update PRs are off; only security updates open PRs. The ignore
+    # rules below still apply to those security updates.
+    open-pull-requests-limit: 0
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    ignore:
+      # TypeScript 7 drops the programmatic compiler API that `astro check`
+      # needs. Remove once @astrojs/language-server supports it:
+      # https://github.com/withastro/roadmap/discussions/1321
+      - dependency-name: "typescript"
+        versions: [">=7"]
+      # Vitest 5 pulls @cloudflare/vitest-pool-workers onto a miniflare alpha
+      # whose proxy worker fails to boot. Remove once the pool ships Vitest 5
+      # support: https://github.com/cloudflare/workers-sdk/issues
+      - dependency-name: "vitest"
+        versions: [">=5"]
+      - dependency-name: "@vitest/ui"
+        versions: [">=5"]
