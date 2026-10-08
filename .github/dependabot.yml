@@ -1,11 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    # The email worker sits outside the pnpm workspace, so list it explicitly
-    # to keep its toolchain in step with the root (see email-worker-manifest test).
-    directories:
-      - "/"
-      - "/workers/indigo-email-queue-consumer"
+    directory: "/"
     schedule:
       interval: "monthly"
     groups:
