@@ -1,5 +1,6 @@
 packages:
   - "."
+  - "workers/indigo-email-queue-consumer"
 
 allowBuilds:
   "@prisma/engines": false
