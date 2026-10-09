@@ -978,8 +978,3 @@ That is exactly the state a mobile client reaches when sign-out races a refresh:
 **Validation.** `pnpm format:check`, `pnpm check`, `pnpm test:run`, `pnpm build`. Apply the migration against a local D1 with existing sessions and confirm they still refresh.
 
 **Client follow-up.** Once this lands with the interleaving case passing, `indigo-swiftui`'s `AuthSessionGate` no longer needs to revoke dropped successors — revoking the stored token kills them — and can be reconsidered as a whole.
-
-## Tasker
-
-- [ ] Move from Tuist to new Xcode format (Tasker #37)
-  https://developer.apple.com/documentation/xcode/updating-your-xcode-project-configuration-file-format
