@@ -894,7 +894,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Landed as #119.** `src/layouts/Layout.astro` declares `<slot name="head" />` as the last entry in `<head>`, and `src/pages/[...lang]/index.astro` is its one consumer, passing `<Fragment slot="head"><meta name="description" content={t.home.description} /></Fragment>`. `tests/e2e/metadata.spec.ts` is the guard, asserting the tag inside `document.head` for both locales.
 
-### 44. Bind the typography plugin's `prose` tokens to the theme
+### 44. [x] Bind the typography plugin's `prose` tokens to the theme
 
 **Gap.** `src/styles.css:3` and `src/_styles.css:2` both load `@plugin "@tailwindcss/typography"`, and `@tailwindcss/typography` is a production dependency (`^0.5.20`). Neither stylesheet then says anything about what `prose` should look like here, so the plugin's own palette applies: `--tw-prose-body`, `--tw-prose-headings`, `--tw-prose-links`, `--tw-prose-bold`, `--tw-prose-counters`, `--tw-prose-bullets`, `--tw-prose-code`, and the table-border variables all default to fixed Tailwind grays. The one utility this dependency exists to provide renders in colours that have no relationship to the semantic tokens every other component in the tree is built on.
 
