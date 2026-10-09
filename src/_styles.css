@@ -141,6 +141,7 @@
   --tw-prose-bullets: var(--muted-foreground);
   --tw-prose-quote-borders: var(--muted-foreground);
   --tw-prose-code: var(--foreground);
+  --tw-prose-quotes: var(--foreground);
   --tw-prose-th-borders: var(--border);
   --tw-prose-td-borders: var(--border);
 }

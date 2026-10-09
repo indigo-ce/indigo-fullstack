@@ -165,7 +165,7 @@ Both `src/styles.css` and `src/_styles.css` carry the `--font-sans` mappings —
 
 ### Prose colors
 
-Both stylesheets load `@tailwindcss/typography`, and each carries an unlayered `.prose` rule that maps the plugin's `--tw-prose-*` color variables onto the semantic tokens: body, headings, bold, and code onto `--foreground`; links onto `--primary`; counters, bullets, and quote borders onto `--muted-foreground`; table borders onto `--border`. Because the rule is unlayered it outranks the plugin's layered defaults, and because the tokens flip in `.dark`, prose content follows the theme in light and dark mode — `dark:prose-invert` is never needed. Keep the mapping in both files when changing palettes or renaming them.
+Both stylesheets load `@tailwindcss/typography`, and each carries an unlayered `.prose` rule that maps the plugin's `--tw-prose-*` color variables onto the semantic tokens: body, headings, bold, code, and blockquote text onto `--foreground`; links onto `--primary`; counters, bullets, and quote borders onto `--muted-foreground`; table borders onto `--border`. Because the rule is unlayered it outranks the plugin's layered defaults, and because the tokens flip in `.dark`, prose content follows the theme in light and dark mode — `dark:prose-invert` is never needed. Keep the mapping in both files when changing palettes or renaming them.
 
 ## Using Tokens in Components
 
