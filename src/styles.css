@@ -198,3 +198,20 @@
     color-scheme: dark;
   }
 }
+
+/* The typography plugin's prose colors follow the theme tokens. The rule is
+ * unlayered, so it outranks the plugin's layered defaults in light and dark
+ * mode alike — `dark:prose-invert` is never needed. */
+.prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+  --tw-prose-bold: var(--foreground);
+  --tw-prose-links: var(--primary);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-bullets: var(--muted-foreground);
+  --tw-prose-quote-borders: var(--muted-foreground);
+  --tw-prose-code: var(--foreground);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-th-borders: var(--border);
+  --tw-prose-td-borders: var(--border);
+}
