@@ -982,4 +982,4 @@ That is exactly the state a mobile client reaches when sign-out races a refresh:
 ## Tasker
 
 - [ ] Move from Tuist to new Xcode format (Tasker #37)
-  https://developer.apple.com/documentation/xcode/updating-your-xcode-project-configuration-file-format
+      https://developer.apple.com/documentation/xcode/updating-your-xcode-project-configuration-file-format
