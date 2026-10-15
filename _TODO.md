@@ -16,4 +16,4 @@
 - [ ] Deploy the app from the Git-linked Workers project (build command `pnpm build`) before setting production secrets.
 - [ ] Set `BETTER_AUTH_SECRET` secret using `pnpm wrangler secret put BETTER_AUTH_SECRET` for production.
 - [ ] (Optional) Turn on require email verification on sign up.
-- [ ] Update logo and landing page copy: replace the artwork in `public/`, then run `pnpm icons`.
+- [ ] Update logo and landing page copy: replace the artwork in `public/`, then run `pnpm icons`, and replace `public/favicon.ico` by hand (the script does not regenerate it).
