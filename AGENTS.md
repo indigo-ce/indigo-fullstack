@@ -17,6 +17,7 @@ Commands marked with **(CI)** run in the `Test` workflow on every pull request.
 - `pnpm test:run` - Run the unit and integration tests once (CI)
 - `pnpm build` - Build production (Cloudflare types generation, then the Astro build) (CI)
 - `pnpm preview` - Preview production build locally with Wrangler
+- `pnpm icons` - Regenerate the favicon PNGs and the apple-touch icon in `public/` from the square source `public/icon.png`
 
 ### Database Operations
 
