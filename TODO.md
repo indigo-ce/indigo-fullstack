@@ -952,7 +952,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 - [x] Refresh the lockfile with `pnpm update --recursive`
 - [x] Add `pnpm.overrides` for anything still vulnerable, each with a removal note
-- [ ] Re-check `http-cache-semantics` once a patched version ships
+- [x] Re-check `http-cache-semantics` once a patched version ships
 - [ ] Consider a CI `pnpm audit --prod --audit-level high` step
 
 ### 47. Make revoking a rotated-away refresh token revoke its successors
