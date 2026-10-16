@@ -912,7 +912,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 **Validation.** `pnpm check`, `pnpm format:check`, `pnpm test:run`, `pnpm build`.
 
-### 45. Give the icon set a one-command regeneration path
+### 45. [x] Give the icon set a one-command regeneration path
 
 **Gap.** `public/` carries `favicon.ico`, `favicon-16x16.png`, `favicon-32x32.png`, and `favicon-48x48.png`, all four linked from the `<head>` of `src/layouts/Layout.astro`, alongside `icon.png` (the square mark, rendered by `src/components/LogoImage.astro`), `logotype.png` (the wide lockup on the landing page), and `logo.png`, which nothing reads. Every raster in that list was cut by hand and nothing in the repository can reproduce any of it: there is no script under `scripts/`, no `package.json` entry, and no documentation. `scripts/bootstrap.js` renames the project across a dozen files, and `_TODO.md` — the checklist a generated project inherits — ends at "Update logo and landing page copy" with no procedure. So a project generated from this template ships the Indigo hyacinth in its browser tab until someone hand-exports three PNG sizes and a multi-resolution `.ico`.
 
