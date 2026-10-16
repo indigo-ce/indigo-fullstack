@@ -950,7 +950,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 
 27 open Dependabot alerts, all transitive (mostly `undici`, `fast-uri`).
 
-- [ ] Refresh the lockfile with `pnpm update --recursive`
+- [x] Refresh the lockfile with `pnpm update --recursive`
 - [ ] Add `pnpm.overrides` for anything still vulnerable, each with a removal note
 - [ ] Re-check `http-cache-semantics` once a patched version ships
 - [ ] Consider a CI `pnpm audit --prod --audit-level high` step
