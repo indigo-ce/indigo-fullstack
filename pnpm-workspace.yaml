@@ -9,3 +9,36 @@ allowBuilds:
   prisma: false
   sharp: true
   workerd: true
+
+overrides:
+  # The vitest pool subtree pins sharp exactly: @cloudflare/vitest-pool-workers
+  # -> wrangler@4.124.0 -> miniflare@5.20260815.0-alpha declares "0.35.2", which is
+  # below the patched 0.35.4 (libheif) and 0.35.5 (librsvg). Everything else in the
+  # tree already resolves >= 0.35.5.
+  # Remove once the pool's miniflare repins sharp to >= 0.35.5.
+  sharp: "^0.35.5"
+
+  # The same pinned miniflare declares undici exactly "7.29.0"; every advisory is
+  # fixed in 7.29.1. Scoped to miniflare so the override does not drag unifont's
+  # separate undici@8 resolution down a major.
+  # Remove once the pool's miniflare repins undici to >= 7.29.1.
+  "miniflare>undici": "^7.29.1"
+
+  # ajv@8.20.0 is already latest but resolved fast-uri@3.1.7, one patch below the
+  # 3.1.8 fix; ajv's own ^3 range admits the fix, so a future lockfile refresh
+  # resolves it without this override.
+  # Remove once a plain pnpm update keeps fast-uri >= 3.1.8 on its own.
+  "fast-uri": "^3.1.8"
+
+  # @tailwindcss/typography pins postcss-selector-parser exactly at "6.0.10";
+  # the advisory is fixed only in 7.1.6. The plugin only calls parser() and
+  # parser.selector(), both unchanged in 7.x.
+  # Remove when the typography plugin's pin includes the 7.1.6 fix.
+  "postcss-selector-parser": "^7.1.6"
+
+  # drizzle-kit's deprecated @esbuild-kit chain (@esbuild-kit/core-utils pins
+  # esbuild ~0.18.20) is the one resolution below the 0.25.0 fix. core-utils only
+  # calls transform/transformSync, stable across the bump, and drizzle-kit itself
+  # already runs esbuild 0.25.12 directly.
+  # Remove when drizzle-kit drops @esbuild-kit for tsx or bumps core-utils.
+  "@esbuild-kit/core-utils>esbuild": "^0.25.0"
