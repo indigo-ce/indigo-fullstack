@@ -4,9 +4,7 @@ import {eq} from "drizzle-orm";
 import {createDrizzle} from "@/db";
 import {familyRevocation, rotatedToken, user, session} from "@/db/schema";
 import {createAuth} from "@/lib/auth";
-import {
-  rotationTestHooks
-} from "@/plugins/better-auth/refresh-access";
+import {rotationTestHooks} from "@/plugins/better-auth/refresh-access";
 import {createHonoApp} from "@/pages/api/[...path]";
 
 const email = "auth-routes-integration@example.com";

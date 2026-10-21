@@ -464,7 +464,11 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           if (resolution?.kind === "rotated") {
             if (resolution.consumed) {
               await deleteFamilySessions(ctx, resolution.familyId);
-              await markFamilyRevoked(ctx, resolution.familyId, resolution.expiresAt);
+              await markFamilyRevoked(
+                ctx,
+                resolution.familyId,
+                resolution.expiresAt
+              );
             }
             throw new APIError("UNAUTHORIZED", {
               message: "Invalid or expired refresh token"
@@ -552,9 +556,7 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               ]
             });
             if (familyRevoked) {
-              await ctx.context.internalAdapter.deleteSession(
-                newSession.token
-              );
+              await ctx.context.internalAdapter.deleteSession(newSession.token);
               throw new APIError("UNAUTHORIZED", {
                 message: "Invalid or expired refresh token"
               });
