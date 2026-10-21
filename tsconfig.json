@@ -9,7 +9,7 @@
     "strictNullChecks": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@drizzle/*": ["drizzle/*"],
+      "@drizzle/*": ["./drizzle/*"],
       "@/*": ["./src/*"]
     },
     "jsx": "react-jsx",

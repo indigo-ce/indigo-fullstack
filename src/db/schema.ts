@@ -53,20 +53,27 @@ export const rotatedToken = sqliteTable(
     consumed: integer("consumed", {mode: "boolean"}).notNull().default(false),
     expiresAt: text("expiresAt").notNull()
   },
-  (table) => [index("rotated_token_family_id_idx").on(table.familyId)]
+  (table) => [
+    index("rotated_token_family_id_idx").on(table.familyId),
+    index("rotated_token_expires_at_idx").on(table.expiresAt)
+  ]
 );
 
 // Durable family-revoked markers. A revoke can land while a rotation is in
 // flight, after the family's session rows are gone but before the successor
 // is written; the marker outlives them and lets the rotation undo the
 // successor it just created.
-export const familyRevocation = sqliteTable("family_revocation", {
-  id: text("id").primaryKey(),
-  familyId: text("familyId").notNull().unique(),
-  // No earlier than the latest expiry any token of the family could still
-  // hold, so pruning never reopens a revoked family.
-  expiresAt: text("expiresAt").notNull()
-});
+export const familyRevocation = sqliteTable(
+  "family_revocation",
+  {
+    id: text("id").primaryKey(),
+    familyId: text("familyId").notNull().unique(),
+    // No earlier than the latest expiry any token of the family could still
+    // hold, so pruning never reopens a revoked family.
+    expiresAt: text("expiresAt").notNull()
+  },
+  (table) => [index("family_revocation_expires_at_idx").on(table.expiresAt)]
+);
 
 export const account = sqliteTable("account", {
   id: text("id").primaryKey(),

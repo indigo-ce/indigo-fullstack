@@ -1,4 +1,5 @@
 import {beforeAll, describe, expect, it} from "vitest";
+import {APIError} from "better-auth/api";
 import {applyD1Migrations, env} from "cloudflare:test";
 import {eq} from "drizzle-orm";
 import {createDrizzle} from "@/db";
@@ -454,6 +455,176 @@ describe("Auth Routes Integration Tests", () => {
       releaseRotation();
       rotationTestHooks.afterClaim = undefined;
     }
+  });
+
+  it("undoes the successor when the marker lands before the rotation's revocation check", async () => {
+    const {refreshToken} = await signIn();
+    const db = createDrizzle(env.DB);
+    const row = await db
+      .select()
+      .from(session)
+      .where(eq(session.token, refreshToken))
+      .get();
+    if (!row)
+      throw new Error("Session row for the refresh token was not found");
+
+    let releaseRotation!: () => void;
+    const rotationBlocked = new Promise<void>((resolve) => {
+      releaseRotation = resolve;
+    });
+    let successorReached!: () => void;
+    const successorReachedPromise = new Promise<void>((resolve) => {
+      successorReached = resolve;
+    });
+    let releaseRevoke!: () => void;
+    const revokeBlocked = new Promise<void>((resolve) => {
+      releaseRevoke = resolve;
+    });
+    let markerWritten!: () => void;
+    const markerWrittenPromise = new Promise<void>((resolve) => {
+      markerWritten = resolve;
+    });
+
+    // Park the rotation after it created the successor but before its
+    // family-revoked check, then let a revoke write its marker. Releasing
+    // the rotation from there must make it undo the successor, because the
+    // marker is written before the family's rows are deleted.
+    rotationTestHooks.afterSuccessorCreated = async () => {
+      successorReached();
+      await rotationBlocked;
+    };
+    rotationTestHooks.afterFamilyMarkerWritten = async () => {
+      markerWritten();
+      await revokeBlocked;
+    };
+
+    let refreshResponse!: Promise<Response>;
+    try {
+      refreshResponse = request("/auth/refresh-access", {refreshToken});
+      await successorReachedPromise;
+
+      const revokePromise = request("/auth/revoke-access", {refreshToken});
+      await markerWrittenPromise;
+
+      releaseRotation();
+      const response = await refreshResponse;
+      expect(response.status).toBe(401);
+      await expect(responseBody(response)).resolves.toEqual({
+        error: "Invalid or expired refresh token"
+      });
+
+      releaseRevoke();
+      const revokeResponse = await revokePromise;
+      expect(revokeResponse.status).toBe(200);
+      await expect(responseBody(revokeResponse)).resolves.toEqual({
+        success: true
+      });
+
+      // No session row of the family - successor included - survives.
+      const remaining = await db
+        .select()
+        .from(session)
+        .where(eq(session.familyId, row.familyId));
+      expect(remaining).toEqual([]);
+    } finally {
+      releaseRotation();
+      releaseRevoke();
+      rotationTestHooks.afterSuccessorCreated = undefined;
+      rotationTestHooks.afterFamilyMarkerWritten = undefined;
+    }
+  });
+
+  it("aborts rotation without claiming the token when the history write fails", async () => {
+    const {refreshToken} = await signIn();
+
+    // An APIError stands in for the adapter failure: a plain Error thrown
+    // through a Better Auth endpoint still yields the 500, but the Workers
+    // pool reports it as an unhandled rejection. recordRotatedToken treats
+    // both alike.
+    rotationTestHooks.failRotatedTokenCreate = async () => {
+      throw new APIError("INTERNAL_SERVER_ERROR", {
+        message: "simulated rotated-token history write failure"
+      });
+    };
+
+    try {
+      const response = await request("/auth/refresh-access", {refreshToken});
+      expect(response.status).toBe(500);
+      await expect(responseBody(response)).resolves.toEqual({
+        error: "simulated rotated-token history write failure"
+      });
+    } finally {
+      rotationTestHooks.failRotatedTokenCreate = undefined;
+    }
+
+    // The token was never claimed, so once the failure is gone it still
+    // rotates normally.
+    const retry = await request("/auth/refresh-access", {refreshToken});
+    expect(retry.status).toBe(200);
+  });
+
+  it("keeps simultaneous revocations of the same token idempotent", async () => {
+    const {refreshToken} = await signIn();
+
+    const responses = await Promise.all([
+      request("/auth/revoke-access", {refreshToken}),
+      request("/auth/revoke-access", {refreshToken})
+    ]);
+
+    for (const response of responses) {
+      expect(response.status).toBe(200);
+      await expect(responseBody(response)).resolves.toEqual({success: true});
+    }
+
+    const reuse = await request("/auth/refresh-access", {refreshToken});
+    expect(reuse.status).toBe(401);
+  });
+
+  it("scopes a revoke of a default-family session to that row only", async () => {
+    const db = createDrizzle(env.DB);
+    const now = new Date();
+    await db.insert(session).values([
+      {
+        id: "default-family-a",
+        token: "default-family-token-a",
+        familyId: "",
+        userId,
+        expiresAt: new Date(now.getTime() + 3_600_000),
+        createdAt: now,
+        updatedAt: now
+      },
+      {
+        id: "default-family-b",
+        token: "default-family-token-b",
+        familyId: "",
+        userId,
+        expiresAt: new Date(now.getTime() + 3_600_000),
+        createdAt: now,
+        updatedAt: now
+      }
+    ]);
+
+    const response = await request("/auth/revoke-access", {
+      refreshToken: "default-family-token-a"
+    });
+    expect(response.status).toBe(200);
+    await expect(responseBody(response)).resolves.toEqual({success: true});
+
+    // The revoked row is gone, the other ''-family row is untouched, and no
+    // revocation marker was written for the shared empty family.
+    await expect(
+      db.select().from(session).where(eq(session.id, "default-family-a")).get()
+    ).resolves.toBeUndefined();
+    await expect(
+      db.select().from(session).where(eq(session.id, "default-family-b")).get()
+    ).resolves.toBeDefined();
+    await expect(
+      db
+        .select()
+        .from(familyRevocation)
+        .where(eq(familyRevocation.familyId, ""))
+        .all()
+    ).resolves.toEqual([]);
   });
 
   it("prunes expired rotated-token records and family-revoked markers only", async () => {

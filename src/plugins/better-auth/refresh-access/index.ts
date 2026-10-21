@@ -34,11 +34,20 @@ export interface RefreshAccessTokenOptions extends JwtOptions {
 }
 
 /**
- * Test-only seam for the deterministic rotation interleaving case in
- * `tests/integration/auth-routes.test.ts`. Production code never sets it, so
- * the optional call is a no-op in every deployment.
+ * Test-only seams for the deterministic interleaving cases in
+ * `tests/integration/auth-routes.test.ts`. Production code never sets them,
+ * so every optional call is a no-op in every deployment.
  */
-export const rotationTestHooks: {afterClaim?: () => Promise<void>} = {};
+export const rotationTestHooks: {
+  afterClaim?: () => Promise<void>;
+  /** Runs after the successor exists but before the family-revoked check. */
+  afterSuccessorCreated?: () => Promise<void>;
+  /** When set, the rotated-token history write fails inside the create's
+   * error handling, exercising the duplicate-race recovery path. */
+  failRotatedTokenCreate?: () => Promise<void>;
+  /** Runs once the family-revoked marker is durably written. */
+  afterFamilyMarkerWritten?: () => Promise<void>;
+} = {};
 
 /**
  * Verifies a refresh token and returns the associated live session, or null
@@ -161,8 +170,8 @@ async function pruneExpiredRecords(ctx: GenericEndpointContext): Promise<void> {
  * stays resolvable after its session row is renamed or deleted. The record is
  * written before the claim rename so the token resolves for the whole
  * rotation. A concurrent rotation of the same token may already have written
- * the row (the token is the primary key); that race is harmless because both
- * writers record the same family and expiry, so the loser just moves on.
+ * the row against the token's unique index; that race is harmless because
+ * both writers record the same family and expiry, so the loser just moves on.
  */
 async function recordRotatedToken(
   ctx: GenericEndpointContext,
@@ -170,6 +179,10 @@ async function recordRotatedToken(
   familyId: string,
   expiresAt: Date
 ): Promise<void> {
+  // Rows from the migration's '' default window predate families; there is
+  // no family to record and no revoke could act on one.
+  if (!familyId) return;
+
   const existing = await ctx.context.adapter.findOne<RotatedTokenRecord>({
     model: "rotatedToken",
     where: [{field: "token", operator: "eq", value: token}]
@@ -177,6 +190,7 @@ async function recordRotatedToken(
   if (existing) return;
 
   try {
+    await rotationTestHooks.failRotatedTokenCreate?.();
     await ctx.context.adapter.create({
       model: "rotatedToken",
       data: {
@@ -186,22 +200,32 @@ async function recordRotatedToken(
         expiresAt: expiresAt.toISOString()
       }
     });
-  } catch {
-    // Lost a simultaneous create against the token's primary key; the
-    // winner's record serves the same purpose.
+  } catch (error) {
+    // Only a duplicate race may be swallowed: confirm the winner's row
+    // actually exists, and let any other failure propagate so rotation
+    // aborts rather than renaming the token without durable history.
+    const raced = await ctx.context.adapter.findOne<RotatedTokenRecord>({
+      model: "rotatedToken",
+      where: [{field: "token", operator: "eq", value: token}]
+    });
+    if (!raced) throw error;
   }
 }
 
 /**
  * Marks a family revoked. The marker's `expiresAt` is never lowered below an
  * existing one, so pruning can never reopen a family that is still within the
- * lifetime of a token it could hold.
+ * lifetime of a token it could hold. Revocation must never use the column's
+ * '' default: that value is shared by every unassigned row, so a marker or
+ * delete keyed on it would span users.
  */
 async function markFamilyRevoked(
   ctx: GenericEndpointContext,
   familyId: string,
   expiresAt: Date
 ): Promise<void> {
+  if (!familyId) return;
+
   const iso = expiresAt.toISOString();
   const existing = await ctx.context.adapter.findOne<FamilyRevocationRecord>({
     model: "familyRevocation",
@@ -219,19 +243,44 @@ async function markFamilyRevoked(
     return;
   }
 
-  await ctx.context.adapter.create({
-    model: "familyRevocation",
-    data: {familyId, expiresAt: iso}
-  });
+  try {
+    await ctx.context.adapter.create({
+      model: "familyRevocation",
+      data: {familyId, expiresAt: iso}
+    });
+  } catch (error) {
+    // Two simultaneous revokes can both observe no marker and race the
+    // insert against the family's unique index. Re-read: keep whichever
+    // expiry is later so pruning stays safe, and propagate anything that is
+    // not that race.
+    const raced = await ctx.context.adapter.findOne<FamilyRevocationRecord>({
+      model: "familyRevocation",
+      where: [{field: "familyId", operator: "eq", value: familyId}]
+    });
+    if (!raced) throw error;
+    if (raced.expiresAt < iso) {
+      await ctx.context.adapter.updateMany({
+        model: "familyRevocation",
+        where: [{field: "familyId", operator: "eq", value: familyId}],
+        update: {expiresAt: iso}
+      });
+    }
+  }
+
+  await rotationTestHooks.afterFamilyMarkerWritten?.();
 }
 
 /**
- * Deletes every live session row of a rotation family.
+ * Deletes every live session row of a rotation family. Refuses the column's
+ * '' default: that value is shared by unassigned rows of every user, so a
+ * family-wide delete on it would wipe other users' sessions.
  */
 async function deleteFamilySessions(
   ctx: GenericEndpointContext,
   familyId: string
 ): Promise<void> {
+  if (!familyId) return;
+
   await ctx.context.adapter.deleteMany({
     model: "session",
     where: [{field: "familyId", operator: "eq", value: familyId}]
@@ -462,13 +511,17 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
           // losing request of a legitimate concurrent race lands here and
           // must not sign the user out, so it only gets the plain 401.
           if (resolution?.kind === "rotated") {
-            if (resolution.consumed) {
-              await deleteFamilySessions(ctx, resolution.familyId);
+            if (resolution.consumed && resolution.familyId) {
+              // The marker goes first: once it is durable, any rotation
+              // whose revocation check runs from here on undoes its own
+              // successor, and the delete below catches everything created
+              // before the check.
               await markFamilyRevoked(
                 ctx,
                 resolution.familyId,
                 resolution.expiresAt
               );
+              await deleteFamilySessions(ctx, resolution.familyId);
             }
             throw new APIError("UNAUTHORIZED", {
               message: "Invalid or expired refresh token"
@@ -543,18 +596,22 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               expiresAt: session.expiresAt
             });
 
+            // Test-only pause point between successor creation and the
+            // family-revoked check; unset in production.
+            await rotationTestHooks.afterSuccessorCreated?.();
+
             // A revoke can land after the claim renamed the family's row but
             // before this successor existed. The family-revoked marker
-            // outlives the rows, so it is the last word: undo the successor
-            // and reject.
-            const familyRevoked = await ctx.context.adapter.findOne<{
-              familyId: string;
-            }>({
-              model: "familyRevocation",
-              where: [
-                {field: "familyId", operator: "eq", value: session.familyId}
-              ]
-            });
+            // outlives the rows, and a revoke writes it before deleting, so
+            // it is the last word: undo the successor and reject.
+            const familyRevoked = session.familyId
+              ? await ctx.context.adapter.findOne<{familyId: string}>({
+                  model: "familyRevocation",
+                  where: [
+                    {field: "familyId", operator: "eq", value: session.familyId}
+                  ]
+                })
+              : null;
             if (familyRevoked) {
               await ctx.context.internalAdapter.deleteSession(newSession.token);
               throw new APIError("UNAUTHORIZED", {
@@ -654,8 +711,30 @@ export const refreshAccessToken = (options?: RefreshAccessTokenOptions) => {
               ? resolution.session.expiresAt
               : resolution.expiresAt;
 
-          await deleteFamilySessions(ctx, familyId);
+          // Rows carrying the migration's '' default predate families and
+          // the value is shared across users, so fall back to the pre-family
+          // behaviour of deleting just this session.
+          if (!familyId) {
+            if (resolution.kind === "live") {
+              await ctx.context.adapter.deleteMany({
+                model: "session",
+                where: [
+                  {
+                    field: "id",
+                    operator: "eq",
+                    value: resolution.session.id
+                  }
+                ]
+              });
+            }
+            return ctx.json({success: true});
+          }
+
+          // The marker goes first so any rotation whose revocation check has
+          // not run yet undoes its own successor; the delete then catches
+          // every session the family still holds.
           await markFamilyRevoked(ctx, familyId, familyExpiry);
+          await deleteFamilySessions(ctx, familyId);
 
           return ctx.json({success: true});
         }
