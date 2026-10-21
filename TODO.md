@@ -955,7 +955,7 @@ One nearby mention is already right and stays: the "Production" bullet in that s
 - [ ] Re-check `http-cache-semantics` once a patched version ships
 - [ ] Consider a CI `pnpm audit --prod --audit-level high` step
 
-### 47. Make revoking a rotated-away refresh token revoke its successors
+### 47. [x] Make revoking a rotated-away refresh token revoke its successors
 
 **Gap.** Rotation in `refreshTokens` (`src/plugins/better-auth/refresh-access/index.ts`) claims the presented session, creates a brand-new `session` row for the successor token, and deletes the claimed row. Nothing records that the new row descends from the old one. `revokeTokens` looks up the single row whose `token` matches and deletes it, returning `{success: true}` when there is none. So revoking a token that has already been rotated away is a silent no-op, and every token issued after it stays live.
 
