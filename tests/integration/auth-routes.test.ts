@@ -2,8 +2,11 @@ import {beforeAll, describe, expect, it} from "vitest";
 import {applyD1Migrations, env} from "cloudflare:test";
 import {eq} from "drizzle-orm";
 import {createDrizzle} from "@/db";
-import {user, session} from "@/db/schema";
+import {familyRevocation, rotatedToken, user, session} from "@/db/schema";
 import {createAuth} from "@/lib/auth";
+import {
+  rotationTestHooks
+} from "@/plugins/better-auth/refresh-access";
 import {createHonoApp} from "@/pages/api/[...path]";
 
 const email = "auth-routes-integration@example.com";
@@ -177,7 +180,8 @@ describe("Auth Routes Integration Tests", () => {
       token: "expired-refresh-token",
       createdAt: new Date(now.getTime() - 120_000),
       updatedAt: new Date(now.getTime() - 120_000),
-      userId
+      userId,
+      familyId: "expired-refresh-session"
     });
 
     const response = await request("/auth/refresh-access", {
@@ -319,6 +323,227 @@ describe("Auth Routes Integration Tests", () => {
     await expect(responseBody(reuseResponse)).resolves.toEqual({
       error: "Invalid or expired refresh token"
     });
+  });
+
+  it("kills the successor family when a rotated-away token is revoked", async () => {
+    // Two independent sign-ins: two families for the same user.
+    const {refreshToken: familyA} = await signIn();
+    const {refreshToken: familyB} = await signIn();
+
+    const firstRefresh = await request("/auth/refresh-access", {
+      refreshToken: familyA
+    });
+    expect(firstRefresh.status).toBe(200);
+    const rotated = (await responseBody(
+      firstRefresh
+    )) as unknown as TokenResponse;
+
+    // Revoking the rotated-away token resolves through its rotated-token
+    // record and kills the family, successor included.
+    const revokeResponse = await request("/auth/revoke-access", {
+      refreshToken: familyA
+    });
+    expect(revokeResponse.status).toBe(200);
+    await expect(responseBody(revokeResponse)).resolves.toEqual({
+      success: true
+    });
+
+    const successorResponse = await request("/auth/refresh-access", {
+      refreshToken: rotated.refreshToken
+    });
+    expect(successorResponse.status).toBe(401);
+    await expect(responseBody(successorResponse)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
+    });
+
+    // The other sign-in's family is untouched.
+    const otherResponse = await request("/auth/refresh-access", {
+      refreshToken: familyB
+    });
+    expect(otherResponse.status).toBe(200);
+  });
+
+  it("treats a rotated-away token presented for refresh as reuse and kills its family", async () => {
+    const {refreshToken: familyA} = await signIn();
+    const {refreshToken: familyB} = await signIn();
+
+    const firstRefresh = await request("/auth/refresh-access", {
+      refreshToken: familyA
+    });
+    expect(firstRefresh.status).toBe(200);
+    const rotated = (await responseBody(
+      firstRefresh
+    )) as unknown as TokenResponse;
+
+    // Presenting the consumed token is reuse: the whole family dies.
+    const reuseResponse = await request("/auth/refresh-access", {
+      refreshToken: familyA
+    });
+    expect(reuseResponse.status).toBe(401);
+    await expect(responseBody(reuseResponse)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
+    });
+
+    const successorResponse = await request("/auth/refresh-access", {
+      refreshToken: rotated.refreshToken
+    });
+    expect(successorResponse.status).toBe(401);
+    await expect(responseBody(successorResponse)).resolves.toEqual({
+      error: "Invalid or expired refresh token"
+    });
+
+    // The other sign-in's family is untouched.
+    const otherResponse = await request("/auth/refresh-access", {
+      refreshToken: familyB
+    });
+    expect(otherResponse.status).toBe(200);
+  });
+
+  it("undoes the rotation successor when a revoke lands mid-rotation", async () => {
+    const {refreshToken} = await signIn();
+    const db = createDrizzle(env.DB);
+    const row = await db
+      .select()
+      .from(session)
+      .where(eq(session.token, refreshToken))
+      .get();
+    if (!row)
+      throw new Error("Session row for the refresh token was not found");
+
+    let releaseRotation!: () => void;
+    const rotationBlocked = new Promise<void>((resolve) => {
+      releaseRotation = resolve;
+    });
+    let claimReached!: () => void;
+    const claimReachedPromise = new Promise<void>((resolve) => {
+      claimReached = resolve;
+    });
+
+    // Pause the rotation right after the claim renamed the token, so the
+    // revoke below lands inside the in-flight window.
+    rotationTestHooks.afterClaim = async () => {
+      claimReached();
+      await rotationBlocked;
+    };
+
+    let refreshResponse!: Promise<Response>;
+    try {
+      refreshResponse = request("/auth/refresh-access", {refreshToken});
+      await claimReachedPromise;
+
+      const revokeResponse = await request("/auth/revoke-access", {
+        refreshToken
+      });
+      expect(revokeResponse.status).toBe(200);
+      await expect(responseBody(revokeResponse)).resolves.toEqual({
+        success: true
+      });
+
+      releaseRotation();
+      const response = await refreshResponse;
+      expect(response.status).toBe(401);
+      await expect(responseBody(response)).resolves.toEqual({
+        error: "Invalid or expired refresh token"
+      });
+
+      // No session row of the family survives the interleaving.
+      const remaining = await db
+        .select()
+        .from(session)
+        .where(eq(session.familyId, row.familyId));
+      expect(remaining).toEqual([]);
+    } finally {
+      releaseRotation();
+      rotationTestHooks.afterClaim = undefined;
+    }
+  });
+
+  it("prunes expired rotated-token records and family-revoked markers only", async () => {
+    const db = createDrizzle(env.DB);
+    const now = Date.now();
+    await db.insert(rotatedToken).values([
+      {
+        id: "prune-expired-rotated",
+        token: "prune-expired-token",
+        familyId: "prune-family",
+        consumed: true,
+        expiresAt: new Date(now - 60_000).toISOString()
+      },
+      {
+        id: "prune-live-rotated",
+        token: "prune-live-token",
+        familyId: "prune-family",
+        consumed: true,
+        expiresAt: new Date(now + 3_600_000).toISOString()
+      }
+    ]);
+    await db.insert(familyRevocation).values([
+      {
+        id: "prune-expired-marker",
+        familyId: "prune-expired-family",
+        expiresAt: new Date(now - 60_000).toISOString()
+      },
+      {
+        id: "prune-live-marker",
+        familyId: "prune-live-family",
+        expiresAt: new Date(now + 3_600_000).toISOString()
+      }
+    ]);
+
+    // Any refresh or revoke prunes as a side effect; an unknown token keeps
+    // the revoke itself a no-op.
+    const response = await request("/auth/revoke-access", {
+      refreshToken: "unknown-prune-token"
+    });
+    expect(response.status).toBe(200);
+
+    await expect(
+      db
+        .select()
+        .from(rotatedToken)
+        .where(eq(rotatedToken.token, "prune-expired-token"))
+        .get()
+    ).resolves.toBeUndefined();
+    await expect(
+      db
+        .select()
+        .from(rotatedToken)
+        .where(eq(rotatedToken.token, "prune-live-token"))
+        .get()
+    ).resolves.toBeDefined();
+    await expect(
+      db
+        .select()
+        .from(familyRevocation)
+        .where(eq(familyRevocation.familyId, "prune-expired-family"))
+        .get()
+    ).resolves.toBeUndefined();
+    await expect(
+      db
+        .select()
+        .from(familyRevocation)
+        .where(eq(familyRevocation.familyId, "prune-live-family"))
+        .get()
+    ).resolves.toBeDefined();
+  });
+
+  it("gives browser-created sessions their own rotation family", async () => {
+    const result = await createAuth(env as Env).api.signInEmail({
+      body: {email, password}
+    });
+    if (!result?.token) {
+      throw new Error("Browser sign-in returned no session token");
+    }
+
+    const db = createDrizzle(env.DB);
+    const row = await db
+      .select()
+      .from(session)
+      .where(eq(session.token, result.token))
+      .get();
+    if (!row) throw new Error("Browser session row was not found");
+
+    expect(row.familyId.length).toBeGreaterThan(0);
   });
 
   it("returns 400 naming email for a non-email sign-up address", async () => {

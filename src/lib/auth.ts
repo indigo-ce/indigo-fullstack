@@ -25,6 +25,28 @@ export function createAuth(env: Env, locale: string = "en") {
     generateId: () => crypto.randomUUID().toUpperCase(),
     trustedOrigins: [env.BETTER_AUTH_BASE_URL, ...extraOrigins],
     database: drizzleAdapter(createDrizzle(env.DB), {provider: "sqlite"}),
+    session: {
+      additionalFields: {
+        // Rotation family id for the refresh-access plugin. Written on every
+        // session creation: the plugin mints one per mobile sign-in and
+        // copies it across rotations, and the create hook below gives
+        // browser sessions their own family so the column's NOT NULL
+        // constraint holds on every path.
+        familyId: {type: "string", required: true, input: false}
+      }
+    },
+    databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => ({
+            data: {
+              ...session,
+              familyId: session.familyId || crypto.randomUUID().toUpperCase()
+            }
+          })
+        }
+      }
+    },
     user: {
       changeEmail: {
         enabled: true
